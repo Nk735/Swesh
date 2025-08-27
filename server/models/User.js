@@ -21,7 +21,15 @@ const userSchema = new mongoose.Schema({
   },
   avatarUrl: {
     type: String,
-  }
+  },
+  likedItems: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Item',
+  }],
+  dislikedItems: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Item',
+  }],
 }, {
   timestamps: true,
 });
@@ -39,5 +47,22 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+// Methods to handle likes and dislikes
+userSchema.methods.likeItem = function (itemId) {
+  if (!this.likedItems.includes(itemId)) {
+    this.likedItems.push(itemId);
+    this.dislikedItems = this.dislikedItems.filter(id => id.toString() !== itemId.toString());
+  }
+  return this.save();
+};
+
+userSchema.methods.dislikeItem = function (itemId) {
+  if (!this.dislikedItems.includes(itemId)) {
+    this.dislikedItems.push(itemId);
+    this.likedItems = this.likedItems.filter(id => id.toString() !== itemId.toString());
+  }
+  return this.save();
+};
+
 const User = mongoose.model('User', userSchema);
-export default User;    
+export default User;

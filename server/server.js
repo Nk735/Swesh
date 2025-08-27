@@ -6,6 +6,7 @@ import { connectDB } from './config/db.js';
 
 // Import routes
 import authRoutes from './routes/authRoutes.js';
+import itemRoutes from "./routes/items.js";
 import clothesRoutes from './routes/clothesRoutes.js';
 import matchRoutes from './routes/matchRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
@@ -29,6 +30,7 @@ app.use(morgan('dev'));            // HTTP request logger
 
 // Mount routes
 app.use('/api/auth', authRoutes);
+app.use("/api/items", itemRoutes);
 app.use('/api/clothes', clothesRoutes);
 app.use('/api/match', matchRoutes);
 app.use('/api/chat', chatRoutes);
