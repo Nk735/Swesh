@@ -38,10 +38,10 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:{ flex:1, justifyContent:"center", padding:24 },
+  container:{ backgroundColor:"#F5F5F5",flex:1, justifyContent:"center", padding:24 },
   title:{ fontSize:26, fontWeight:"bold", marginBottom:24, textAlign:"center" },
   input:{ borderWidth:1, borderColor:"#ccc", borderRadius:8, padding:12, marginBottom:12 },
-  button:{ backgroundColor:"#007AFF", padding:14, borderRadius:8, alignItems:"center" },
+  button:{ backgroundColor:"#FFA8C8", padding:14, borderRadius:8, alignItems:"center" },
   buttonText:{ color:"#fff", fontWeight:"bold" },
   link:{ marginTop:16, color:"#007AFF", textAlign:"center" }
 });

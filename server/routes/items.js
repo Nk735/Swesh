@@ -43,4 +43,13 @@ router.get('/:id', protect, async (req, res) => {
   }
 });
 
+router.get('/mine', protect, async (req, res) => {
+  try {
+    const items = await Item.find({ owner: req.user._id });
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;

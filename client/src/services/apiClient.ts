@@ -4,7 +4,7 @@ import Constants from 'expo-constants';
 
 const BASE_URL =
   (Constants.expoConfig?.extra as { API_BASE_URL?: string })?.API_BASE_URL ?? 
-  'http://127.0.0.1:5000';
+  'http://172.17.0.1:5000';
 
 export const api = axios.create({
   baseURL: `${BASE_URL}/api`,
