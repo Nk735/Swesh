@@ -1,6 +1,7 @@
 import express from 'express';
 import Item from '../models/Item.js';
 import { protect } from '../middleware/auth.js';
+import ItemInteraction from '../models/ItemInteraction.js';
 
 const router = express.Router();
 
@@ -22,10 +23,27 @@ router.post('/', protect, async (req, res) => {
   }
 });
 
-// Get all items except those owned by current user
+// Get all items except owned + già likati/dislikati
 router.get('/', protect, async (req, res) => {
   try {
-    const items = await Item.find({ owner: { $ne: req.user._id } }).populate('owner', 'nickname avatarUrl');
+    const excludeIds = [
+      ...(req.user.likedItems || []),
+      ...(req.user.dislikedItems || []),
+    ];
+    const query = {
+      owner: { $ne: req.user._id },
+      ...(excludeIds.length ? { _id: { $nin: excludeIds } } : {}),
+    };
+    const items = await Item.find(query).populate('owner', 'nickname avatarUrl');
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get('/mine', protect, async (req, res) => {
+  try {
+    const items = await Item.find({ owner: req.user._id });
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -43,10 +61,17 @@ router.get('/:id', protect, async (req, res) => {
   }
 });
 
-router.get('/mine', protect, async (req, res) => {
+// DELETE un abito se proprietario
+router.delete('/:id', protect, async (req, res) => {
   try {
-    const items = await Item.find({ owner: req.user._id });
-    res.json(items);
+    const item = await Item.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: 'Item non trovato' });
+    // Permetti solo al proprietario di cancellare
+    if (item.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Non autorizzato' });
+    }
+    await item.deleteOne();
+    res.json({ message: 'Abito eliminato' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

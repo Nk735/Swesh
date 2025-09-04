@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { Link } from "expo-router";
 import { useAuth } from "../../src/context/AuthContext";
+import { showAlert } from '../../src/utils/showAlert';
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -11,14 +12,14 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Errore","Inserisci email e password");
+      showAlert("Errore","Inserisci email e password");
       return;
     }
     setSubmitting(true);
     try {
       await login(email, password);
     } catch (e:any) {
-      Alert.alert("Login fallito", e?.response?.data?.message || e.message || "Errore");
+      showAlert("Login fallito", e?.response?.data?.message || e.message || "Errore");
     } finally {
       setSubmitting(false);
     }

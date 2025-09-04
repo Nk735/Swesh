@@ -6,6 +6,9 @@ import { connectDB } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import itemRoutes from './routes/items.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
+import interactionRoutes from './routes/interactions.js';
+// import matchRoutes from './routes/match.js'; // future
+// import chatRoutes from './routes/chat.js'; // future 
 
 dotenv.config();
 
@@ -22,6 +25,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemRoutes);
+app.use('/api/interactions', interactionRoutes);
 // TODO future: app.use('/api/match', matchRoutes); app.use('/api/chat', chatRoutes);
 
 app.use(notFound);

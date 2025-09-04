@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { Link } from "expo-router";
 import { useAuth } from "../../src/context/AuthContext";
+import { showAlert } from '../../src/utils/showAlert';
 
 export default function RegisterScreen() {
   const { register } = useAuth();
@@ -12,14 +13,14 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     if (!email || !password || !nickname) {
-      Alert.alert("Errore","Compila tutti i campi");
+      showAlert("Errore","Compila tutti i campi");
       return;
     }
     setSubmitting(true);
     try {
       await register(email, password, nickname);
     } catch (e:any) {
-      Alert.alert("Registrazione fallita", e?.response?.data?.message || e.message || "Errore");
+      showAlert("Registrazione fallita", e?.response?.data?.message || e.message || "Errore");
     } finally {
       setSubmitting(false);
     }

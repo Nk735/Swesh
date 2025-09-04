@@ -4,33 +4,22 @@ import { View, ActivityIndicator } from "react-native";
 import { useAuth } from "../../src/context/AuthContext";
 
 export default function ProtectedLayout() {
-  return <Stack />;
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/login");
+    }
+  }, [loading, user, router]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return <Stack screenOptions={{ headerShown: false }} />;
 }
-
-// export default function AppLayout() {
-//   const { user, loading } = useAuth();
-//   const router = useRouter();
-
-//   useEffect(() => {
-//     if (!loading && !user) {
-//       router.replace("../auth/login"); // Reindirizza a /login se non autenticato
-//     }
-//   }, [loading, user, router]);
-
-//   if (loading) {
-//     // Mostra un caricamento mentre verifica lo stato dell'utente
-//     return (
-//       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-//         <ActivityIndicator size="large" />
-//       </View>
-//     );
-//   }
-
-//   return (
-//     <Stack
-//       screenOptions={{
-//         headerShown: true,
-//       }}
-//     />
-//   );
-// }
