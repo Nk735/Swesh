@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Image, Dimensions, ActivityIndicator, Alert } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { Ionicons, FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import { useAuth } from '../../src/context/AuthContext';
 import { api } from '../../src/services/apiClient';
 import SwipeDeck, { DeckItem } from '../../components/SwipeDeck';
+import { ProposeSwapModal } from '@/components/ProposeSwapModal';
+import { getGroupedMatches } from '../../src/services/tradeApi';
 
 const { width } = Dimensions.get('window');
 
@@ -14,6 +16,10 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [reloadFlag, setReloadFlag] = useState(0);
+
+  // Modal
+  const [swapModalVisible, setSwapModalVisible] = useState(false);
+  const [targetItemId, setTargetItemId] = useState<string | null>(null);
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
@@ -33,23 +39,9 @@ export default function HomeScreen() {
     fetchItems();
   }, [fetchItems, reloadFlag]);
 
-  // Helpers per rimuovere la prima card (quella swippata)
   const popFirst = () => setItems(prev => prev.slice(1));
 
-  const handleLike = async (item: DeckItem) => {
-    if (actionLoading) return;
-    setActionLoading(true);
-    try {
-      await api.post('/auth/like', { id: item._id });
-      popFirst();
-      refreshMe().catch(() => {});
-    } catch (e: any) {
-      Alert.alert('Errore', e?.response?.data?.message || e.message || 'Like fallito');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
+  // Dislike / Skip mantengono per ora stessa logica placeholder
   const handleDislike = async (item: DeckItem) => {
     if (actionLoading) return;
     setActionLoading(true);
@@ -65,7 +57,24 @@ export default function HomeScreen() {
   };
 
   const handleSkip = (item: DeckItem) => {
-    // Nessuna chiamata server (per ora)
+    popFirst();
+  };
+
+  const openProposal = (item: DeckItem) => {
+    setTargetItemId(item._id);
+    setSwapModalVisible(true);
+  };
+
+  const onProposalResult = (r: { matched: boolean; matchId?: string; chatId?: string }) => {
+    if (r.matched && r.matchId && r.chatId) {
+      Alert.alert('Match!', 'Hai un nuovo scambio. Apri la chat.', [
+        { text: 'Apri chat', onPress: () => router.push(`/chats/${r.matchId}`) },
+        { text: 'OK' }
+      ]);
+    } else {
+      // Pending
+      Alert.alert('Proposta inviata', 'In attesa di reciprocità.');
+    }
     popFirst();
   };
 
@@ -78,7 +87,6 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
       <View style={styles.header}>
         <Text>Ciao {user?.nickname || user?.email}</Text>
         <Image
@@ -94,13 +102,12 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Swipe Deck */}
       <View style={styles.deckWrapper}>
         <SwipeDeck
           items={items}
           loading={loading}
-            actionLoading={actionLoading}
-          onLike={handleLike}
+          actionLoading={actionLoading}
+          onLike={openProposal}
           onDislike={handleDislike}
           onSkip={handleSkip}
           emptyComponent={
@@ -124,17 +131,8 @@ export default function HomeScreen() {
                 disabled={!current || actionLoading}
                 onPress={() => current && handleDislike(current)}
               >
-                <Ionicons name="arrow-undo-sharp" size={28} color="#FF6347" />
+                <Ionicons name="close" size={38} color="#FF6347" />
               </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.actionButton, styles.crossButton]}
-                disabled={!current || actionLoading}
-                onPress={() => current && handleDislike(current)}
-              >
-                <Ionicons name="close" size={38} color="white" />
-              </TouchableOpacity>
-
               <TouchableOpacity
                 style={[styles.actionButton, styles.starButton]}
                 disabled={!current || actionLoading}
@@ -142,15 +140,13 @@ export default function HomeScreen() {
               >
                 <FontAwesome name="star-o" size={28} color="#5A31F4" />
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={[styles.actionButton, styles.checkButton]}
                 disabled={!current || actionLoading}
-                onPress={() => current && handleLike(current)}
+                onPress={() => current && openProposal(current)}
               >
-                <Ionicons name="checkmark" size={38} color="white" />
+                <Ionicons name="swap-horizontal" size={38} color="white" />
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={[styles.actionButton]}
                 disabled={!current || actionLoading}
@@ -163,7 +159,6 @@ export default function HomeScreen() {
         />
       </View>
 
-      {/* Bottom Nav */}
       <View style={styles.bottomNavContainer}>
         <View style={styles.bottomNav}>
           <View style={styles.navItem}>
@@ -172,20 +167,14 @@ export default function HomeScreen() {
           </View>
           <Link href="/matches" style={styles.linkWrapper}>
             <View style={styles.navItem}>
-              <Ionicons name="heart-outline" size={24} color="#fff" />
-              <Text style={styles.navText}>Like</Text>
+              <Ionicons name="sync-outline" size={24} color="#fff" />
+              <Text style={styles.navText}>Scambi</Text>
             </View>
           </Link>
-          <TouchableOpacity style={styles.homeButton}>
-            <Image
-              source={{ uri: 'https://placehold.co/60x60/fff/F87171?text=SWESH' }}
-              style={{ width: 60, height: 60, resizeMode: 'contain' }}
-            />
-          </TouchableOpacity>
           <Link href="/chats" style={styles.linkWrapper}>
             <View style={styles.navItem}>
-              <Ionicons name="sync-outline" size={24} color="#fff" />
-              <Text style={styles.navText}>Match</Text>
+              <Ionicons name="chatbubbles-outline" size={24} color="#fff" />
+              <Text style={styles.navText}>Chat</Text>
             </View>
           </Link>
           <Link href="/profile" style={styles.linkWrapper}>
@@ -200,15 +189,20 @@ export default function HomeScreen() {
       <TouchableOpacity onPress={logout} style={styles.logoutButton}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
+
+      <ProposeSwapModal
+        visible={swapModalVisible}
+        onClose={() => setSwapModalVisible(false)}
+        targetItemId={targetItemId}
+        onResult={onProposalResult}
+      />
     </SafeAreaView>
   );
 }
 
-const ACTION_SIZE = 70;
-
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-
   deckWrapper: {
     flex: 1,
     paddingTop: 10,
@@ -219,48 +213,20 @@ const styles = StyleSheet.create({
     marginTop: 24,
     flexDirection: 'row',
     justifyContent: 'space-around',
-    width: width,
+    width: SCREEN_WIDTH,
     paddingHorizontal: 14,
     alignItems: 'center',
   },
-
   safeArea: { flex: 1, backgroundColor: '#F5F5F5' },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 20, paddingTop: 10,
   },
   logo: { width: 100, height: 40, resizeMode: 'contain' },
-  cardContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  card: {
-    width: width * 0.9, /*height: height * 0.65,*/ borderRadius: 30, overflow: 'hidden',
-    backgroundColor: '#eee', position: 'relative',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 8,
-  },
-  cardImage: { width: '100%', height: '100%', resizeMode: 'cover' },
-  cardOverlay: {
-    position: 'absolute', bottom: 0, left: 0, right: 0,
-    padding: 25, backgroundColor: 'rgba(0,0,0,0.4)',
-    borderBottomLeftRadius: 30, borderBottomRightRadius: 30,
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-  },
-  cardTextWrapper: { flexShrink: 1 },
-  cardTitle: { fontSize: 28, fontWeight: 'bold', color: 'white' },
-  cardSubtitle: { fontSize: 18, color: 'white', marginTop: 4 },
-  cardButton: {
-    width: 50, height: 50, borderRadius: 25,
-    backgroundColor: 'rgba(255,255,255,0.25)', justifyContent: 'center', alignItems: 'center',
-  },
-  actions: {
-    flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', paddingVertical: 18,
-  },
   actionButton: {
     width: 65, height: 65, borderRadius: 35, justifyContent: 'center', alignItems: 'center',
     backgroundColor: '#FFF', shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12, shadowRadius: 5,
-  },
-  crossButton: {
-    backgroundColor: '#FF6347', width: 80, height: 80, borderRadius: 40,
-    shadowColor: '#FF6347', shadowOpacity: 0.4,
   },
   starButton: { backgroundColor: '#FFF', width: 80, height: 80, borderRadius: 40 },
   checkButton: {
@@ -284,12 +250,6 @@ const styles = StyleSheet.create({
     borderColor: '#FF5A61', borderWidth: 5, borderRadius: 50, padding: 8,
   },
   navText: { fontSize: 12, color: '#fff', marginTop: 2 },
-  homeButton: {
-    backgroundColor: 'white', width: 60, height: 60, borderRadius: 30,
-    justifyContent: 'center', alignItems: 'center',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.2, shadowRadius: 8,
-    elevation: 6, marginTop: -30,
-  },
   logoutButton: {
     position: 'absolute', bottom: 40, left: 20, right: 20, padding: 15,
     backgroundColor: '#FF6347', borderRadius: 12, alignItems: 'center', opacity: 0.9,

@@ -7,8 +7,9 @@ import authRoutes from './routes/authRoutes.js';
 import itemRoutes from './routes/items.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 import interactionRoutes from './routes/interactions.js';
-// import matchRoutes from './routes/match.js'; // future
-// import chatRoutes from './routes/chat.js'; // future 
+import proposalsRoutes from './routes/proposals.js';
+import matchRoutes from './routes/matches.js';
+import chatRoutes from './routes/chat.js';
 
 dotenv.config();
 
@@ -26,7 +27,9 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/interactions', interactionRoutes);
-// TODO future: app.use('/api/match', matchRoutes); app.use('/api/chat', chatRoutes);
+app.use('/api/proposals', proposalsRoutes);
+app.use('/api/matches', matchRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
