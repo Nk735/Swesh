@@ -4,12 +4,13 @@ import Constants from 'expo-constants';
 
 const BASE_URL =
   (Constants.expoConfig?.extra as { API_BASE_URL?: string })?.API_BASE_URL ?? 
-  'http://172.17.0.1:5000';
+  'http://192.168.1.9:5000';
 
 export const api = axios.create({
   baseURL: `${BASE_URL}/api`,
   timeout: 10000, // Timeout configurabile
 });
+console.log('API Base URL:', BASE_URL);
 
 api.interceptors.request.use(async (config) => {
   const token = await AsyncStorage.getItem('auth_token');

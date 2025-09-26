@@ -7,7 +7,7 @@ import authRoutes from './routes/authRoutes.js';
 import itemRoutes from './routes/items.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 import interactionRoutes from './routes/interactions.js';
-import proposalsRoutes from './routes/proposals.js';
+//import proposalsRoutes from './routes/proposals.js';
 import matchRoutes from './routes/matches.js';
 import chatRoutes from './routes/chat.js';
 
@@ -27,7 +27,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/interactions', interactionRoutes);
-app.use('/api/proposals', proposalsRoutes);
+//app.use('/api/proposals', proposalsRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/chat', chatRoutes);
 

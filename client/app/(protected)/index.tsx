@@ -5,10 +5,25 @@ import { Ionicons, FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import { useAuth } from '../../src/context/AuthContext';
 import { api } from '../../src/services/apiClient';
 import SwipeDeck, { DeckItem } from '../../components/SwipeDeck';
-import { ProposeSwapModal } from '@/components/ProposeSwapModal';
-import { getGroupedMatches } from '../../src/services/tradeApi';
+import { MatchNotificationModal } from '../../components/MatchNotificationModal';
 
 const { width } = Dimensions.get('window');
+
+interface InteractionResponse {
+  itemId: string;
+  action: string;
+  updatedAt: string;
+  match?: {
+    matched: boolean;
+    matchId: string;
+    chatId: string;
+    isNew: boolean;
+    matchedItems?: {
+      myItem: string;
+      theirItem: string;
+    };
+  };
+}
 
 export default function HomeScreen() {
   const { user, logout, refreshMe } = useAuth();
@@ -17,9 +32,14 @@ export default function HomeScreen() {
   const [actionLoading, setActionLoading] = useState(false);
   const [reloadFlag, setReloadFlag] = useState(0);
 
-  // Modal
-  const [swapModalVisible, setSwapModalVisible] = useState(false);
-  const [targetItemId, setTargetItemId] = useState<string | null>(null);
+  // State per match notification
+  const [matchModalVisible, setMatchModalVisible] = useState(false);
+  const [currentMatch, setCurrentMatch] = useState<{
+    matchId: string;
+    chatId: string;
+    otherUser?: { nickname: string; avatarUrl?: string };
+    matchedItems?: { myItem: any; theirItem: any };
+  } | null>(null);
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
@@ -41,42 +61,48 @@ export default function HomeScreen() {
 
   const popFirst = () => setItems(prev => prev.slice(1));
 
-  // Dislike / Skip mantengono per ora stessa logica placeholder
-  const handleDislike = async (item: DeckItem) => {
+  // Funzione generica per gestire le interazioni
+  const handleInteraction = async (item: DeckItem, action: 'like' | 'dislike' | 'skip') => {
     if (actionLoading) return;
     setActionLoading(true);
+    
     try {
-      await api.post('/auth/dislike', { id: item._id });
+      const response = await api.post<InteractionResponse>('/interactions', { 
+        itemId: item._id, 
+        action 
+      });
+      
       popFirst();
+      
+      // Se c'è un match, mostra la notifica
+      if (response.data.match?.matched && response.data.match.isNew) {
+        setCurrentMatch({
+          matchId: response.data.match.matchId,
+          chatId: response.data.match.chatId,
+          otherUser: {
+            nickname: item.owner.nickname,
+            avatarUrl: item.owner.avatarUrl
+          },
+          matchedItems: {
+            myItem: response.data.match.matchedItems?.myItem,
+            theirItem: item // L'item che ho appena messo like
+          }
+        });
+        setMatchModalVisible(true);
+      }
+      
       refreshMe().catch(() => {});
     } catch (e: any) {
-      Alert.alert('Errore', e?.response?.data?.message || e.message || 'Dislike fallito');
+      console.error(`Errore ${action}:`, e?.response?.data || e.message);
+      Alert.alert('Errore', e?.response?.data?.message || e.message || `${action} fallito`);
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleSkip = (item: DeckItem) => {
-    popFirst();
-  };
-
-  const openProposal = (item: DeckItem) => {
-    setTargetItemId(item._id);
-    setSwapModalVisible(true);
-  };
-
-  const onProposalResult = (r: { matched: boolean; matchId?: string; chatId?: string }) => {
-    if (r.matched && r.matchId && r.chatId) {
-      Alert.alert('Match!', 'Hai un nuovo scambio. Apri la chat.', [
-        { text: 'Apri chat', onPress: () => router.push(`/chats/${r.matchId}`) },
-        { text: 'OK' }
-      ]);
-    } else {
-      // Pending
-      Alert.alert('Proposta inviata', 'In attesa di reciprocità.');
-    }
-    popFirst();
-  };
+  const handleLike = (item: DeckItem) => handleInteraction(item, 'like');
+  const handleDislike = (item: DeckItem) => handleInteraction(item, 'dislike');
+  const handleSkip = (item: DeckItem) => handleInteraction(item, 'skip');
 
   const reload = () => {
     if (loading || actionLoading) return;
@@ -84,6 +110,16 @@ export default function HomeScreen() {
   };
 
   const current = items[0];
+
+  const handleMatchModalAction = (action: 'chat' | 'continue') => {
+    setMatchModalVisible(false);
+    
+    if (action === 'chat' && currentMatch) {
+      router.push(`/chats/${currentMatch.matchId}`);
+    }
+    
+    setCurrentMatch(null);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -107,7 +143,7 @@ export default function HomeScreen() {
           items={items}
           loading={loading}
           actionLoading={actionLoading}
-          onLike={openProposal}
+          onLike={handleLike}
           onDislike={handleDislike}
           onSkip={handleSkip}
           emptyComponent={
@@ -141,11 +177,11 @@ export default function HomeScreen() {
                 <FontAwesome name="star-o" size={28} color="#5A31F4" />
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.actionButton, styles.checkButton]}
+                style={[styles.actionButton, styles.heartButton]}
                 disabled={!current || actionLoading}
-                onPress={() => current && openProposal(current)}
+                onPress={() => current && handleLike(current)}
               >
-                <Ionicons name="swap-horizontal" size={38} color="white" />
+                <Ionicons name="heart" size={38} color="white" />
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.actionButton]}
@@ -190,11 +226,11 @@ export default function HomeScreen() {
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
 
-      <ProposeSwapModal
-        visible={swapModalVisible}
-        onClose={() => setSwapModalVisible(false)}
-        targetItemId={targetItemId}
-        onResult={onProposalResult}
+      {/* Match Notification Modal */}
+      <MatchNotificationModal
+        visible={matchModalVisible}
+        match={currentMatch}
+        onAction={handleMatchModalAction}
       />
     </SafeAreaView>
   );
@@ -229,9 +265,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12, shadowRadius: 5,
   },
   starButton: { backgroundColor: '#FFF', width: 80, height: 80, borderRadius: 40 },
-  checkButton: {
-    backgroundColor: '#32CD32', width: 80, height: 80, borderRadius: 40,
-    shadowColor: '#32CD32', shadowOpacity: 0.4,
+  heartButton: {
+    backgroundColor: '#FF4458', width: 80, height: 80, borderRadius: 40,
+    shadowColor: '#FF4458', shadowOpacity: 0.4,
   },
   bottomNavContainer: {
     backgroundColor: '#5A31F4', borderWidth: 5, borderColor: '#FF5A61',
@@ -251,7 +287,7 @@ const styles = StyleSheet.create({
   },
   navText: { fontSize: 12, color: '#fff', marginTop: 2 },
   logoutButton: {
-    position: 'absolute', bottom: 40, left: 20, right: 20, padding: 15,
+    position: 'absolute', top: 50, left: 20, right: 20, padding: 15,
     backgroundColor: '#FF6347', borderRadius: 12, alignItems: 'center', opacity: 0.9,
   },
   logoutText: { color: 'white', fontWeight: 'bold', fontSize: 16 },

@@ -46,9 +46,9 @@ export default function SwipeDeck(props: SwipeDeckProps) {
         position.setValue({ x: g.dx, y: g.dy });
       },
       onPanResponderRelease: (_, g) => {
-        if (g.dx > 120) {
+        if (g.dx > 80) {
           forceSwipe('right');
-        } else if (g.dx < -120) {
+        } else if (g.dx < -80) {
           forceSwipe('left');
         } else {
           resetPosition();

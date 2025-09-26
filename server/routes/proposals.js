@@ -1,4 +1,4 @@
-import express from 'express';
+{/*import express from 'express';
 import { protect } from '../middleware/auth.js';
 import { incrementDailyProposalsOrThrow } from '../services/rateLimitService.js';
 import { createPendingProposal } from '../services/proposalService.js';
@@ -35,4 +35,4 @@ router.post('/', protect, async (req, res) => {
   }
 });
 
-export default router;
+export default router;*/}

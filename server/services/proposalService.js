@@ -1,4 +1,4 @@
-import Proposal from '../models/Proposal.js';
+{/*import Proposal from '../models/Proposal.js';
 import Item from '../models/Item.js';
 
 export async function createPendingProposal({ proposerUserId, targetItemId, offeredItemId }) {
@@ -52,4 +52,4 @@ export async function createPendingProposal({ proposerUserId, targetItemId, offe
     }
     throw err;
   }
-}
+}*/}
