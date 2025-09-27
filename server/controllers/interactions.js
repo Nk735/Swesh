@@ -1,5 +1,6 @@
 import Item from '../models/Item.js';
 import ItemInteraction from '../models/ItemInteraction.js';
+import { checkForTinderMatch } from '../services/matchService.js';
 
 export const upsertInteraction = async (req, res) => {
   try {
@@ -15,16 +16,27 @@ export const upsertInteraction = async (req, res) => {
       return res.status(400).json({ message: 'Non puoi interagire con un tuo item' });
     }
 
+    // Una sola entry per (user,item), aggiorniamo l’azione
     const interaction = await ItemInteraction.findOneAndUpdate(
       { user: req.user._id, item: item._id },
       { action },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
+    let matchInfo = null;
+    if (action === 'like') {
+      const match = await checkForTinderMatch({ userId: req.user._id, likedItemId: item._id });
+      if (match?.matched) {
+        matchInfo = match;
+      }
+    }
+
     return res.status(200).json({
       itemId: item._id,
       action: interaction.action,
-      updatedAt: interaction.updatedAt,
+      // updatedAt sarà valorizzato se abilitiamo timestamps nello schema
+      updatedAt: interaction.updatedAt || interaction.createdAt,
+      ...(matchInfo ? { match: matchInfo } : {})
     });
   } catch (err) {
     return res.status(500).json({ message: err.message });

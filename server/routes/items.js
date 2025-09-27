@@ -23,17 +23,16 @@ router.post('/', protect, async (req, res) => {
   }
 });
 
-// Get all items except owned + già likati/dislikati
+// Feed: escludi i miei + già interagiti (like/dislike/skip)
 router.get('/', protect, async (req, res) => {
   try {
-    const excludeIds = [
-      ...(req.user.likedItems || []),
-      ...(req.user.dislikedItems || []),
-    ];
+    const interactedIds = await ItemInteraction.find({ user: req.user._id }).distinct('item');
+
     const query = {
       owner: { $ne: req.user._id },
-      ...(excludeIds.length ? { _id: { $nin: excludeIds } } : {}),
+      ...(interactedIds.length ? { _id: { $nin: interactedIds } } : {}),
     };
+
     const items = await Item.find(query).populate('owner', 'nickname avatarUrl');
     res.json(items);
   } catch (error) {
@@ -66,7 +65,6 @@ router.delete('/:id', protect, async (req, res) => {
   try {
     const item = await Item.findById(req.params.id);
     if (!item) return res.status(404).json({ message: 'Item non trovato' });
-    // Permetti solo al proprietario di cancellare
     if (item.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Non autorizzato' });
     }

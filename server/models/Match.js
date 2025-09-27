@@ -5,11 +5,16 @@ const matchSchema = new mongoose.Schema({
   userBId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   itemAId: { type: mongoose.Schema.Types.ObjectId, ref: 'Item', required: true, index: true },
   itemBId: { type: mongoose.Schema.Types.ObjectId, ref: 'Item', required: true, index: true },
-  fromProposalIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Proposal', required: true }],
   status: {
     type: String,
     enum: ['active', 'completed', 'archived'],
     default: 'active',
+    index: true
+  },
+  matchType: {
+    type: String,
+    enum: ['tinder', 'proposal'],
+    default: 'tinder',
     index: true
   },
   lastActivityAt: { type: Date, default: Date.now, index: true },

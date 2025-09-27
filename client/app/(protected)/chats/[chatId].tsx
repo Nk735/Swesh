@@ -3,9 +3,11 @@ import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Keyboard
 import { useLocalSearchParams } from "expo-router";
 import { getChatMessages, sendChatMessage } from "../../../src/services/tradeApi";
 import { ChatMessage } from "../../../src/types/trade";
+import { useAuth } from "../../../src/context/AuthContext";
 
 export default function ChatScreen() {
   const { chatId } = useLocalSearchParams<{ chatId: string }>();
+  const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -55,13 +57,10 @@ export default function ChatScreen() {
           data={messages}
           keyExtractor={m => m._id}
           renderItem={({ item }) => {
-            const mine = item.senderId === 'ME_PLACEHOLDER'; // TODO: sostituire con user id (richiedere /auth/me)
+            const mine = user?.id ? String(item.senderId) === String(user.id) : false;
             return (
-              <View style={[
-                styles.bubble,
-                mine ? styles.mine : styles.theirs
-              ]}>
-                <Text style={styles.msgTxt}>{item.content}</Text>
+              <View style={[styles.bubble, mine ? styles.mine : styles.theirs]}>
+                <Text style={[styles.msgTxt, !mine && { color: '#111' }]}>{item.content}</Text>
                 <Text style={styles.time}>{new Date(item.createdAt).toLocaleTimeString()}</Text>
               </View>
             );
@@ -71,13 +70,7 @@ export default function ChatScreen() {
         />
       )}
       <View style={styles.composer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Scrivi un messaggio..."
-          value={draft}
-          onChangeText={setDraft}
-          editable={!sending}
-        />
+        <TextInput style={styles.input} placeholder="Scrivi un messaggio..." value={draft} onChangeText={setDraft} editable={!sending} />
         <TouchableOpacity style={styles.sendBtn} onPress={submit} disabled={sending}>
           <Text style={{ color:'#fff', fontWeight:'600' }}>{sending ? '...' : 'Invia'}</Text>
         </TouchableOpacity>
@@ -90,20 +83,12 @@ const styles = StyleSheet.create({
   header:{ padding:16, borderBottomWidth:1, borderColor:'#eee' },
   headerTitle:{ fontSize:18, fontWeight:'600' },
   center:{ flex:1, justifyContent:'center', alignItems:'center' },
-  bubble:{
-    padding:10, borderRadius:12, marginBottom:8, maxWidth:'80%'
-  },
+  bubble:{ padding:10, borderRadius:12, marginBottom:8, maxWidth:'80%' },
   mine:{ backgroundColor:'#5A31F4', alignSelf:'flex-end' },
   theirs:{ backgroundColor:'#E4E6EB', alignSelf:'flex-start' },
   msgTxt:{ color:'#fff' },
-  time:{ fontSize:10, color:'#ddd', marginTop:4 },
-  composer:{
-    flexDirection:'row', padding:12, borderTopWidth:1, borderColor:'#eee'
-  },
-  input:{
-    flex:1, borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:10, marginRight:8
-  },
-  sendBtn:{
-    backgroundColor:'#5A31F4', paddingHorizontal:16, justifyContent:'center', borderRadius:8
-  }
+  time:{ fontSize:10, color:'#666', marginTop:4 },
+  composer:{ flexDirection:'row', padding:12, borderTopWidth:1, borderColor:'#eee' },
+  input:{ flex:1, borderWidth:1, borderColor:"#ccc", borderRadius:8, padding:10, marginRight:8 },
+  sendBtn:{ backgroundColor:'#5A31F4', paddingHorizontal:16, justifyContent:'center', borderRadius:8 }
 });

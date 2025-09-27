@@ -32,7 +32,6 @@ export default function HomeScreen() {
   const [actionLoading, setActionLoading] = useState(false);
   const [reloadFlag, setReloadFlag] = useState(0);
 
-  // State per match notification
   const [matchModalVisible, setMatchModalVisible] = useState(false);
   const [currentMatch, setCurrentMatch] = useState<{
     matchId: string;
@@ -61,19 +60,20 @@ export default function HomeScreen() {
 
   const popFirst = () => setItems(prev => prev.slice(1));
 
-  // Funzione generica per gestire le interazioni
+  // Aggiornamento ottimistico: togli la card SUBITO, poi chiama l’API
   const handleInteraction = async (item: DeckItem, action: 'like' | 'dislike' | 'skip') => {
     if (actionLoading) return;
     setActionLoading(true);
-    
+
+    // RIMUOVI SUBITO la card corrente (aggiornamento ottimistico)
+    setItems(prev => prev.slice(1));
+
     try {
-      const response = await api.post<InteractionResponse>('/interactions', { 
-        itemId: item._id, 
-        action 
+      const response = await api.post<InteractionResponse>('/interactions', {
+        itemId: item._id,
+        action,
       });
-      
-      popFirst();
-      
+
       // Se c'è un match, mostra la notifica
       if (response.data.match?.matched && response.data.match.isNew) {
         setCurrentMatch({
@@ -81,18 +81,20 @@ export default function HomeScreen() {
           chatId: response.data.match.chatId,
           otherUser: {
             nickname: item.owner.nickname,
-            avatarUrl: item.owner.avatarUrl
+            avatarUrl: item.owner.avatarUrl,
           },
           matchedItems: {
             myItem: response.data.match.matchedItems?.myItem,
-            theirItem: item // L'item che ho appena messo like
-          }
+            theirItem: item,
+          },
         });
         setMatchModalVisible(true);
       }
-      
+
       refreshMe().catch(() => {});
     } catch (e: any) {
+      // Se vuoi re-inserire l'item in caso di errore, decommenta la riga seguente:
+      // setItems(prev => [item, ...prev]);
       console.error(`Errore ${action}:`, e?.response?.data || e.message);
       Alert.alert('Errore', e?.response?.data?.message || e.message || `${action} fallito`);
     } finally {
@@ -113,11 +115,9 @@ export default function HomeScreen() {
 
   const handleMatchModalAction = (action: 'chat' | 'continue') => {
     setMatchModalVisible(false);
-    
     if (action === 'chat' && currentMatch) {
       router.push(`/chats/${currentMatch.matchId}`);
     }
-    
     setCurrentMatch(null);
   };
 
@@ -130,11 +130,7 @@ export default function HomeScreen() {
           style={styles.logo}
         />
         <TouchableOpacity onPress={reload} disabled={loading}>
-          <Ionicons
-            name="refresh-outline"
-            size={28}
-            color={loading ? '#bbb' : '#000'}
-          />
+          <Ionicons name="refresh-outline" size={28} color={loading ? '#bbb' : '#000'} />
         </TouchableOpacity>
       </View>
 
@@ -151,43 +147,23 @@ export default function HomeScreen() {
               <Text style={{ color: '#777', fontSize: 16, marginBottom: 12 }}>
                 Nessun vestito disponibile
               </Text>
-              <TouchableOpacity
-                onPress={reload}
-                style={styles.reloadBtn}
-                disabled={loading}
-              >
+              <TouchableOpacity onPress={reload} style={styles.reloadBtn} disabled={loading}>
                 <Text style={{ color: '#fff', fontWeight: '600' }}>Ricarica feed</Text>
               </TouchableOpacity>
             </View>
           }
           renderFooter={
             <View style={styles.actionsBar}>
-              <TouchableOpacity
-                style={[styles.actionButton]}
-                disabled={!current || actionLoading}
-                onPress={() => current && handleDislike(current)}
-              >
+              <TouchableOpacity style={[styles.actionButton]} disabled={!current || actionLoading} onPress={() => current && handleDislike(current)}>
                 <Ionicons name="close" size={38} color="#FF6347" />
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionButton, styles.starButton]}
-                disabled={!current || actionLoading}
-                onPress={() => current && handleSkip(current)}
-              >
+              <TouchableOpacity style={[styles.actionButton, styles.starButton]} disabled={!current || actionLoading} onPress={() => current && handleSkip(current)}>
                 <FontAwesome name="star-o" size={28} color="#5A31F4" />
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionButton, styles.heartButton]}
-                disabled={!current || actionLoading}
-                onPress={() => current && handleLike(current)}
-              >
+              <TouchableOpacity style={[styles.actionButton, styles.heartButton]} disabled={!current || actionLoading} onPress={() => current && handleLike(current)}>
                 <Ionicons name="heart" size={38} color="white" />
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionButton]}
-                disabled={!current || actionLoading}
-                onPress={() => current && handleSkip(current)}
-              >
+              <TouchableOpacity style={[styles.actionButton]} disabled={!current || actionLoading} onPress={() => current && handleSkip(current)}>
                 <FontAwesome5 name="bolt" size={24} color="#FFC107" />
               </TouchableOpacity>
             </View>
@@ -226,12 +202,7 @@ export default function HomeScreen() {
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
 
-      {/* Match Notification Modal */}
-      <MatchNotificationModal
-        visible={matchModalVisible}
-        match={currentMatch}
-        onAction={handleMatchModalAction}
-      />
+      <MatchNotificationModal visible={matchModalVisible} match={currentMatch} onAction={handleMatchModalAction} />
     </SafeAreaView>
   );
 }
@@ -239,60 +210,29 @@ export default function HomeScreen() {
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-  deckWrapper: {
-    flex: 1,
-    paddingTop: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  deckWrapper: { flex: 1, paddingTop: 10, alignItems: 'center', justifyContent: 'center' },
   actionsBar: {
-    marginTop: 24,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: SCREEN_WIDTH,
-    paddingHorizontal: 14,
-    alignItems: 'center',
+    marginTop: 24, flexDirection: 'row', justifyContent: 'space-around', width: SCREEN_WIDTH, paddingHorizontal: 14, alignItems: 'center',
   },
   safeArea: { flex: 1, backgroundColor: '#F5F5F5' },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: 20, paddingTop: 10,
-  },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 10 },
   logo: { width: 100, height: 40, resizeMode: 'contain' },
   actionButton: {
     width: 65, height: 65, borderRadius: 35, justifyContent: 'center', alignItems: 'center',
-    backgroundColor: '#FFF', shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12, shadowRadius: 5,
+    backgroundColor: '#FFF', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 5,
   },
   starButton: { backgroundColor: '#FFF', width: 80, height: 80, borderRadius: 40 },
-  heartButton: {
-    backgroundColor: '#FF4458', width: 80, height: 80, borderRadius: 40,
-    shadowColor: '#FF4458', shadowOpacity: 0.4,
-  },
+  heartButton: { backgroundColor: '#FF4458', width: 80, height: 80, borderRadius: 40, shadowColor: '#FF4458', shadowOpacity: 0.4 },
   bottomNavContainer: {
     backgroundColor: '#5A31F4', borderWidth: 5, borderColor: '#FF5A61',
-    borderTopLeftRadius: 100, borderTopRightRadius: 25,
-    borderBottomLeftRadius: 25, borderBottomRightRadius: 100,
-    overflow: 'hidden', margin: 20,
-    shadowColor: '#000', shadowOffset: { width: 0, height: -5 }, shadowOpacity: 0.1, shadowRadius: 10,
+    borderTopLeftRadius: 100, borderTopRightRadius: 25, borderBottomLeftRadius: 25, borderBottomRightRadius: 100,
+    overflow: 'hidden', margin: 20, shadowColor: '#000', shadowOffset: { width: 0, height: -5 }, shadowOpacity: 0.1, shadowRadius: 10,
   },
-  bottomNav: {
-    flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center',
-    paddingVertical: 10, paddingHorizontal: 25,
-  },
+  bottomNav: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 25 },
   linkWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  navItem: {
-    width: 70, height: 70, alignItems: 'center', flexDirection: 'column',
-    borderColor: '#FF5A61', borderWidth: 5, borderRadius: 50, padding: 8,
-  },
+  navItem: { width: 70, height: 70, alignItems: 'center', flexDirection: 'column', borderColor: '#FF5A61', borderWidth: 5, borderRadius: 50, padding: 8 },
   navText: { fontSize: 12, color: '#fff', marginTop: 2 },
-  logoutButton: {
-    position: 'absolute', top: 50, left: 20, right: 20, padding: 15,
-    backgroundColor: '#FF6347', borderRadius: 12, alignItems: 'center', opacity: 0.9,
-  },
+  logoutButton: { position: 'absolute', top: 50, left: 20, right: 20, padding: 15, backgroundColor: '#FF6347', borderRadius: 12, alignItems: 'center', opacity: 0.9 },
   logoutText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
-  reloadBtn: {
-    position: 'absolute', bottom: 24, left: '20%', right: '20%',
-    backgroundColor: '#5A31F4', paddingVertical: 12, borderRadius: 12, alignItems: 'center',
-  },
+  reloadBtn: { position: 'absolute', bottom: 24, left: '20%', right: '20%', backgroundColor: '#5A31F4', paddingVertical: 12, borderRadius: 12, alignItems: 'center' },
 });

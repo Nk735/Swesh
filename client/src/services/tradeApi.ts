@@ -35,7 +35,7 @@ export async function getMyLikes() {
 }
 
 // Match functions
-export async function getGroupedMatches(type?: 'tinder' | 'proposal'): Promise<GroupedMatchesResponse[]> {
+export async function getGroupedMatches(type?: 'tinder'): Promise<GroupedMatchesResponse[]> {
   const params: any = { groupByUser: 'true' };
   if (type) params.type = type;
   
@@ -43,7 +43,7 @@ export async function getGroupedMatches(type?: 'tinder' | 'proposal'): Promise<G
   return data;
 }
 
-export async function getAllMatches(type?: 'tinder' | 'proposal'): Promise<TinderMatch[]> {
+export async function getAllMatches(type?: 'tinder'): Promise<TinderMatch[]> {
   const params: any = {};
   if (type) params.type = type;
   
@@ -64,12 +64,6 @@ export async function getChatMessages(matchId: string): Promise<ChatMessage[]> {
 
 export async function sendChatMessage(matchId: string, content: string) {
   const { data } = await api.post(`/chat/${matchId}/messages`, { content });
-  return data;
-}
-
-// Legacy functions - manteniamo per backward compatibility
-export async function createProposal(targetItemId: string, offeredItemId: string) {
-  const { data } = await api.post('/proposals', { targetItemId, offeredItemId });
   return data;
 }
 
