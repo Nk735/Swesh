@@ -6,24 +6,9 @@ import { useAuth } from '../../src/context/AuthContext';
 import { api } from '../../src/services/apiClient';
 import SwipeDeck, { DeckItem } from '../../components/SwipeDeck';
 import { MatchNotificationModal } from '../../components/MatchNotificationModal';
+import { InteractionResponse } from '../../src/types/trade';
 
 const { width } = Dimensions.get('window');
-
-interface InteractionResponse {
-  itemId: string;
-  action: string;
-  updatedAt: string;
-  match?: {
-    matched: boolean;
-    matchId: string;
-    chatId: string;
-    isNew: boolean;
-    matchedItems?: {
-      myItem: string;
-      theirItem: string;
-    };
-  };
-}
 
 export default function HomeScreen() {
   const { user, logout, refreshMe } = useAuth();
@@ -124,7 +109,6 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Text>Ciao {user?.nickname || user?.email}</Text>
         <Image
           source={{ uri: 'https://placehold.co/100x40/5A31F4/FFFFFF?text=SWESH' }}
           style={styles.logo}

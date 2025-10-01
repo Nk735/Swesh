@@ -31,7 +31,7 @@ export const validateAuthBody = (req, res, next) => {
 };
 
 export const validateItemBody = (req, res, next) => {
-  const { title, imageUrl, description, size, category } = req.body;
+  let { title, imageUrl, description, size, category } = req.body;
 
   if (!title || !imageUrl) {
     return res.status(400).json({ message: 'Titolo e imageUrl sono obbligatori' });
@@ -49,13 +49,24 @@ export const validateItemBody = (req, res, next) => {
     return res.status(400).json({ message: 'imageUrl deve iniziare con http:// o https://' });
   }
 
-  if (size && size.length > 30) {
-    return res.status(400).json({ message: 'Size troppo lunga (max 30)' });
+  // Normalizza stringhe vuote -> undefined (per evitare errori enum)
+  if (typeof size === 'string' && size.trim() === '') size = undefined;
+  if (typeof category === 'string' && category.trim() === '') category = undefined;
+
+  const SIZE_ENUM = ["XS", "S", "M", "L", "XL", "XXL"];
+  const CATEGORY_ENUM = ["shirt", "pants", "shoes", "jacket", "accessory", "other"];
+
+  if (size && !SIZE_ENUM.includes(size)) {
+    return res.status(400).json({ message: `Size non valida. Valori consentiti: ${SIZE_ENUM.join(', ')}` });
   }
 
-  if (category && category.length > 40) {
-    return res.status(400).json({ message: 'Categoria troppo lunga (max 40)' });
+  if (category && !CATEGORY_ENUM.includes(category)) {
+    return res.status(400).json({ message: `Categoria non valida. Valori consentiti: ${CATEGORY_ENUM.join(', ')}` });
   }
+
+  // Riassegna i valori normalizzati
+  req.body.size = size;
+  req.body.category = category;
 
   next();
 };

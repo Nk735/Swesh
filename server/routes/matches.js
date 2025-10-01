@@ -8,8 +8,6 @@ import mongoose from 'mongoose';
 
 const router = express.Router();
 
-// GET /api/matches
-// ?groupByUser=true per raggruppare
 router.get('/', protect, async (req, res) => {
   try {
     const groupByUser = req.query.groupByUser === 'true';
@@ -59,13 +57,25 @@ router.get('/', protect, async (req, res) => {
           : (chat.unreadCountByUser[String(userId)] || 0);
       }
 
+      // Migliora lastActivityAt: scegli il più recente tra match e chat
       const lastActivityAt = chat?.lastMessageAt
         ? (chat.lastMessageAt > m.lastActivityAt ? chat.lastMessageAt : m.lastActivityAt)
         : m.lastActivityAt;
 
+      // Nuovo campo tinderMetadata
+      const tinderMetadata = m.matchType === 'tinder'
+        ? {
+            triggerUserId: String(userId), // Per ora chi fa la richiesta
+            triggerItemId: meIsA ? itemTheirsId : itemMineId,
+            matchedAt: m.createdAt
+          }
+        : undefined;
+
       return {
         matchId: m._id,
         status: m.status,
+        matchType: m.matchType,
+        tinderMetadata,
         lastActivityAt,
         unread,
         itemMine: itemMine ? {
@@ -100,7 +110,6 @@ router.get('/', protect, async (req, res) => {
 
     const groups = [];
     groupedMap.forEach((arr, key) => {
-      // ordina match interni per lastActivityAt desc
       arr.sort((a, b) => new Date(b.lastActivityAt) - new Date(a.lastActivityAt));
       const aggregateLast = arr[0].lastActivityAt;
       const unreadTotal = arr.reduce((s, x) => s + x.unread, 0);
@@ -108,16 +117,20 @@ router.get('/', protect, async (req, res) => {
         otherUser: arr[0].otherUser,
         aggregate: {
           matchCount: arr.length,
+          tinderMatches: arr.filter(x => x.matchType === 'tinder').length,
+          proposalMatches: arr.filter(x => x.matchType === 'proposal').length,
           unreadTotal,
           lastActivityAt: aggregateLast
         },
         matches: arr.map(x => ({
           matchId: x.matchId,
-            status: x.status,
-            itemMine: x.itemMine,
-            itemTheirs: x.itemTheirs,
-            unread: x.unread,
-            lastActivityAt: x.lastActivityAt
+          status: x.status,
+          matchType: x.matchType,
+          tinderMetadata: x.tinderMetadata,
+          itemMine: x.itemMine,
+          itemTheirs: x.itemTheirs,
+          unread: x.unread,
+          lastActivityAt: x.lastActivityAt
         }))
       });
     });

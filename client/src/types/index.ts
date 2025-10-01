@@ -27,12 +27,6 @@ export type Item = {
 
 export type InteractionAction = 'like' | 'dislike' | 'skip';
 
-export interface InteractionResponse {
-  itemId: string;
-  action: InteractionAction;
-  updatedAt: string;
-}
-
 export interface FeedMeta {
   limit: number;
   excludedCount: number;

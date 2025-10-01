@@ -2,21 +2,27 @@ import express from 'express';
 import Item from '../models/Item.js';
 import { protect } from '../middleware/auth.js';
 import ItemInteraction from '../models/ItemInteraction.js';
+import { validateItemBody } from '../middleware/validate.js';
 
 const router = express.Router();
 
 // Create new item
-router.post('/', protect, async (req, res) => {
+router.post('/', protect, validateItemBody, async (req, res) => {
   try {
     const { title, description, imageUrl, size, category } = req.body;
-    const item = await Item.create({
+
+    const payload = {
       title,
       description,
       imageUrl,
-      size,
-      category,
       owner: req.user._id,
-    });
+    };
+
+    // Includi solo se presenti (evita stringhe vuote)
+    if (size) payload.size = size;
+    if (category) payload.category = category;
+
+    const item = await Item.create(payload);
     res.status(201).json(item);
   } catch (error) {
     res.status(400).json({ message: error.message });
