@@ -10,8 +10,60 @@ function canonicalUsers(u1, u2) {
 }
 
 /**
+ * Helper function to create or get match and ensure chat exists
+ */
+async function createOrGetMatchAndChat(userAId, userBId, itemAId, itemBId) {
+  let match;
+  let isNew = false;
+  
+  try {
+    match = await Match.create({
+      userAId,
+      userBId,
+      itemAId,
+      itemBId,
+      lastActivityAt: new Date(),
+      matchType: 'tinder'
+    });
+    isNew = true;
+  } catch (err) {
+    if (err.code === 11000) {
+      // Match already exists, retrieve it
+      match = await Match.findOne({ userAId, userBId, itemAId, itemBId });
+      isNew = false;
+    } else {
+      throw err;
+    }
+  }
+
+  if (!match) {
+    throw new Error('Failed to create or find match');
+  }
+
+  // Ensure chat exists for this match
+  let chat = await Chat.findOne({ matchId: match._id });
+  if (!chat) {
+    chat = await Chat.create({
+      matchId: match._id,
+      participants: [userAId, userBId],
+      lastMessageAt: new Date(),
+      unreadCountByUser: new Map([[userAId, 0], [userBId, 0]])
+    });
+  }
+
+  // Link chat to match if not already linked
+  if (!match.chatId) {
+    match.chatId = chat._id;
+    await match.save();
+  }
+
+  return { match, chat, isNew };
+}
+
+/**
  * Controlla se esiste un match reciproco dopo che un utente ha messo like
  * Logica Tinder: se A ha messo like a un item di B, e B ha messo like a qualsiasi item di A, è match!
+ * Crea tutti i possibili match per ogni combinazione di item reciprocamente piaciuti.
  */
 export async function checkForTinderMatch({ userId, likedItemId }) {
   try {
@@ -26,14 +78,14 @@ export async function checkForTinderMatch({ userId, likedItemId }) {
     const myItems = await Item.find({ owner: userId }).select('_id');
     const myItemIds = myItems.map(item => item._id);
 
-    // 3. Controlla se l'altro utente ha messo like a qualcuno dei miei item
-    const reciprocalLike = await ItemInteraction.findOne({
+    // 3. Trova tutti i "miei item" che l'altro utente ha messo like (set A)
+    const myItemsLikedByOther = await ItemInteraction.find({
       user: otherUserId,
       item: { $in: myItemIds },
       action: 'like'
     }).populate('item');
 
-    if (!reciprocalLike) {
+    if (myItemsLikedByOther.length === 0) {
       console.log('[tinder.no_match]', {
         userId: userId.toString(),
         likedItemOwner: otherUserId.toString(),
@@ -42,82 +94,117 @@ export async function checkForTinderMatch({ userId, likedItemId }) {
       return { matched: false };
     }
 
-    // 4. MATCH! Crea il match con gli item che si sono piaciuti reciprocamente
-    const [userAId, userBId] = canonicalUsers(userId, otherUserId);
+    // 4. Trova tutti gli item dell'altro utente che ho messo like (set B)
+    // Include l'item appena messo like + tutti gli altri già piaciuti
+    const otherItems = await Item.find({ owner: otherUserId }).select('_id');
+    const otherItemIds = otherItems.map(item => item._id);
     
-    // Determina quale item appartiene a quale utente in ordine canonico
-    let itemAId, itemBId;
-    if (userAId === String(userId)) {
-      itemAId = reciprocalLike.item._id; // Il mio item che piace all'altro
-      itemBId = likedItemId; // L'item dell'altro che piace a me
-    } else {
-      itemAId = likedItemId; // L'item dell'altro che piace a me  
-      itemBId = reciprocalLike.item._id; // Il mio item che piace all'altro
-    }
-
-    // 5. Crea o trova il match esistente
-    let match;
-    try {
-      match = await Match.create({
-        userAId,
-        userBId,
-        itemAId,
-        itemBId,
-        fromProposalIds: [], // Vuoto per match Tinder-style
-        lastActivityAt: new Date(),
-        matchType: 'tinder' // Nuovo campo per distinguere i tipi di match
-      });
-    } catch (err) {
-      if (err.code === 11000) {
-        // Match già esistente, lo recupero
-        match = await Match.findOne({ userAId, userBId, itemAId, itemBId });
-        if (match) {
-          console.log('[tinder.match_exists]', { matchId: match._id.toString() });
-          return {
-            matched: true,
-            matchId: match._id,
-            chatId: match.chatId,
-            isExisting: true
-          };
-        }
-      } else {
-        throw err;
-      }
-    }
-
-    // 6. Crea la chat associata
-    let chat = await Chat.findOne({ matchId: match._id });
-    if (!chat) {
-      chat = await Chat.create({
-        matchId: match._id,
-        participants: [userAId, userBId],
-        lastMessageAt: new Date(),
-        unreadCountByUser: new Map([[userAId, 0], [userBId, 0]])
-      });
-    }
-
-    if (!match.chatId) {
-      match.chatId = chat._id;
-      await match.save();
-    }
-
-    console.log('[tinder.match_created]', {
-      matchId: match._id.toString(),
-      users: [userAId, userBId],
-      items: [itemAId, itemBId],
-      trigger: `${userId} liked item ${likedItemId}`
+    const theirItemsLikedByMe = await ItemInteraction.find({
+      user: userId,
+      item: { $in: otherItemIds },
+      action: 'like'
     });
 
-    return {
-      matched: true,
-      matchId: match._id,
-      chatId: chat._id,
-      isNew: true,
-      matchedItems: {
-        myItem: userAId === String(userId) ? itemAId : itemBId,
-        theirItem: userAId === String(userId) ? itemBId : itemAId
+    // Aggiungi l'item appena messo like se non è già nella lista
+    const likedItemIds = theirItemsLikedByMe.map(interaction => String(interaction.item));
+    if (!likedItemIds.includes(String(likedItemId))) {
+      theirItemsLikedByMe.push({ item: likedItemId });
+    }
+
+    // 5. Crea match per ogni combinazione A×B
+    const [userAId, userBId] = canonicalUsers(userId, otherUserId);
+    const createdMatches = [];
+    let featuredMatch = null;
+
+    for (const myItemLiked of myItemsLikedByOther) {
+      for (const theirItemLiked of theirItemsLikedByMe) {
+        const myItemId = myItemLiked.item._id;
+        const theirItemId = theirItemLiked.item;
+
+        // Determina quale item appartiene a quale utente in ordine canonico
+        let itemAId, itemBId;
+        if (userAId === String(userId)) {
+          itemAId = myItemId; // Il mio item che piace all'altro
+          itemBId = theirItemId; // L'item dell'altro che piace a me
+        } else {
+          itemAId = theirItemId; // L'item dell'altro che piace a me  
+          itemBId = myItemId; // Il mio item che piace all'altro
+        }
+
+        try {
+          const { match, chat, isNew } = await createOrGetMatchAndChat(
+            userAId, userBId, itemAId, itemBId
+          );
+
+          createdMatches.push({ match, chat, isNew });
+
+          // Feature the match that involves the item just liked
+          if (String(theirItemId) === String(likedItemId)) {
+            featuredMatch = {
+              matched: true,
+              matchId: match._id,
+              chatId: chat._id,
+              isNew: isNew,
+              isExisting: !isNew,
+              matchedItems: {
+                myItem: userAId === String(userId) ? itemAId : itemBId,
+                theirItem: userAId === String(userId) ? itemBId : itemAId
+              }
+            };
+          }
+        } catch (error) {
+          console.error('[tinder.match_creation_error]', {
+            userAId, userBId, itemAId, itemBId, error: error.message
+          });
+        }
       }
-    };
+    }
+
+    // 6. Log all created matches
+    const newMatches = createdMatches.filter(m => m.isNew);
+    const existingMatches = createdMatches.filter(m => !m.isNew);
+
+    console.log('[tinder.matches_processed]', {
+      userId: userId.toString(),
+      otherUserId: otherUserId.toString(),
+      trigger: `${userId} liked item ${likedItemId}`,
+      totalMatches: createdMatches.length,
+      newMatches: newMatches.length,
+      existingMatches: existingMatches.length,
+      featuredMatch: featuredMatch?.matchId?.toString()
+    });
+
+    // 7. Return featured match or first new match if no featured match found
+    if (featuredMatch) {
+      return featuredMatch;
+    } else if (newMatches.length > 0) {
+      const firstNewMatch = newMatches[0];
+      return {
+        matched: true,
+        matchId: firstNewMatch.match._id,
+        chatId: firstNewMatch.chat._id,
+        isNew: true,
+        matchedItems: {
+          myItem: userAId === String(userId) ? firstNewMatch.match.itemAId : firstNewMatch.match.itemBId,
+          theirItem: userAId === String(userId) ? firstNewMatch.match.itemBId : firstNewMatch.match.itemAId
+        }
+      };
+    } else if (createdMatches.length > 0) {
+      // All matches already existed
+      const firstMatch = createdMatches[0];
+      return {
+        matched: true,
+        matchId: firstMatch.match._id,
+        chatId: firstMatch.chat._id,
+        isExisting: true,
+        matchedItems: {
+          myItem: userAId === String(userId) ? firstMatch.match.itemAId : firstMatch.match.itemBId,
+          theirItem: userAId === String(userId) ? firstMatch.match.itemBId : firstMatch.match.itemAId
+        }
+      };
+    }
+
+    return { matched: false };
 
   } catch (error) {
     console.error('[tinder.match_error]', error);
