@@ -9,18 +9,27 @@ const router = express.Router();
 // Create new item
 router.post('/', protect, validateItemBody, async (req, res) => {
   try {
-    const { title, description, imageUrl, size, category } = req.body;
+    const { title, description, imageUrl, size, category, images, condition, isAvailable } = req.body;
 
     const payload = {
       title,
       description,
-      imageUrl,
       owner: req.user._id,
     };
+
+    // Se abbiamo images[], usiamo quello e generiamo imageUrl dal primo elemento
+    if (images && images.length > 0) {
+      payload.images = images;
+      payload.imageUrl = images[0];
+    } else if (imageUrl) {
+      payload.imageUrl = imageUrl;
+    }
 
     // Includi solo se presenti (evita stringhe vuote)
     if (size) payload.size = size;
     if (category) payload.category = category;
+    if (condition) payload.condition = condition;
+    if (typeof isAvailable === 'boolean') payload.isAvailable = isAvailable;
 
     const item = await Item.create(payload);
     res.status(201).json(item);
@@ -29,13 +38,14 @@ router.post('/', protect, validateItemBody, async (req, res) => {
   }
 });
 
-// Feed: escludi i miei + già interagiti (like/dislike/skip)
+// Feed: escludi i miei + già interagiti (like/dislike/skip) + non disponibili
 router.get('/', protect, async (req, res) => {
   try {
     const interactedIds = await ItemInteraction.find({ user: req.user._id }).distinct('item');
 
     const query = {
       owner: { $ne: req.user._id },
+      isAvailable: true, // Solo item disponibili
       ...(interactedIds.length ? { _id: { $nin: interactedIds } } : {}),
     };
 
