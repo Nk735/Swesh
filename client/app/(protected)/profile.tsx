@@ -27,7 +27,7 @@ export default function ProfileScreen() {
       // Filtra solo gli item disponibili
       const availableItems = mine.filter((item: Item) => item.isAvailable !== false);
       setMyItems(availableItems);
-    } catch (e: any) {
+    } catch {
       setMyItems([]);
     } finally {
       setLoadingItems(false);
