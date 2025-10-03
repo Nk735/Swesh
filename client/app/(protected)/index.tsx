@@ -138,7 +138,8 @@ export default function HomeScreen() {
           }
           renderFooter={
             <View style={styles.actionsBar}>
-              <TouchableOpacity style={[styles.actionButton]} disabled={!current || actionLoading} onPress={() => current && handleDislike(current)}>
+              {/* Pulsante vedi item precednete da implementare*/}
+              <TouchableOpacity style={[styles.actionButton, styles.skipButton]} disabled={!current || actionLoading} onPress={() => current && handleDislike(current)}>
                 <Ionicons name="close" size={38} color="#FF6347" />
               </TouchableOpacity>
               <TouchableOpacity style={[styles.actionButton, styles.starButton]} disabled={!current || actionLoading} onPress={() => current && handleSkip(current)}>
@@ -147,9 +148,10 @@ export default function HomeScreen() {
               <TouchableOpacity style={[styles.actionButton, styles.heartButton]} disabled={!current || actionLoading} onPress={() => current && handleLike(current)}>
                 <Ionicons name="heart" size={38} color="white" />
               </TouchableOpacity>
+              {/* Pulsante per azioni premium da implementare
               <TouchableOpacity style={[styles.actionButton]} disabled={!current || actionLoading} onPress={() => current && handleSkip(current)}>
                 <FontAwesome5 name="bolt" size={24} color="#FFC107" />
-              </TouchableOpacity>
+              </TouchableOpacity>*/}
             </View>
           }
         />
@@ -209,7 +211,8 @@ const styles = StyleSheet.create({
     width: 65, height: 65, borderRadius: 35, justifyContent: 'center', alignItems: 'center',
     backgroundColor: '#FFF', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 5,
   },
-  starButton: { backgroundColor: '#FFF', width: 80, height: 80, borderRadius: 40 },
+  skipButton: { backgroundColor: '#FFF', width: 80, height: 80, borderRadius: 40 },
+  starButton: { backgroundColor: '#FFF', width: 60, height: 60, borderRadius: 40 },
   heartButton: { backgroundColor: '#FF4458', width: 80, height: 80, borderRadius: 40, shadowColor: '#FF4458', shadowOpacity: 0.4 },
   bottomNavContainer: {
     backgroundColor: '#FF7AE9', borderWidth: 2.5, borderColor: '#FFE77A',
