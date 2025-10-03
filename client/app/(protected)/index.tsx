@@ -11,7 +11,7 @@ import { InteractionResponse } from '../../src/types/trade';
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
-  const { user, logout, refreshMe } = useAuth();
+  const { user, refreshMe } = useAuth();
   const [items, setItems] = useState<DeckItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -188,10 +188,6 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <TouchableOpacity onPress={logout} style={styles.logoutButton}>
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
-
       <MatchNotificationModal visible={matchModalVisible} match={currentMatch} onAction={handleMatchModalAction} />
     </SafeAreaView>
   );
@@ -223,7 +219,5 @@ const styles = StyleSheet.create({
   linkWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 10 },
   navItem: { width: 60, height: 60, alignItems: 'center', flexDirection: 'column', borderColor: '#FFE77A', borderWidth: 2.5, borderRadius: 50, padding: 5 },
   navText: { fontSize: 12, color: '#fff', marginTop: 2 },
-  logoutButton: { position: 'absolute', top: 50, left: 20, right: 20, padding: 15, backgroundColor: '#FFE77A', borderRadius: 12, alignItems: 'center', opacity: 0.9 },
-  logoutText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
   reloadBtn: { position: 'absolute', bottom: 24, left: '20%', right: '20%', backgroundColor: '#FF7AE9', paddingVertical: 12, borderRadius: 12, alignItems: 'center' },
 });

@@ -1,33 +1,33 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Image, ActivityIndicator, Platform, Alert as RNAlert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Image, ActivityIndicator, Platform, Alert as RNAlert, ScrollView } from "react-native";
 import { useAuth } from "../../src/context/AuthContext";
 import { api } from "../../src/services/apiClient";
 import { Item } from "../../src/types";
+import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
-const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL"] as const;
-const CATEGORY_OPTIONS = ["shirt", "pants", "shoes", "jacket", "accessory", "other"] as const;
+const CONDITION_LABELS: Record<string, string> = {
+  new: "Nuovo",
+  excellent: "Ottimo",
+  good: "Buono",
+};
 
 export default function ProfileScreen() {
-  const { user } = useAuth();
-
-  // Stati per il form di inserimento
-  const [title, setTitle] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [size, setSize] = useState<typeof SIZE_OPTIONS[number] | "">("M");
-  const [category, setCategory] = useState<typeof CATEGORY_OPTIONS[number] | "">("other");
-  const [loading, setLoading] = useState(false);
+  const { user, logout } = useAuth();
 
   // Stato per la lista dei propri abiti
   const [myItems, setMyItems] = useState<Item[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
 
-  // Carica gli abiti dell'utente corrente
+  // Carica gli abiti dell'utente corrente (solo disponibili)
   const fetchMyItems = async () => {
     setLoadingItems(true);
     try {
       const mine = (await api.get("/items/mine")).data;
-      setMyItems(mine);
-    } catch (e: any) {
+      // Filtra solo gli item disponibili
+      const availableItems = mine.filter((item: Item) => item.isAvailable !== false);
+      setMyItems(availableItems);
+    } catch {
       setMyItems([]);
     } finally {
       setLoadingItems(false);
@@ -48,139 +48,130 @@ export default function ProfileScreen() {
     }
   }
 
-  const isValidUrl = (url: string) => /^https?:\/\//i.test(url);
-
-  const handleAddItem = async () => {
-    if (!title || !imageUrl) {
-      showAlert("Errore", "Titolo e immagine sono obbligatori");
-      return;
-    }
-    if (!isValidUrl(imageUrl)) {
-      showAlert("Errore", "L'URL immagine deve iniziare con http:// o https://");
-      return;
-    }
-    setLoading(true);
+  const handleDeleteItem = async (itemId: string) => {
     try {
-      const payload: any = { title, imageUrl };
-      if (size) payload.size = size;
-      if (category) payload.category = category;
-
-      await api.post("/items", payload);
-      showAlert("Successo", "Abito aggiunto!");
-      setTitle("");
-      setImageUrl("");
-      setSize("M");
-      setCategory("other");
+      await api.delete(`/items/${itemId}`);
       await fetchMyItems();
+      showAlert("Abito eliminato");
     } catch (e: any) {
       showAlert("Errore", e?.response?.data?.message || e.message || "Errore");
-    } finally {
-      setLoading(false);
     }
   };
 
+  // Genera URL placeholder per avatar
+  const getAvatarUrl = () => {
+    const initial = user?.nickname?.charAt(0)?.toUpperCase() || "U";
+    return `https://placehold.co/100x100/5A31F4/FFFFFF?text=${initial}`;
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Profilo</Text>
-      <Text>Email: {user?.email}</Text>
-      <Text>Nickname: {user?.nickname}</Text>
-
-      <View style={styles.form}>
-        <Text style={styles.subtitle}>Aggiungi un nuovo abito</Text>
-        <TextInput style={styles.input} placeholder="Titolo" value={title} onChangeText={setTitle} />
-        <TextInput style={styles.input} placeholder="URL immagine" value={imageUrl} onChangeText={setImageUrl} />
-
-        <Text style={styles.label}>Taglia</Text>
-        <View style={styles.chipsRow}>
-          {SIZE_OPTIONS.map(opt => {
-            const selected = size === opt;
-            return (
-              <TouchableOpacity
-                key={opt}
-                onPress={() => setSize(opt)}
-                style={[styles.chip, selected && styles.chipSelected]}
-              >
-                <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{opt}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        <Text style={[styles.label, { marginTop: 10 }]}>Categoria</Text>
-        <View style={styles.chipsRow}>
-          {CATEGORY_OPTIONS.map(opt => {
-            const selected = category === opt;
-            return (
-              <TouchableOpacity
-                key={opt}
-                onPress={() => setCategory(opt)}
-                style={[styles.chip, selected && styles.chipSelected]}
-              >
-                <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{opt}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        <TouchableOpacity style={styles.button} onPress={handleAddItem} disabled={loading}>
-          <Text style={styles.buttonText}>{loading ? "Salvataggio..." : "Aggiungi abito"}</Text>
-        </TouchableOpacity>
+    <ScrollView style={styles.container}>
+      {/* Sezione profilo */}
+      <View style={styles.profileSection}>
+        <Image source={{ uri: user?.avatarUrl || getAvatarUrl() }} style={styles.avatar} />
+        <Text style={styles.nickname}>{user?.nickname}</Text>
+        <Text style={styles.email}>{user?.email}</Text>
       </View>
 
-      <Text style={styles.subtitle}>I tuoi abiti</Text>
-      {loadingItems ? (
-        <ActivityIndicator color="#888" />
-      ) : (
-        <FlatList
-          data={myItems}
-          keyExtractor={item => item._id}
-          horizontal
-          renderItem={({ item }) => (
-            <View style={styles.itemBox}>
-              <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
-              <Text style={styles.itemTitle}>{item.title}</Text>
-              {item.size ? <Text style={styles.itemMeta}>Taglia: {item.size}</Text> : null}
-              {item.category ? <Text style={styles.itemMeta}>Categoria: {item.category}</Text> : null}
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={async () => {
-                  try {
-                    await api.delete(`/items/${item._id}`);
-                    await fetchMyItems();
-                    showAlert("Abito eliminato");
-                  } catch (e:any) {
-                    showAlert("Errore", e?.response?.data?.message || e.message || "Errore");
-                  }
-                }}
-              >
-                <Text style={{ color: "#FF6347", fontWeight: "bold" }}>Elimina</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          ListEmptyComponent={<Text style={{ color: "#aaa" }}>Non hai ancora inserito abiti</Text>}
-        />
-      )}
-    </View>
+      {/* Pulsante per aggiungere abito */}
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => router.push("/addItem")}
+      >
+        <Ionicons name="add-circle-outline" size={24} color="#fff" />
+        <Text style={styles.addButtonText}>Aggiungi nuovo abito</Text>
+      </TouchableOpacity>
+
+      {/* Lista abiti disponibili */}
+      <View style={styles.itemsSection}>
+        <Text style={styles.sectionTitle}>I tuoi abiti disponibili</Text>
+        {loadingItems ? (
+          <ActivityIndicator color="#5A31F4" size="large" style={{ marginTop: 20 }} />
+        ) : (
+          <FlatList
+            data={myItems}
+            keyExtractor={item => item._id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <View style={styles.itemBox}>
+                <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
+                <Text style={styles.itemTitle} numberOfLines={1}>{item.title}</Text>
+                {item.size ? <Text style={styles.itemMeta}>Taglia: {item.size}</Text> : null}
+                {item.category ? <Text style={styles.itemMeta}>Categoria: {item.category}</Text> : null}
+                {item.condition ? (
+                  <Text style={styles.itemMeta}>
+                    Condizione: {CONDITION_LABELS[item.condition] || item.condition}
+                  </Text>
+                ) : null}
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleDeleteItem(item._id)}
+                >
+                  <Text style={styles.deleteButtonText}>Elimina</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>Non hai ancora abiti disponibili per lo scambio</Text>
+                <Text style={styles.emptySubtext}>Aggiungi il tuo primo capo!</Text>
+              </View>
+            }
+          />
+        )}
+      </View>
+
+      {/* Pulsante logout */}
+      <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+        <Ionicons name="log-out-outline" size={20} color="#FF6347" />
+        <Text style={styles.logoutText}>Logout</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex:1, padding:20 },
-  title: { fontSize:22, fontWeight:"600", marginBottom:8 },
-  subtitle: { fontSize:18, fontWeight:"500", marginTop:18, marginBottom:8 },
-  form: { marginTop:14, marginBottom:18 },
-  input: { borderWidth:1, borderColor:"#ccc", borderRadius:8, padding:10, marginBottom:10 },
-  label: { fontSize:14, color:"#444", marginBottom:6, marginTop:4 },
-  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
-  chip: { paddingVertical:6, paddingHorizontal:10, borderRadius:16, borderWidth:1, borderColor:'#ccc', backgroundColor:'#fff' },
-  chipSelected: { backgroundColor:'#5A31F4', borderColor:'#5A31F4' },
-  chipText: { color:'#333' },
-  chipTextSelected: { color:'#fff', fontWeight:'600' },
-  button: { backgroundColor:"#5A31F4", padding:12, borderRadius:8, alignItems:"center", marginTop:8 },
-  buttonText: { color:"#fff", fontWeight:"bold" },
-  itemBox: { marginRight:14, alignItems:"center", width:130 },
-  itemImage: { width:110, height:110, borderRadius:8, marginBottom:4, backgroundColor:"#eee" },
-  itemTitle: { fontWeight:"600", textAlign:"center" },
-  itemMeta: { color:"#555", fontSize:12, textAlign:"center" },
-  deleteButton: { marginTop: 8, padding: 6, backgroundColor: "#ffeaea", borderRadius: 8, alignItems: "center" }
+  container: { flex: 1, backgroundColor: "#F5F5F5" },
+  profileSection: { alignItems: "center", paddingVertical: 30, backgroundColor: "#fff", marginBottom: 10 },
+  avatar: { width: 100, height: 100, borderRadius: 50, marginBottom: 12, backgroundColor: "#eee" },
+  nickname: { fontSize: 24, fontWeight: "600", color: "#333", marginBottom: 4 },
+  email: { fontSize: 14, color: "#777" },
+  addButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#5A31F4",
+    marginHorizontal: 20,
+    marginVertical: 10,
+    padding: 14,
+    borderRadius: 10,
+    gap: 8,
+  },
+  addButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  itemsSection: { backgroundColor: "#fff", marginTop: 10, paddingVertical: 20 },
+  sectionTitle: { fontSize: 20, fontWeight: "600", color: "#333", marginBottom: 16, paddingHorizontal: 20 },
+  itemBox: { marginLeft: 20, alignItems: "center", width: 140 },
+  itemImage: { width: 130, height: 130, borderRadius: 10, marginBottom: 8, backgroundColor: "#eee" },
+  itemTitle: { fontWeight: "600", textAlign: "center", fontSize: 14, marginBottom: 4 },
+  itemMeta: { color: "#555", fontSize: 12, textAlign: "center" },
+  deleteButton: { marginTop: 10, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: "#ffeaea", borderRadius: 8 },
+  deleteButtonText: { color: "#FF6347", fontWeight: "600", fontSize: 12 },
+  emptyContainer: { alignItems: "center", paddingHorizontal: 40, paddingVertical: 40 },
+  emptyText: { fontSize: 16, color: "#999", textAlign: "center", marginBottom: 8 },
+  emptySubtext: { fontSize: 14, color: "#bbb", textAlign: "center" },
+  logoutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 20,
+    marginVertical: 20,
+    padding: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#FF6347",
+    backgroundColor: "#fff",
+    gap: 8,
+  },
+  logoutText: { color: "#FF6347", fontSize: 16, fontWeight: "600" },
 });

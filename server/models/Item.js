@@ -4,6 +4,13 @@ const itemSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true },
   description: { type: String, trim: true },
   imageUrl: { type: String, required: true },
+  images: [{ type: String }],
+  condition: {
+    type: String,
+    enum: ["new", "excellent", "good"],
+    default: "good",
+  },
+  isAvailable: { type: Boolean, default: true },
   size: {
       type: String,
       enum: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -21,9 +28,15 @@ const itemSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-// Middleware per mantenere likesCount aggiornato
+// Middleware per mantenere likesCount aggiornato e sincronizzare imageUrl con images[0]
 itemSchema.pre("save", function (next) {
   this.likesCount = this.likesList.length;
+  
+  // Se images[] è presente e non vuoto, setta imageUrl = images[0] per compatibilità
+  if (this.images && this.images.length > 0 && !this.imageUrl) {
+    this.imageUrl = this.images[0];
+  }
+  
   next();
 });
 
