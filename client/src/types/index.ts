@@ -18,6 +18,9 @@ export type Item = {
   title: string;
   description?: string;
   imageUrl: string;
+  images?: string[];
+  condition?: 'new' | 'excellent' | 'good';
+  isAvailable?: boolean;
   size?: string;
   category?: string;
   owner: ItemOwner;
