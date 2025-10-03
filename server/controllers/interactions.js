@@ -16,6 +16,10 @@ export const upsertInteraction = async (req, res) => {
       return res.status(400).json({ message: 'Non puoi interagire con un tuo item' });
     }
 
+    // Controlla stato precedente per ridurre trigger inutili
+    const prev = await ItemInteraction.findOne({ user: req.user._id, item: item._id });
+    const wasAlreadyLike = prev?.action === 'like';
+
     // Una sola entry per (user,item), aggiorniamo l’azione
     const interaction = await ItemInteraction.findOneAndUpdate(
       { user: req.user._id, item: item._id },
@@ -24,7 +28,8 @@ export const upsertInteraction = async (req, res) => {
     );
 
     let matchInfo = null;
-    if (action === 'like') {
+    // Avvia la logica di match solo quando si passa a like da uno stato diverso
+    if (action === 'like' && !wasAlreadyLike) {
       const match = await checkForTinderMatch({ userId: req.user._id, likedItemId: item._id });
       if (match?.matched) {
         matchInfo = match;
@@ -34,7 +39,6 @@ export const upsertInteraction = async (req, res) => {
     return res.status(200).json({
       itemId: item._id,
       action: interaction.action,
-      // updatedAt sarà valorizzato se abilitiamo timestamps nello schema
       updatedAt: interaction.updatedAt || interaction.createdAt,
       ...(matchInfo ? { match: matchInfo } : {})
     });

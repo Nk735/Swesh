@@ -157,22 +157,26 @@ export default function HomeScreen() {
 
       <View style={styles.bottomNavContainer}>
         <View style={styles.bottomNav}>
+          {/*filtri per ora inutili, vedremo dopo
           <View style={styles.navItem}>
             <Ionicons name="options-outline" size={24} color="#fff" />
             <Text style={styles.navText}>Filtri</Text>
           </View>
+          */}
           <Link href="/matches" style={styles.linkWrapper}>
             <View style={styles.navItem}>
               <Ionicons name="sync-outline" size={24} color="#fff" />
-              <Text style={styles.navText}>Scambi</Text>
+              <Text style={styles.navText}>Match</Text>
             </View>
           </Link>
+          {/*Chat lista inutile per ora, forse da rimuovere perchè le chat si aprono da match
           <Link href="/chats" style={styles.linkWrapper}>
             <View style={styles.navItem}>
               <Ionicons name="chatbubbles-outline" size={24} color="#fff" />
               <Text style={styles.navText}>Chat</Text>
             </View>
           </Link>
+          */}
           <Link href="/profile" style={styles.linkWrapper}>
             <View style={styles.navItem}>
               <Ionicons name="person-outline" size={24} color="#fff" />
@@ -208,15 +212,15 @@ const styles = StyleSheet.create({
   starButton: { backgroundColor: '#FFF', width: 80, height: 80, borderRadius: 40 },
   heartButton: { backgroundColor: '#FF4458', width: 80, height: 80, borderRadius: 40, shadowColor: '#FF4458', shadowOpacity: 0.4 },
   bottomNavContainer: {
-    backgroundColor: '#5A31F4', borderWidth: 5, borderColor: '#FF5A61',
+    backgroundColor: '#FF7AE9', borderWidth: 2.5, borderColor: '#FFE77A',
     borderTopLeftRadius: 100, borderTopRightRadius: 25, borderBottomLeftRadius: 25, borderBottomRightRadius: 100,
-    overflow: 'hidden', margin: 20, shadowColor: '#000', shadowOffset: { width: 0, height: -5 }, shadowOpacity: 0.1, shadowRadius: 10,
+    overflow: 'hidden', margin: 20, alignSelf:'center', shadowColor: '#000', shadowOffset: { width: 0, height: -5 }, shadowOpacity: 0.1, shadowRadius: 10,
   },
-  bottomNav: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 25 },
-  linkWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  navItem: { width: 70, height: 70, alignItems: 'center', flexDirection: 'column', borderColor: '#FF5A61', borderWidth: 5, borderRadius: 50, padding: 8 },
+  bottomNav: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 30 },
+  linkWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 10 },
+  navItem: { width: 60, height: 60, alignItems: 'center', flexDirection: 'column', borderColor: '#FFE77A', borderWidth: 2.5, borderRadius: 50, padding: 5 },
   navText: { fontSize: 12, color: '#fff', marginTop: 2 },
-  logoutButton: { position: 'absolute', top: 50, left: 20, right: 20, padding: 15, backgroundColor: '#FF6347', borderRadius: 12, alignItems: 'center', opacity: 0.9 },
+  logoutButton: { position: 'absolute', top: 50, left: 20, right: 20, padding: 15, backgroundColor: '#FFE77A', borderRadius: 12, alignItems: 'center', opacity: 0.9 },
   logoutText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
-  reloadBtn: { position: 'absolute', bottom: 24, left: '20%', right: '20%', backgroundColor: '#5A31F4', paddingVertical: 12, borderRadius: 12, alignItems: 'center' },
+  reloadBtn: { position: 'absolute', bottom: 24, left: '20%', right: '20%', backgroundColor: '#FF7AE9', paddingVertical: 12, borderRadius: 12, alignItems: 'center' },
 });

@@ -1,4 +1,3 @@
-// routes/authRoutes.js
 import express from 'express';
 import { registerUser, loginUser, getMe, likeItem, dislikeItem } from '../controllers/user.js';
 import { protect } from '../middleware/auth.js';
