@@ -20,7 +20,6 @@ interface SwipeDeckProps {
 
 const SWIPE_DISTANCE_THRESHOLD = Math.max(60, width * 0.2);
 const SWIPE_VELOCITY_THRESHOLD = 0.6;
-// Mostra solo la card in cima (evita confusione “altri vestiti dietro”)
 const SHOW_SECOND_CARD = false;
 
 export default function SwipeDeck(props: SwipeDeckProps) {
@@ -105,7 +104,9 @@ export default function SwipeDeck(props: SwipeDeckProps) {
     // Reset per il prossimo render
     position.setValue({ x: 0, y: 0 });
     if (!item) return;
+    
     setHistory(h => [item, ...h].slice(0, 20));
+    
     if (direction === 'right') onLike(item);
     else if (direction === 'left') onDislike(item);
     else onSkip(item);
