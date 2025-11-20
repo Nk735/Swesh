@@ -18,7 +18,7 @@ import Chat from './models/Chat.js';
 dotenv.config();
 
 // Connect to MongoDB
-connectDB(process.env.MONGO_URI).then(async () => {
+connectDB(process.env.MONGO_URI || process.env.MONGODB_URI).then(async () => {
   // Garantisce che l'indice unique su Match e gli indici di Chat siano aggiornati
   try {
     await Match.syncIndexes();
@@ -30,7 +30,7 @@ connectDB(process.env.MONGO_URI).then(async () => {
 });
 const app = express();
 
-app.use(cors()); // TODO restringere origin
+app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || true }));
 app.use(express.json({ limit: '1mb' }));
 app.use(morgan('dev'));
 
