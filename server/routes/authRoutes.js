@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, loginUser, getMe, likeItem, dislikeItem } from '../controllers/user.js';
+import { registerUser, loginUser, getMe, likeItem, dislikeItem, updateMyAvatar } from '../controllers/user.js';
 import { protect } from '../middleware/auth.js';
 //import { validateAuthBody } from '../middleware/validate.js';
 
@@ -13,6 +13,9 @@ router.post('/login', loginUser);
 
 // @desc    Get current user
 router.get('/me', protect, getMe);
+
+// @desc    Update my avatar (default avatar picker)
+router.patch('/me/avatar', protect, updateMyAvatar);
 
 // @desc    Like item
 router.post('/like', protect, likeItem);

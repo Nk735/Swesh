@@ -7,6 +7,7 @@ import { api } from '../../src/services/apiClient';
 import SwipeDeck, { DeckItem } from '../../components/SwipeDeck';
 import { MatchNotificationModal } from '../../components/MatchNotificationModal';
 import { InteractionResponse } from '../../src/types/trade';
+import BottomNav from '../../components/BottomNav';
 
 const { width } = Dimensions.get('window');
 
@@ -110,7 +111,7 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <Image
-          source={{ uri: 'https://placehold.co/100x40/5A31F4/FFFFFF?text=SWESH' }}
+          source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQp_2rtjz5BDvEY3-DDF8uM9bMZhyWSIgk2bg&s' }}
           style={styles.logo}
         />
         <TouchableOpacity onPress={reload} disabled={loading}>
@@ -140,10 +141,10 @@ export default function HomeScreen() {
             <View style={styles.actionsBar}>
               {/* Pulsante vedi item precednete da implementare*/}
               <TouchableOpacity style={[styles.actionButton, styles.skipButton]} disabled={!current || actionLoading} onPress={() => current && handleDislike(current)}>
-                <Ionicons name="close" size={38} color="#FF6347" />
+                <Ionicons name="close" size={38} color="#F28585" />
               </TouchableOpacity>
               <TouchableOpacity style={[styles.actionButton, styles.starButton]} disabled={!current || actionLoading} onPress={() => current && handleSkip(current)}>
-                <FontAwesome name="star-o" size={28} color="#5A31F4" />
+                <FontAwesome name="star-o" size={28} color="#F2B263" />
               </TouchableOpacity>
               <TouchableOpacity style={[styles.actionButton, styles.heartButton]} disabled={!current || actionLoading} onPress={() => current && handleLike(current)}>
                 <Ionicons name="heart" size={38} color="white" />
@@ -156,37 +157,8 @@ export default function HomeScreen() {
           }
         />
       </View>
-
-      <View style={styles.bottomNavContainer}>
-        <View style={styles.bottomNav}>
-          {/*filtri per ora inutili, vedremo dopo
-          <View style={styles.navItem}>
-            <Ionicons name="options-outline" size={24} color="#fff" />
-            <Text style={styles.navText}>Filtri</Text>
-          </View>
-          */}
-          <Link href="/matches" style={styles.linkWrapper}>
-            <View style={styles.navItem}>
-              <Ionicons name="sync-outline" size={24} color="#fff" />
-              <Text style={styles.navText}>Match</Text>
-            </View>
-          </Link>
-          {/*Chat lista inutile per ora, forse da rimuovere perchè le chat si aprono da match
-          <Link href="/chats" style={styles.linkWrapper}>
-            <View style={styles.navItem}>
-              <Ionicons name="chatbubbles-outline" size={24} color="#fff" />
-              <Text style={styles.navText}>Chat</Text>
-            </View>
-          </Link>
-          */}
-          <Link href="/profile" style={styles.linkWrapper}>
-            <View style={styles.navItem}>
-              <Ionicons name="person-outline" size={24} color="#fff" />
-              <Text style={styles.navText}>Profilo</Text>
-            </View>
-          </Link>
-        </View>
-      </View>
+      
+      <BottomNav />
 
       <MatchNotificationModal visible={matchModalVisible} match={currentMatch} onAction={handleMatchModalAction} />
     </SafeAreaView>
@@ -200,7 +172,7 @@ const styles = StyleSheet.create({
   actionsBar: {
     marginTop: 24, flexDirection: 'row', justifyContent: 'space-around', width: SCREEN_WIDTH, paddingHorizontal: 14, alignItems: 'center',
   },
-  safeArea: { flex: 1, backgroundColor: '#F5F5F5' },
+  safeArea: { flex: 1, backgroundColor: '#F2E8DF', paddingTop: 50, paddingBottom: 110 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 10 },
   logo: { width: 100, height: 40, resizeMode: 'contain' },
   actionButton: {
@@ -209,15 +181,9 @@ const styles = StyleSheet.create({
   },
   skipButton: { backgroundColor: '#FFF', width: 80, height: 80, borderRadius: 40 },
   starButton: { backgroundColor: '#FFF', width: 60, height: 60, borderRadius: 40 },
-  heartButton: { backgroundColor: '#FF4458', width: 80, height: 80, borderRadius: 40, shadowColor: '#FF4458', shadowOpacity: 0.4 },
-  bottomNavContainer: {
-    backgroundColor: '#FF7AE9', borderWidth: 2.5, borderColor: '#FFE77A',
-    borderTopLeftRadius: 100, borderTopRightRadius: 25, borderBottomLeftRadius: 25, borderBottomRightRadius: 100,
-    overflow: 'hidden', margin: 20, alignSelf:'center', shadowColor: '#000', shadowOffset: { width: 0, height: -5 }, shadowOpacity: 0.1, shadowRadius: 10,
-  },
-  bottomNav: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 30 },
+  heartButton: { backgroundColor: '#86A69D', width: 80, height: 80, borderRadius: 40, shadowColor: '#86A69D', shadowOpacity: 0.4 },
   linkWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 10 },
-  navItem: { width: 60, height: 60, alignItems: 'center', flexDirection: 'column', borderColor: '#FFE77A', borderWidth: 2.5, borderRadius: 50, padding: 5 },
+  navItem: { width: 60, height: 60, alignItems: 'center', flexDirection: 'column', borderColor: '#F2B263', borderWidth: 2.5, borderRadius: 50, padding: 5 },
   navText: { fontSize: 12, color: '#fff', marginTop: 2 },
-  reloadBtn: { position: 'absolute', bottom: 24, left: '20%', right: '20%', backgroundColor: '#FF7AE9', paddingVertical: 12, borderRadius: 12, alignItems: 'center' },
+  reloadBtn: { position: 'absolute', bottom: 24, left: '20%', right: '20%', backgroundColor: '#F28585', paddingVertical: 12, borderRadius: 12, alignItems: 'center' },
 });

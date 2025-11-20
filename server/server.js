@@ -9,6 +9,7 @@ import { notFound, errorHandler } from './middleware/errorHandler.js';
 import interactionRoutes from './routes/interactions.js';
 import matchRoutes from './routes/matches.js';
 import chatRoutes from './routes/chat.js';
+import avatarsRoutes from './routes/avatars.js';
 
 // I MODELS PER SINCRONIZZARE GLI INDICI
 import Match from './models/Match.js';
@@ -41,8 +42,11 @@ app.use('/api/interactions', interactionRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/chat', chatRoutes);
 
+app.use('/api/avatars', avatarsRoutes);
+
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
+app.listen(process.env.PORT || 3000, '0.0.0.0', () => {
+  console.log(`Listening on ${process.env.PORT || 3000}`);
+});

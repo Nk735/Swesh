@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import Item from '../models/Item.js';
 import jwt from 'jsonwebtoken';
+import { AVATARS_V1 } from '../config/avatars.js';
 
 const signToken = (user) => jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
@@ -64,6 +65,41 @@ export const dislikeItem = async (req, res) => {
     if (!item) return res.status(404).json({ message: 'Item non trovato' });
     const user = await req.user.dislikeItem(item._id);
     return res.status(200).json(user.dislikedItems);
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+export const updateMyAvatar = async (req, res) => {
+  try {
+    const { avatarKey, avatarUrl } = req.body || {};
+    if (!avatarKey && !avatarUrl) {
+      return res.status(400).json({ message: 'avatarKey o avatarUrl richiesto' });
+    }
+
+    // Whitelist: trova l’avatar nel catalogo
+    let selected = null;
+    if (avatarKey) {
+      selected = AVATARS_V1.find(a => a.key === avatarKey);
+    } else if (avatarUrl) {
+      selected = AVATARS_V1.find(a => a.url === avatarUrl);
+    }
+
+    if (!selected) {
+      return res.status(400).json({ message: 'Avatar non valido' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'Utente non trovato' });
+
+    user.avatarUrl = selected.url;
+    // Se vuoi anche salvare la key in futuro:
+    // user.avatarKey = selected.key;
+
+    await user.save();
+
+    const sanitized = await User.findById(user._id).select('-password -__v');
+    return res.json(sanitized);
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }

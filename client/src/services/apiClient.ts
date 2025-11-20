@@ -2,9 +2,7 @@ import axios, { AxiosHeaders } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
-const BASE_URL =
-  (Constants.expoConfig?.extra as { API_BASE_URL?: string })?.API_BASE_URL ?? 
-  'http://192.168.1.9:5000';
+const BASE_URL = (Constants.expoConfig?.extra as { API_BASE_URL?: string })?.API_BASE_URL ?? 'https://swesh-production.up.railway.app';
 
 export const api = axios.create({
   baseURL: `${BASE_URL}/api`,

@@ -4,6 +4,7 @@ import Match from '../models/Match.js';
 import Chat from '../models/Chat.js';
 import Item from '../models/Item.js';
 import User from '../models/User.js';
+import Message from '../models/Message.js';
 import mongoose from 'mongoose';
 
 const router = express.Router();
@@ -137,6 +138,95 @@ router.get('/', protect, async (req, res) => {
 
     groups.sort((a, b) => new Date(b.aggregate.lastActivityAt) - new Date(a.aggregate.lastActivityAt));
     res.json(groups);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+// PATCH /api/matches/:matchId/cancel - annulla scambio
+router.patch('/:matchId/cancel', protect, async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const { reason } = req.body || {};
+    const me = req.user;
+
+    const match = await Match.findById(matchId);
+    if (!match) return res.status(404).json({ message: 'Match non trovato' });
+
+    // Autorizzazione: devo essere uno dei due partecipanti
+    if (String(match.userAId) !== String(me._id) && String(match.userBId) !== String(me._id)) {
+      return res.status(403).json({ message: 'Non autorizzato' });
+    }
+
+    // Non annullabile se completato
+    if (match.status === 'completed') {
+      return res.status(409).json({ message: 'Scambio già completato, non annullabile' });
+    }
+
+    // Idempotenza: se già archiviato, ritorna info correnti
+    if (match.status === 'archived') {
+      return res.json({
+        matchId: match._id,
+        status: match.status,
+        cancellation: match.cancellation,
+        lastActivityAt: match.lastActivityAt
+      });
+    }
+
+    // Aggiorna stato e metadati
+    match.status = 'archived';
+    match.cancellation = {
+      by: me._id,
+      at: new Date(),
+      ...(reason ? { reason } : {})
+    };
+    match.lastActivityAt = new Date();
+
+    // Garantisci la chat e invia un messaggio informativo
+    let chat = await Chat.findOne({ matchId: match._id });
+    if (!chat) {
+      chat = await Chat.create({
+        matchId: match._id,
+        participants: [match.userAId, match.userBId],
+        lastMessageAt: new Date(),
+        unreadCountByUser: new Map([
+          [String(match.userAId), 0],
+          [String(match.userBId), 0]
+        ])
+      });
+      match.chatId = chat._id;
+    }
+
+    // Messaggio "di sistema" (semplice testo)
+    const nickname = me.nickname || 'Utente';
+    const sysMsg = await Message.create({
+      chatId: chat._id,
+      senderId: me._id, // possiamo usare il mittente come chi annulla
+      content: `Scambio annullato da ${nickname}.`
+    });
+
+    // Aggiorna unread per l'altro utente
+    const otherUserId = String(me._id) === String(match.userAId) ? String(match.userBId) : String(match.userAId);
+    chat.lastMessageAt = new Date();
+    const currentUnread = chat.unreadCountByUser.get
+      ? (chat.unreadCountByUser.get(otherUserId) || 0)
+      : (chat.unreadCountByUser[otherUserId] || 0);
+    const newUnread = currentUnread + 1;
+    if (chat.unreadCountByUser.set) {
+      chat.unreadCountByUser.set(otherUserId, newUnread);
+    } else {
+      chat.unreadCountByUser[otherUserId] = newUnread;
+    }
+
+    await chat.save();
+    await match.save();
+
+    return res.json({
+      matchId: match._id,
+      status: 'archived',
+      cancellation: match.cancellation,
+      lastActivityAt: match.lastActivityAt
+    });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }

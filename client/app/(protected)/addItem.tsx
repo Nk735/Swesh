@@ -95,7 +95,7 @@ export default function AddItemScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#5A31F4" />
+          <Ionicons name="arrow-back" size={24} color="#86A69D" />
         </TouchableOpacity>
         <Text style={styles.title}>Aggiungi un nuovo abito</Text>
       </View>
@@ -140,7 +140,7 @@ export default function AddItemScreen() {
           </View>
         ))}
         <TouchableOpacity onPress={addImageField} style={styles.addImageButton}>
-          <Ionicons name="add-circle-outline" size={20} color="#5A31F4" />
+          <Ionicons name="add-circle-outline" size={20} color="#86A69D" />
           <Text style={styles.addImageText}>Aggiungi altra immagine</Text>
         </TouchableOpacity>
 
@@ -203,7 +203,7 @@ export default function AddItemScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#F2E8DF" },
   header: { flexDirection: "row", alignItems: "center", padding: 20, paddingTop: 50 },
   backButton: { marginRight: 12 },
   title: { fontSize: 22, fontWeight: "600" },
@@ -215,12 +215,12 @@ const styles = StyleSheet.create({
   imageInput: { flex: 1, marginBottom: 0 },
   removeButton: { marginLeft: 8 },
   addImageButton: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  addImageText: { marginLeft: 8, color: "#5A31F4", fontWeight: "500" },
+  addImageText: { marginLeft: 8, color: "#86A69D", fontWeight: "500" },
   chipsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 8 },
   chip: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 16, borderWidth: 1, borderColor: "#ccc", backgroundColor: "#fff" },
-  chipSelected: { backgroundColor: "#5A31F4", borderColor: "#5A31F4" },
+  chipSelected: { backgroundColor: "#F28585", borderColor: "#F28585" },
   chipText: { color: "#333", fontSize: 14 },
   chipTextSelected: { color: "#fff", fontWeight: "600" },
-  button: { backgroundColor: "#5A31F4", padding: 14, borderRadius: 8, alignItems: "center", marginTop: 20 },
+  button: { backgroundColor: "#F2B263", padding: 14, borderRadius: 8, alignItems: "center", marginTop: 20 },
   buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 });

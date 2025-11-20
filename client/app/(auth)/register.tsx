@@ -41,10 +41,10 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:{ flex:1, justifyContent:"center", padding:24 },
+  container:{ backgroundColor:"#F2E8DF", flex:1, justifyContent:"center", padding:24 },
   title:{ fontSize:26, fontWeight:"bold", marginBottom:24, textAlign:"center" },
   input:{ borderWidth:1, borderColor:"#ccc", borderRadius:8, padding:12, marginBottom:12 },
-  button:{ backgroundColor:"#34C759", padding:14, borderRadius:8, alignItems:"center" },
+  button:{ backgroundColor:"#F28585", padding:14, borderRadius:8, alignItems:"center" },
   buttonText:{ color:"#fff", fontWeight:"bold" },
   link:{ marginTop:16, color:"#007AFF", textAlign:"center" }
 });

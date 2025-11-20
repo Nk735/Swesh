@@ -70,7 +70,11 @@ router.get('/:matchId/messages', protect, async (req, res) => {
         read: true // dopo fetch li consideriamo letti
       }));
 
-    res.json({ messages: enriched });
+    res.json({
+      matchStatus: match.status,
+      ...(match.cancellation ? { cancellation: match.cancellation } : {}),
+      messages: enriched
+    });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
@@ -86,6 +90,10 @@ router.post('/:matchId/messages', protect, async (req, res) => {
     }
     const { match, chat, error } = await loadMatchAndChat(matchId, req.user._id);
     if (error) return res.status(error === 'Non autorizzato' ? 403 : 404).json({ message: error });
+
+    if (match.status !== 'active') {
+      return res.status(409).json({ message: 'Match non attivo: chat in sola lettura' });
+    }
 
     const msg = await Message.create({
       chatId: chat._id,

@@ -18,7 +18,12 @@ const matchSchema = new mongoose.Schema({
     index: true
   },
   lastActivityAt: { type: Date, default: Date.now, index: true },
-  chatId: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat' }
+  chatId: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat' },
+  cancellation: {
+    by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    at: { type: Date },
+    reason: { type: String, maxlength: 500 }
+  }
 }, {
   timestamps: true
 });

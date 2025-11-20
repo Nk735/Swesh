@@ -102,6 +102,17 @@ export interface ChatMessage {
   read: boolean;
 }
 
+// Envelope per GET chat messages (include stato match)
+export interface ChatMessagesEnvelope {
+  matchStatus?: 'active' | 'completed' | 'archived';
+  cancellation?: {
+    by: string;
+    at: string;
+    reason?: string;
+  };
+  messages: ChatMessage[];
+}
+
 export interface InteractionStats {
   likes: number;
   dislikes: number;

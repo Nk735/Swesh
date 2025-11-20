@@ -5,7 +5,8 @@ import {
   ChatMessage, 
   RecentMatch,
   InteractionStats,
-  TinderMatch
+  TinderMatch,
+  ChatMessagesEnvelope
 } from '../types/trade';
 
 // Nuove funzioni per il sistema Tinder
@@ -56,15 +57,21 @@ export async function getRecentMatches(limit: number = 10): Promise<RecentMatch[
   return data;
 }
 
-// Chat functions (unchanged)
-export async function getChatMessages(matchId: string): Promise<ChatMessage[]> {
+// Chat functions
+export async function getChatMessages(matchId: string): Promise<ChatMessagesEnvelope> {
   const { data } = await api.get(`/chat/${matchId}/messages`);
-  return data.messages;
+  return data;
 }
 
 export async function sendChatMessage(matchId: string, content: string) {
   const { data } = await api.post(`/chat/${matchId}/messages`, { content });
   return data;
+}
+
+// Annulla scambio
+export async function cancelMatch(matchId: string, reason?: string) {
+  const { data } = await api.patch(`/matches/${matchId}/cancel`, reason ? { reason } : {});
+  return data as { matchId: string; status: 'archived'; cancellation?: { by: string; at: string; reason?: string }; lastActivityAt: string };
 }
 
 // Utility functions
