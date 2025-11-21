@@ -17,7 +17,7 @@ import Chat from './models/Chat.js';
 
 dotenv.config();
 
-// Connect to MongoDB
+// Connessione MongoDB (fallback MONGO_URI || MONGODB_URI)
 connectDB(process.env.MONGO_URI || process.env.MONGODB_URI).then(async () => {
   // Garantisce che l'indice unique su Match e gli indici di Chat siano aggiornati
   try {
@@ -28,13 +28,37 @@ connectDB(process.env.MONGO_URI || process.env.MONGODB_URI).then(async () => {
     console.error('Index sync error', e);
   }
 });
+
 const app = express();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || true }));
+// Configurazione CORS
+const rawOrigins = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+const useWildcard = rawOrigins.length === 0 || rawOrigins.includes('*');
+
+const corsOptions = {
+  origin: useWildcard
+    ? (origin, cb) => cb(null, true) // Accetta tutte le origini in sviluppo / wildcard
+    : rawOrigins,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false, // Imposta true solo se specifichi origini precise e usi cookie
+};
+
+if (process.env.NODE_ENV !== 'production') {
+  app.use((req, _res, next) => {
+    console.log('[CORS] Request Origin:', req.headers.origin);
+    next();
+  });
+}
+
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
 app.use(morgan('dev'));
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemRoutes);
