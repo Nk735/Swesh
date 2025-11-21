@@ -8,12 +8,13 @@ export const connectDB = async (uri) => {
   try {
     const conn = await mongoose.connect(uri, {
       autoIndex: true,
-      serverSelectionTimeoutMS: 5000, // Timeout dopo 5 secondi
+      serverSelectionTimeoutMS: 30000, // 30s per trovare un server
+      socketTimeoutMS: 45000,          // Evita chiusura prematura su operazioni lente
     });
     console.log(`MongoDB connesso: ${conn.connection.host}`);
   } catch (err) {
     console.error('Errore connessione MongoDB:', err.message);
-    // In development, non bloccare il server se MongoDB non è disponibile
+    // In sviluppo puoi decidere se continuare; manteniamo comportamento precedente.
     if (process.env.NODE_ENV !== 'production') {
       console.warn('Continuando senza MongoDB per development...');
       return;

@@ -1,0 +1,9 @@
+# Riduce il contesto di build Docker
+.git
+.gitignore
+client
+**/node_modules
+**/.env
+npm-debug.log
+Dockerfile
+.dockerignore
