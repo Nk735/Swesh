@@ -1,58 +1,18 @@
 import axios, { AxiosHeaders } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
 
 // URL di produzione Railway
 const PRODUCTION_URL = 'https://swesh-production-ee2e.up.railway.app';
 
-// Type-safe helper to get debugger host from various Expo Constants locations
-const getDebuggerHost = (): string | undefined => {
-  // Check modern Expo SDK (expoConfig.hostUri)
-  if (Constants.expoConfig?.hostUri) {
-    return Constants.expoConfig.hostUri;
-  }
-  
-  // Check legacy manifest (Expo SDK < 46)
-  const legacyConstants = Constants as Record<string, unknown>;
-  const manifest = legacyConstants.manifest as { debuggerHost?: string } | undefined;
-  if (manifest?.debuggerHost) {
-    return manifest.debuggerHost;
-  }
-  
-  // Check manifest2 for Expo Go
-  const manifest2 = legacyConstants.manifest2 as { extra?: { expoGo?: { debuggerHost?: string } } } | undefined;
-  if (manifest2?.extra?.expoGo?.debuggerHost) {
-    return manifest2.extra.expoGo.debuggerHost;
-  }
-  
-  return undefined;
-};
-
 // Rileva automaticamente il base URL
 const getBaseUrl = (): string => {
-  // 1. Se definito in config/env, usa quello (override manuale)
-  const configUrl = (Constants.expoConfig?.extra as { API_BASE_URL?: string } | undefined)?.API_BASE_URL
-    || ((Constants as Record<string, unknown>).manifest2 as { extra?: { API_BASE_URL?: string } } | undefined)?.extra?.API_BASE_URL;
-  
-  if (configUrl && configUrl !== PRODUCTION_URL) {
-    return configUrl;
-  }
-
-  // 2. In sviluppo (__DEV__), usa l'IP del server Expo
+  // In sviluppo, usa sempre localhost
   if (__DEV__) {
-    const debuggerHost = getDebuggerHost();
-    
-    if (debuggerHost) {
-      const ip = debuggerHost.split(':')[0];
-      console.log(`[API] Dev mode - IP rilevato: ${ip}`);
-      return `http://${ip}:3000`;
-    }
-    
-    console.warn('[API] Impossibile rilevare IP, uso localhost');
+    console.log('[API] Dev mode - uso localhost:3000');
     return 'http://localhost:3000';
   }
 
-  // 3. In produzione, usa Railway
+  // In produzione, usa Railway
   return PRODUCTION_URL;
 };
 
@@ -69,19 +29,16 @@ export const api = axios.create({
 api.interceptors.request.use(async (config) => {
   const token = await AsyncStorage.getItem('auth_token');
 
-  // Convert headers to AxiosHeaders if not already
-  if (!config.headers || !(config.headers instanceof AxiosHeaders)) {
-    config.headers = new AxiosHeaders(config.headers);
+  if (! config.headers || !(config.headers instanceof AxiosHeaders)) {
+    config. headers = new AxiosHeaders(config.headers);
   }
 
-  // Manage Authorization header based on token
   if (token) {
     (config.headers as AxiosHeaders).set('Authorization', `Bearer ${token}`);
   } else {
     (config.headers as AxiosHeaders).delete('Authorization');
   }
 
-  // Set default headers
   (config.headers as AxiosHeaders).set('Accept', 'application/json');
 
   return config;
@@ -90,13 +47,13 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use(
   response => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?. status === 401) {
       await AsyncStorage.removeItem('auth_token');
       if (__DEV__) console.log('[API] 401 → token rimosso');
-    } else if (!error.response) {
-      console.error('[API] Network Error:', error.message);
+    } else if (! error.response) {
+      console.error('[API] Network Error:', error. message);
     }
-    return Promise.reject(error);
+    return Promise. reject(error);
   }
 );
 
