@@ -5,21 +5,42 @@ import Constants from 'expo-constants';
 // URL di produzione Railway
 const PRODUCTION_URL = 'https://swesh-production.up.railway.app';
 
+// Type-safe helper to get debugger host from various Expo Constants locations
+const getDebuggerHost = (): string | undefined => {
+  // Check modern Expo SDK (expoConfig.hostUri)
+  if (Constants.expoConfig?.hostUri) {
+    return Constants.expoConfig.hostUri;
+  }
+  
+  // Check legacy manifest (Expo SDK < 46)
+  const legacyConstants = Constants as Record<string, unknown>;
+  const manifest = legacyConstants.manifest as { debuggerHost?: string } | undefined;
+  if (manifest?.debuggerHost) {
+    return manifest.debuggerHost;
+  }
+  
+  // Check manifest2 for Expo Go
+  const manifest2 = legacyConstants.manifest2 as { extra?: { expoGo?: { debuggerHost?: string } } } | undefined;
+  if (manifest2?.extra?.expoGo?.debuggerHost) {
+    return manifest2.extra.expoGo.debuggerHost;
+  }
+  
+  return undefined;
+};
+
 // Rileva automaticamente il base URL
 const getBaseUrl = (): string => {
   // 1. Se definito in config/env, usa quello (override manuale)
-  const configUrl = (Constants.expoConfig?.extra as { API_BASE_URL?: string })?.API_BASE_URL
-    || (Constants as unknown as { manifest2?: { extra?: { API_BASE_URL?: string } } })?.manifest2?.extra?.API_BASE_URL;
+  const configUrl = (Constants.expoConfig?.extra as { API_BASE_URL?: string } | undefined)?.API_BASE_URL
+    || ((Constants as Record<string, unknown>).manifest2 as { extra?: { API_BASE_URL?: string } } | undefined)?.extra?.API_BASE_URL;
   
-  if (configUrl && configUrl !== 'https://swesh-production.up.railway.app') {
+  if (configUrl && configUrl !== PRODUCTION_URL) {
     return configUrl;
   }
 
   // 2. In sviluppo (__DEV__), usa l'IP del server Expo
   if (__DEV__) {
-    const debuggerHost = Constants.expoConfig?.hostUri 
-      || (Constants as unknown as { manifest?: { debuggerHost?: string } })?.manifest?.debuggerHost
-      || (Constants as unknown as { manifest2?: { extra?: { expoGo?: { debuggerHost?: string } } } })?.manifest2?.extra?.expoGo?.debuggerHost;
+    const debuggerHost = getDebuggerHost();
     
     if (debuggerHost) {
       const ip = debuggerHost.split(':')[0];
