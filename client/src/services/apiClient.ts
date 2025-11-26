@@ -2,23 +2,69 @@ import axios, { AxiosHeaders } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
-// Recupera base URL dalle extra (app.config.ts)
-const BASE_URL = (Constants.expoConfig?.extra as { API_BASE_URL?: string })?.API_BASE_URL
-  || (Constants as any)?.manifest2?.extra?.API_BASE_URL
-  || undefined;
+// URL di produzione Railway
+const PRODUCTION_URL = 'https://swesh-production.up.railway.app';
 
-if (!BASE_URL) {
-  console.warn('[API] Nessuna API_BASE_URL definita. Imposta EXPO_PUBLIC_API_BASE_URL o extra.API_BASE_URL.');
-}
+// Type-safe helper to get debugger host from various Expo Constants locations
+const getDebuggerHost = (): string | undefined => {
+  // Check modern Expo SDK (expoConfig.hostUri)
+  if (Constants.expoConfig?.hostUri) {
+    return Constants.expoConfig.hostUri;
+  }
+  
+  // Check legacy manifest (Expo SDK < 46)
+  const legacyConstants = Constants as Record<string, unknown>;
+  const manifest = legacyConstants.manifest as { debuggerHost?: string } | undefined;
+  if (manifest?.debuggerHost) {
+    return manifest.debuggerHost;
+  }
+  
+  // Check manifest2 for Expo Go
+  const manifest2 = legacyConstants.manifest2 as { extra?: { expoGo?: { debuggerHost?: string } } } | undefined;
+  if (manifest2?.extra?.expoGo?.debuggerHost) {
+    return manifest2.extra.expoGo.debuggerHost;
+  }
+  
+  return undefined;
+};
+
+// Rileva automaticamente il base URL
+const getBaseUrl = (): string => {
+  // 1. Se definito in config/env, usa quello (override manuale)
+  const configUrl = (Constants.expoConfig?.extra as { API_BASE_URL?: string } | undefined)?.API_BASE_URL
+    || ((Constants as Record<string, unknown>).manifest2 as { extra?: { API_BASE_URL?: string } } | undefined)?.extra?.API_BASE_URL;
+  
+  if (configUrl && configUrl !== PRODUCTION_URL) {
+    return configUrl;
+  }
+
+  // 2. In sviluppo (__DEV__), usa l'IP del server Expo
+  if (__DEV__) {
+    const debuggerHost = getDebuggerHost();
+    
+    if (debuggerHost) {
+      const ip = debuggerHost.split(':')[0];
+      console.log(`[API] Dev mode - IP rilevato: ${ip}`);
+      return `http://${ip}:3000`;
+    }
+    
+    console.warn('[API] Impossibile rilevare IP, uso localhost');
+    return 'http://localhost:3000';
+  }
+
+  // 3. In produzione, usa Railway
+  return PRODUCTION_URL;
+};
+
+const BASE_URL = getBaseUrl();
+
+console.log(`[API] Ambiente: ${__DEV__ ? 'DEVELOPMENT' : 'PRODUCTION'}`);
+console.log(`[API] Base URL: ${BASE_URL}`);
 
 export const api = axios.create({
-  baseURL: BASE_URL ? `${BASE_URL}/api` : undefined,
-  timeout: 10000,
+  baseURL: `${BASE_URL}/api`,
+  timeout: 15000,
 });
-
-if (__DEV__) {
-  console.log('[API] Base URL attiva:', BASE_URL);
-}
 
 api.interceptors.request.use(async (config) => {
   const token = await AsyncStorage.getItem('auth_token');
@@ -47,9 +93,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       await AsyncStorage.removeItem('auth_token');
       if (__DEV__) console.log('[API] 401 → token rimosso');
-      // TODO: redirect a login se necessario
     } else if (!error.response) {
-      console.warn('[API] Errore rete/timeout:', error.message);
+      console.error('[API] Network Error:', error.message);
     }
     return Promise.reject(error);
   }

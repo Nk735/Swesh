@@ -38,8 +38,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ],
     experiments: { typedRoutes: true },
     extra: {
-      // Usa variabile d'ambiente oppure fallback locale
-      API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000'
+      // Usa variabile d'ambiente oppure fallback a Railway
+      API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://swesh-production.up.railway.app'
     }
   };
 };
