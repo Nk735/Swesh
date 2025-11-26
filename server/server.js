@@ -32,27 +32,39 @@ connectDB(process.env.MONGO_URI || process.env.MONGODB_URI).then(async () => {
 const app = express();
 
 // Configurazione CORS
-const rawOrigins = (process.env.CORS_ORIGIN || '')
-  .split(',')
-  .map(o => o.trim())
-  .filter(Boolean);
-const useWildcard = rawOrigins.length === 0 || rawOrigins.includes('*');
+console.log(`[Server] Startup - NODE_ENV: ${process.env.NODE_ENV}`);
 
 const corsOptions = {
-  origin: useWildcard
-    ? (origin, cb) => cb(null, true) // Accetta tutte le origini in sviluppo / wildcard
-    : rawOrigins,
+  origin: true, // Accetta automaticamente qualsiasi origine (localhost, app, ecc.)
+  credentials: true, // Permette l'invio di cookie/header auth
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: false, // Imposta true solo se specifichi origini precise e usi cookie
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
 };
 
-if (process.env.NODE_ENV !== 'production') {
-  app.use((req, _res, next) => {
-    console.log('[CORS] Request Origin:', req.headers.origin);
-    next();
-  });
-}
+{/*const corsOptions = {
+  origin: (origin, callback) => {
+    // Consenti richieste senza origin (es. Postman, app mobile native pure)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = (process.env.CORS_ORIGIN || '').split(',').map(o => o.trim()).filter(Boolean);
+    
+    // Controlli di sicurezza
+    const isDev = process.env.NODE_ENV !== 'production';
+    // Permetti sempre localhost/loopback per sviluppo locale (anche se in container production)
+    const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('10.0.2.2');
+    const isWildcard = allowedOrigins.includes('*') || allowedOrigins.length === 0;
+
+    if (isDev || isWildcard || isLocalhost || allowedOrigins.includes(origin)) {
+      return callback(null, true); // Accesso consentito
+    }
+
+    console.error(`[CORS] Blocked origin: ${origin}`);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  credentials: true
+};*/}
 
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
