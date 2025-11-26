@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
 // URL di produzione Railway
-const PRODUCTION_URL = 'https://swesh-production.up.railway.app';
+const PRODUCTION_URL = 'https://swesh-production-ee2e.up.railway.app';
 
 // Type-safe helper to get debugger host from various Expo Constants locations
 const getDebuggerHost = (): string | undefined => {
