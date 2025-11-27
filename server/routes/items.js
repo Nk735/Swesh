@@ -49,7 +49,8 @@ router.get('/', protect, async (req, res) => {
       ...(interactedIds.length ? { _id: { $nin: interactedIds } } : {}),
     };
 
-    const items = await Item.find(query).populate('owner', 'nickname avatarUrl');
+    // Use lean() for better performance on read-only queries
+    const items = await Item.find(query).populate('owner', 'nickname avatarUrl').lean();
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -58,7 +59,8 @@ router.get('/', protect, async (req, res) => {
 
 router.get('/mine', protect, async (req, res) => {
   try {
-    const items = await Item.find({ owner: req.user._id });
+    // Use lean() for better performance on read-only queries
+    const items = await Item.find({ owner: req.user._id }).lean();
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -68,7 +70,8 @@ router.get('/mine', protect, async (req, res) => {
 // Get single item by ID
 router.get('/:id', protect, async (req, res) => {
   try {
-    const item = await Item.findById(req.params.id).populate('owner', 'nickname avatarUrl');
+    // Use lean() for better performance on read-only queries
+    const item = await Item.findById(req.params.id).populate('owner', 'nickname avatarUrl').lean();
     if (!item) return res.status(404).json({ message: 'Item not found' });
     res.json(item);
   } catch (error) {

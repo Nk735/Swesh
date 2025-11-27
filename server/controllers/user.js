@@ -77,7 +77,7 @@ export const updateMyAvatar = async (req, res) => {
       return res.status(400).json({ message: 'avatarKey o avatarUrl richiesto' });
     }
 
-    // Whitelist: trova l’avatar nel catalogo
+    // Whitelist: trova l'avatar nel catalogo
     let selected = null;
     if (avatarKey) {
       selected = AVATARS_V1.find(a => a.key === avatarKey);
@@ -89,17 +89,16 @@ export const updateMyAvatar = async (req, res) => {
       return res.status(400).json({ message: 'Avatar non valido' });
     }
 
-    const user = await User.findById(req.user._id);
+    // Use findByIdAndUpdate with { new: true } to get updated document in one operation
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { avatarUrl: selected.url },
+      { new: true }
+    ).select('-password -__v');
+
     if (!user) return res.status(404).json({ message: 'Utente non trovato' });
 
-    user.avatarUrl = selected.url;
-    // Se vuoi anche salvare la key in futuro:
-    // user.avatarKey = selected.key;
-
-    await user.save();
-
-    const sanitized = await User.findById(user._id).select('-password -__v');
-    return res.json(sanitized);
+    return res.json(user);
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }

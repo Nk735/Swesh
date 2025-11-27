@@ -58,37 +58,38 @@ async function createOrGetMatchAndChat(userAId, userBId, itemAId, itemBId) {
  */
 export async function checkForTinderMatch({ userId, likedItemId }) {
   try {
-    // 1) Item appena likato e proprietario
-    const likedItem = await Item.findById(likedItemId);
+    // 1) Item appena likato e proprietario - use lean() for read-only query
+    const likedItem = await Item.findById(likedItemId).select('owner').lean();
     if (!likedItem) return { matched: false };
 
     const otherUserId = likedItem.owner;
     if (String(otherUserId) === String(userId)) return { matched: false };
 
-    // 2) Miei item
-    const myItems = await Item.find({ owner: userId }).select('_id');
-    const myItemIds = myItems.map(i => i._id);
+    // 2) Run parallel queries for better performance
+    const [myItemIds, otherItemIds] = await Promise.all([
+      Item.find({ owner: userId }).distinct('_id'),
+      Item.find({ owner: otherUserId }).distinct('_id')
+    ]);
 
-    // 3) Miei item che l'altro ha likato (A)
-    const myItemsLikedByOther = await ItemInteraction.find({
-      user: otherUserId,
-      item: { $in: myItemIds },
-      action: 'like'
-    }).populate('item');
+    // 3) Run parallel queries for interactions
+    const [myItemsLikedByOther, theirItemsILikedDocs] = await Promise.all([
+      // Miei item che l'altro ha likato (A)
+      ItemInteraction.find({
+        user: otherUserId,
+        item: { $in: myItemIds },
+        action: 'like'
+      }).select('item').lean(),
+      // Item dell'altro che ho likato io (B)
+      ItemInteraction.find({
+        user: userId,
+        item: { $in: otherItemIds },
+        action: 'like'
+      }).select('item').lean()
+    ]);
 
     if (!myItemsLikedByOther.length) {
       return { matched: false };
     }
-
-    // 4) Item dell'altro che ho likato io (B) + includi quello appena likato
-    const otherItems = await Item.find({ owner: otherUserId }).select('_id');
-    const otherItemIds = otherItems.map(i => i._id);
-
-    const theirItemsILikedDocs = await ItemInteraction.find({
-      user: userId,
-      item: { $in: otherItemIds },
-      action: 'like'
-    }).select('item');
 
     const theirItemsILikedSet = new Set(theirItemsILikedDocs.map(d => String(d.item)));
     theirItemsILikedSet.add(String(likedItemId));
@@ -100,7 +101,7 @@ export async function checkForTinderMatch({ userId, likedItemId }) {
     const created = [];
 
     for (const myItemLiked of myItemsLikedByOther) {
-      const myItemId = myItemLiked.item._id;
+      const myItemId = myItemLiked.item;
       for (const theirItemId of theirItemsILiked) {
         let itemAId, itemBId;
         if (userAId === String(userId)) {
@@ -154,6 +155,7 @@ export async function checkForTinderMatch({ userId, likedItemId }) {
  * Ottieni tutti i match dell'utente (helper non usato direttamente nelle routes qui).
  */
 export async function getUserMatches(userId) {
+  // Use lean() for better performance on read-only queries
   const matches = await Match.find({
     $or: [{ userAId: userId }, { userBId: userId }]
   })
@@ -161,7 +163,8 @@ export async function getUserMatches(userId) {
     .populate('itemBId', 'title imageUrl')
     .populate('userAId', 'nickname avatarUrl')
     .populate('userBId', 'nickname avatarUrl')
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .lean();
 
   return matches.map(match => {
     const isUserA = String(match.userAId._id) === String(userId);
