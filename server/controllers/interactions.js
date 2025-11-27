@@ -53,7 +53,7 @@ export const getMyLikes = async (req, res) => {
     const docs = await ItemInteraction
       .find({ user: req.user._id, action: 'like' })
       .sort({ updatedAt: -1 })
-      .populate('item');
+      .populate('item').lean();
     res.json(docs);
   } catch (err) {
     res.status(500).json({ message: err.message });

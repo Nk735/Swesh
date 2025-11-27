@@ -10,7 +10,7 @@ const itemSchema = new mongoose.Schema({
     enum: ["new", "excellent", "good"],
     default: "good",
   },
-  isAvailable: { type: Boolean, default: true },
+  isAvailable: { type: Boolean, default: true, index: true },
   size: {
       type: String,
       enum: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -21,12 +21,15 @@ const itemSchema = new mongoose.Schema({
       enum: ["shirt", "pants", "shoes", "jacket", "accessory", "other"],
       default: "other",
     },
-  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   likesCount: { type: Number, default: 0 },
   likesList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, {
   timestamps: true,
 });
+
+// Compound index for common feed queries (owner + isAvailable)
+itemSchema.index({ owner: 1, isAvailable: 1 });
 
 // Middleware per mantenere likesCount aggiornato e sincronizzare imageUrl con images[0]
 itemSchema.pre("save", function (next) {
