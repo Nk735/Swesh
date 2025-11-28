@@ -23,7 +23,14 @@ const matchSchema = new mongoose.Schema({
     by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     at: { type: Date },
     reason: { type: String, maxlength: 500 }
-  }
+  },
+  confirmation: {
+    userAConfirmed: { type: Boolean, default: false },
+    userAConfirmedAt: { type: Date },
+    userBConfirmed: { type: Boolean, default: false },
+    userBConfirmedAt: { type: Date }
+  },
+  completedAt: { type: Date }
 }, {
   timestamps: true
 });
@@ -31,7 +38,8 @@ const matchSchema = new mongoose.Schema({
 // Un match è unico per quadrupla utenti+item (canonical ordering)
 matchSchema.index(
   { userAId: 1, userBId: 1, itemAId: 1, itemBId: 1 },
-  { unique: true }
+  { unique: true
+  }
 );
 
 export default mongoose.model('Match', matchSchema);
