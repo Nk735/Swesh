@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Nickname is required'],
     trim: true,
   },
-  avatarUrl: {
+  avatarKey: {
     type: String,
   },
   likedItems: [{

@@ -1,7 +1,6 @@
 import User from '../models/User.js';
 import Item from '../models/Item.js';
 import jwt from 'jsonwebtoken';
-import { AVATARS_V1 } from '../config/avatars.js';
 
 const signToken = (user) => jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
@@ -72,29 +71,17 @@ export const dislikeItem = async (req, res) => {
 
 export const updateMyAvatar = async (req, res) => {
   try {
-    const { avatarKey, avatarUrl } = req.body || {};
-    if (!avatarKey && !avatarUrl) {
-      return res.status(400).json({ message: 'avatarKey o avatarUrl richiesto' });
+    const { avatarKey } = req.body;
+    
+    if (!avatarKey) {
+      return res.status(400). json({ message: 'avatarKey richiesto' });
     }
 
-    // Whitelist: trova l'avatar nel catalogo
-    let selected = null;
-    if (avatarKey) {
-      selected = AVATARS_V1.find(a => a.key === avatarKey);
-    } else if (avatarUrl) {
-      selected = AVATARS_V1.find(a => a.url === avatarUrl);
-    }
-
-    if (!selected) {
-      return res.status(400).json({ message: 'Avatar non valido' });
-    }
-
-    // Use findByIdAndUpdate with { new: true } to get updated document in one operation
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { avatarUrl: selected.url },
+      { avatarKey },
       { new: true }
-    ).select('-password -__v');
+    ). select('-password -__v');
 
     if (!user) return res.status(404).json({ message: 'Utente non trovato' });
 

@@ -4,12 +4,13 @@ export type User = {
   id: string;
   email: string;
   nickname: string;
+  avatarUrl?: string;
   avatarKey?: string;
 };
 
 export type ItemOwner = {
   nickname: string;
-  avatarKey?: string;
+  avatarUrl?: string;
   _id?: string;
 };
 

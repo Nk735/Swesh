@@ -9,7 +9,6 @@ import { notFound, errorHandler } from './middleware/errorHandler.js';
 import interactionRoutes from './routes/interactions.js';
 import matchRoutes from './routes/matches.js';
 import chatRoutes from './routes/chat.js';
-import avatarsRoutes from './routes/avatars.js';
 
 // I MODELS PER SINCRONIZZARE GLI INDICI
 import Match from './models/Match.js';
@@ -77,8 +76,6 @@ app.use('/api/items', itemRoutes);
 app.use('/api/interactions', interactionRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/chat', chatRoutes);
-
-app.use('/api/avatars', avatarsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

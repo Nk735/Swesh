@@ -4,6 +4,7 @@ import { getGroupedMatches } from '../../src/services/tradeApi';
 import { GroupedMatchesResponse } from '../../src/types/trade';
 import { router } from 'expo-router';
 import BottomNav from '../../components/BottomNav';
+import EmptyState from '../../components/EmptyState';
 
 export default function MatchesScreen() {
   const [groups, setGroups] = useState<GroupedMatchesResponse[]>([]);
@@ -29,7 +30,18 @@ export default function MatchesScreen() {
   }
 
   if (!groups.length) {
-    return <View style={styles.center}><Text style={{ color:'#666' }}>Nessun match ancora</Text></View>;
+    return (
+      <View style={{ flex: 1, backgroundColor: '#F2E8DF' }}>
+        <EmptyState
+          icon="heart-outline"
+          title="Nessun match ancora"
+          subtitle="Continua a esplorare e metti like agli abiti che ti piacciono.  Quando ci sarà un interesse reciproco, apparirà qui!"
+          buttonText="Inizia a esplorare"
+          onButtonPress={() => router.push('/')}
+        />
+        <BottomNav />
+      </View>
+    );
   }
 
   return (
