@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, Image, Animated, PanResponder, Alert, Modal } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { getChatMessages, sendChatMessage, getMatchById, cancelMatch, confirmExchange } from "../../../src/services/tradeApi";
@@ -98,7 +98,8 @@ export default function ChatScreen() {
     };
   }, [matchId, user?.id, matchInfo?.otherUser?._id]);
 
-  const createSliderResponder = useCallback(() => {
+  // Use useMemo to avoid recreating PanResponder on every render
+  const sliderResponder = useMemo(() => {
     return PanResponder.create({
       onStartShouldSetPanResponder: () => !myConfirmed && !isReadOnly,
       onMoveShouldSetPanResponder: (_, g) => !myConfirmed && !isReadOnly && Math.abs(g.dx) > 3,
@@ -141,9 +142,7 @@ export default function ChatScreen() {
         Animated.spring(sliderX, { toValue: 0, useNativeDriver: false, friction: 7 }).start(() => setSliderActive(false));
       }
     });
-  }, [myConfirmed, isReadOnly, matchId, SLIDER_WIDTH, KNOB_SIZE, sliderX]);
-
-  const sliderResponder = useRef(createSliderResponder()).current;
+  }, [myConfirmed, isReadOnly, matchId, sliderX]);
 
   const loadAll = useCallback(async () => {
     if (!matchId) return;
