@@ -19,6 +19,8 @@ function emitMatchUpdate(userAId, userBId, matchId, type) {
     const event = { type, matchId: String(matchId) };
     io.to(`user:${String(userAId)}`).emit('match_update', event);
     io.to(`user:${String(userBId)}`).emit('match_update', event);
+  } else {
+    console.warn('[matchService] Cannot emit match_update: Socket.io not available');
   }
 }
 

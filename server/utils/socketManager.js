@@ -6,5 +6,8 @@ export function setIO(io) {
 }
 
 export function getIO() {
+  if (!ioInstance) {
+    console.warn('[socketManager] Socket.io instance not initialized');
+  }
   return ioInstance;
 }

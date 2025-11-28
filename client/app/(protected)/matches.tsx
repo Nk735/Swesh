@@ -31,7 +31,7 @@ export default function MatchesScreen() {
           load();
         });
       } catch (err) {
-        console.log('[Matches] Socket connection failed');
+        console.log('[Matches] Socket connection failed:', err);
       }
     };
 
