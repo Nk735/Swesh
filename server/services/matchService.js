@@ -2,11 +2,26 @@ import Match from '../models/Match.js';
 import Chat from '../models/Chat.js';
 import ItemInteraction from '../models/ItemInteraction.js';
 import Item from '../models/Item.js';
+import { getIO } from '../utils/socketManager.js';
 
 function canonicalUsers(u1, u2) {
   const a = String(u1);
   const b = String(u2);
   return a < b ? [a, b] : [b, a];
+}
+
+/**
+ * Emit match_update event to both users involved in a match
+ */
+function emitMatchUpdate(userAId, userBId, matchId, type) {
+  const io = getIO();
+  if (io) {
+    const event = { type, matchId: String(matchId) };
+    io.to(`user:${String(userAId)}`).emit('match_update', event);
+    io.to(`user:${String(userBId)}`).emit('match_update', event);
+  } else {
+    console.warn('[matchService] Cannot emit match_update: Socket.io not available');
+  }
 }
 
 /**
@@ -48,6 +63,11 @@ async function createOrGetMatchAndChat(userAId, userBId, itemAId, itemBId) {
   if (!match.chatId) {
     match.chatId = chat._id;
     await match.save();
+  }
+
+  // Emit match_update event for new matches
+  if (isNew) {
+    emitMatchUpdate(userAId, userBId, match._id, 'new_match');
   }
 
   return { match, chat, isNew };

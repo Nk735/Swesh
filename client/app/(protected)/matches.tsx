@@ -1,29 +1,49 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, ActivityIndicator, FlatList, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native';
 import { getGroupedMatches } from '../../src/services/tradeApi';
 import { GroupedMatchesResponse } from '../../src/types/trade';
 import { router } from 'expo-router';
 import BottomNav from '../../components/BottomNav';
 import EmptyState from '../../components/EmptyState';
+import socketService from '../../src/services/socketService';
 
 export default function MatchesScreen() {
   const [groups, setGroups] = useState<GroupedMatchesResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true);
     getGroupedMatches()
       .then(setGroups)
       .catch(()=> setGroups([]))
       .finally(()=> setLoading(false));
-  };
+  }, []);
 
   useEffect(() => {
+    let unsubMatchUpdate: (() => void) | undefined;
+
+    const setupSocket = async () => {
+      try {
+        await socketService.connect();
+        // Listen for match updates and reload the list
+        unsubMatchUpdate = socketService.onMatchUpdate(() => {
+          load();
+        });
+      } catch (err) {
+        console.log('[Matches] Socket connection failed:', err);
+      }
+    };
+
+    // Initial load
     load();
-    const id = setInterval(load, 30000);
-    return () => clearInterval(id);
-  }, []);
+    // Setup socket listener
+    setupSocket();
+
+    return () => {
+      unsubMatchUpdate?.();
+    };
+  }, [load]);
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator /></View>;

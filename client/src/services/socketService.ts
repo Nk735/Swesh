@@ -44,6 +44,11 @@ export type NewMessageEvent = {
   message: ChatMessage;
 };
 
+export type MatchUpdateEvent = {
+  type: 'new_match' | 'new_message' | 'match_confirmed' | 'match_cancelled';
+  matchId: string;
+};
+
 class SocketService {
   private socket: Socket | null = null;
   private connecting: boolean = false;
@@ -197,6 +202,13 @@ class SocketService {
     };
   }
 
+  onMatchUpdate(callback: (data: MatchUpdateEvent) => void) {
+    this.socket?.on('match_update', callback);
+    return () => {
+      this.socket?.off('match_update', callback);
+    };
+  }
+
   // Remove all event listeners
   removeAllListeners() {
     if (this.socket) {
@@ -204,6 +216,7 @@ class SocketService {
       this.socket.off('new_message_notification');
       this.socket.off('user_typing');
       this.socket.off('exchange_status');
+      this.socket.off('match_update');
     }
   }
 }

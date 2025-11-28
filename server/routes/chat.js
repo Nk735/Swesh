@@ -4,6 +4,7 @@ import Match from '../models/Match.js';
 import Chat from '../models/Chat.js';
 import Message from '../models/Message.js';
 import mongoose from 'mongoose';
+import { getIO } from '../utils/socketManager.js';
 
 const router = express.Router();
 
@@ -119,6 +120,15 @@ router.post('/:matchId/messages', protect, async (req, res) => {
     // Aggiorna match.lastActivityAt
     match.lastActivityAt = chat.lastMessageAt;
     await match.save();
+
+    // Emit match_update to the recipient to update unread count in matches list
+    const io = getIO();
+    if (io) {
+      io.to(`user:${otherUserId}`).emit('match_update', {
+        type: 'new_message',
+        matchId: String(match._id)
+      });
+    }
 
     res.status(201).json({
       _id: msg._id,

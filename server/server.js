@@ -12,6 +12,7 @@ import { notFound, errorHandler } from './middleware/errorHandler.js';
 import interactionRoutes from './routes/interactions.js';
 import matchRoutes from './routes/matches.js';
 import chatRoutes from './routes/chat.js';
+import { setIO } from './utils/socketManager.js';
 
 // I MODELS PER SINCRONIZZARE GLI INDICI
 import Match from './models/Match.js';
@@ -91,6 +92,9 @@ const io = new Server(httpServer, {
   cors: corsOptions,
   pingTimeout: 60000,
 });
+
+// Make io available to routes/services
+setIO(io);
 
 // Socket.io authentication middleware
 io.use(async (socket, next) => {
@@ -205,6 +209,8 @@ io.on('connection', (socket) => {
       io.to(`chat:${matchId}`).emit('new_message', { matchId, message: messageData });
       // Also emit to the other user's personal room in case they're not in the chat
       io.to(`user:${otherUserId}`).emit('new_message_notification', { matchId, message: messageData });
+      // Emit match_update to the recipient to update unread count in matches list
+      io.to(`user:${otherUserId}`).emit('match_update', { type: 'new_message', matchId: String(matchId) });
 
     } catch (err) {
       console.error('[Socket] send_message error:', err.message);
