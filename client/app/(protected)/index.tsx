@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   actionsBar: {
     marginTop: 24, flexDirection: 'row', justifyContent: 'space-around', width: SCREEN_WIDTH, paddingHorizontal: 14, alignItems: 'center',
   },
-  safeArea: { flex: 1, backgroundColor: '#F2E8DF', paddingTop: 50, paddingBottom: 110 },
+  safeArea: { flex: 1, backgroundColor: '#F2E8DF', paddingTop: 20, paddingBottom: 110 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 10 },
   logo: { width: 100, height: 40, resizeMode: 'contain' },
   actionButton: {

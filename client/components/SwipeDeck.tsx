@@ -126,14 +126,14 @@ export default function SwipeDeck(props: SwipeDeckProps) {
     Animated.timing(position, {
       toValue,
       duration: 220,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start(() => onSwipeComplete(direction));
   };
 
   const resetPosition = () => {
     Animated.spring(position, {
       toValue: { x: 0, y: 0 },
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
       friction: 8,
       tension: 40,
     }).start();
@@ -194,7 +194,7 @@ export default function SwipeDeck(props: SwipeDeckProps) {
 
         <Animated.View
           key={top._id}
-          pointerEvents="box-only"
+          pointerEvents="box-none"
           style={[
             styles.card,
             webDragStyle,
@@ -302,8 +302,8 @@ function badgeStyleFor(condition?: string) {
 const styles = StyleSheet.create({
   deck: { flex: 1, alignItems: 'center', justifyContent: 'center', position: 'relative' },
   card: {
-    width: width * 0.90,
-    height: height * 0.65,
+    width: width * 0.85,
+    height: height * 0.58,
     backgroundColor: '#eee',
     position: 'absolute',
     borderRadius: 28,
