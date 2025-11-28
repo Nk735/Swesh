@@ -26,11 +26,13 @@ export interface TinderMatch {
     _id: string;
     title: string;
     imageUrl: string;
+    description?: string;
   } | null;
   itemTheirs: {
     _id: string;
     title: string;
     imageUrl: string;
+    description?: string;
   } | null;
   otherUser: {
     _id: string;
@@ -42,6 +44,16 @@ export interface TinderMatch {
     triggerItemId: string;
     matchedAt: string;
   };
+  confirmation?: {
+    myConfirmed: boolean;
+    otherConfirmed: boolean;
+  };
+  cancellation?: {
+    by: string;
+    at: string;
+    reason?: string;
+  };
+  completedAt?: string;
 }
 
 export interface GroupedMatchesResponse {

@@ -74,6 +74,28 @@ export async function cancelMatch(matchId: string, reason?: string) {
   return data as { matchId: string; status: 'archived'; cancellation?: { by: string; at: string; reason?: string }; lastActivityAt: string };
 }
 
+// Get single match by ID
+export async function getMatchById(matchId: string): Promise<TinderMatch & { 
+  confirmation: { myConfirmed: boolean; otherConfirmed: boolean };
+  cancellation?: { by: string; at: string; reason?: string };
+  completedAt?: string;
+}> {
+  const { data } = await api.get(`/matches/${matchId}`);
+  return data;
+}
+
+// Confirm exchange
+export async function confirmExchange(matchId: string) {
+  const { data } = await api.patch(`/matches/${matchId}/confirm`);
+  return data as {
+    matchId: string;
+    status: 'active' | 'completed' | 'archived';
+    confirmation: { myConfirmed: boolean; otherConfirmed: boolean };
+    lastActivityAt: string;
+    completedAt?: string;
+  };
+}
+
 // Utility functions
 export function isNewMatch(interaction: InteractionResponse): boolean {
   return interaction.match?.matched === true && interaction.match?.isNew === true;

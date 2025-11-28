@@ -143,6 +143,152 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
+// GET /api/matches/:matchId - get a single match by ID
+router.get('/:matchId', protect, async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const userId = req.user._id;
+
+    const match = await Match.findById(matchId).lean();
+    if (!match) {
+      return res.status(404).json({ message: 'Match non trovato' });
+    }
+
+    // Verify user is a participant
+    if (String(match.userAId) !== String(userId) && String(match.userBId) !== String(userId)) {
+      return res.status(403).json({ message: 'Non autorizzato' });
+    }
+
+    const meIsA = String(match.userAId) === String(userId);
+    const otherUserId = meIsA ? String(match.userBId) : String(match.userAId);
+    const itemMineId = meIsA ? match.itemAId : match.itemBId;
+    const itemTheirsId = meIsA ? match.itemBId : match.itemAId;
+
+    // Load items and user
+    const [itemMine, itemTheirs, otherUser, chat] = await Promise.all([
+      Item.findById(itemMineId).lean(),
+      Item.findById(itemTheirsId).lean(),
+      User.findById(otherUserId).select('nickname avatarUrl').lean(),
+      Chat.findOne({ matchId: match._id }).lean()
+    ]);
+
+    let unread = 0;
+    if (chat && chat.unreadCountByUser) {
+      unread = chat.unreadCountByUser.get
+        ? (chat.unreadCountByUser.get(String(userId)) || 0)
+        : (chat.unreadCountByUser[String(userId)] || 0);
+    }
+
+    // Calculate confirmation status from the user's perspective
+    const myConfirmed = meIsA 
+      ? (match.confirmation?.userAConfirmed || false)
+      : (match.confirmation?.userBConfirmed || false);
+    const otherConfirmed = meIsA 
+      ? (match.confirmation?.userBConfirmed || false)
+      : (match.confirmation?.userAConfirmed || false);
+
+    res.json({
+      matchId: match._id,
+      status: match.status,
+      matchType: match.matchType,
+      lastActivityAt: match.lastActivityAt,
+      unread,
+      itemMine: itemMine ? {
+        _id: itemMine._id,
+        title: itemMine.title,
+        imageUrl: itemMine.imageUrl,
+        description: itemMine.description
+      } : null,
+      itemTheirs: itemTheirs ? {
+        _id: itemTheirs._id,
+        title: itemTheirs.title,
+        imageUrl: itemTheirs.imageUrl,
+        description: itemTheirs.description
+      } : null,
+      otherUser: {
+        _id: otherUserId,
+        nickname: otherUser?.nickname || 'Utente',
+        avatarUrl: otherUser?.avatarUrl
+      },
+      confirmation: {
+        myConfirmed,
+        otherConfirmed
+      },
+      ...(match.cancellation ? { cancellation: match.cancellation } : {}),
+      ...(match.completedAt ? { completedAt: match.completedAt } : {})
+    });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+// PATCH /api/matches/:matchId/confirm - confirm exchange
+router.patch('/:matchId/confirm', protect, async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const me = req.user;
+
+    const match = await Match.findById(matchId);
+    if (!match) return res.status(404).json({ message: 'Match non trovato' });
+
+    // Verify user is a participant
+    if (String(match.userAId) !== String(me._id) && String(match.userBId) !== String(me._id)) {
+      return res.status(403).json({ message: 'Non autorizzato' });
+    }
+
+    // Can only confirm active matches
+    if (match.status !== 'active') {
+      return res.status(409).json({ message: 'Match non attivo, impossibile confermare' });
+    }
+
+    const meIsA = String(match.userAId) === String(me._id);
+
+    // Initialize confirmation object if not exists
+    if (!match.confirmation) {
+      match.confirmation = { userAConfirmed: false, userBConfirmed: false };
+    }
+
+    // Update confirmation
+    if (meIsA) {
+      match.confirmation.userAConfirmed = true;
+      match.confirmation.userAConfirmedAt = new Date();
+    } else {
+      match.confirmation.userBConfirmed = true;
+      match.confirmation.userBConfirmedAt = new Date();
+    }
+
+    // Check if both confirmed
+    if (match.confirmation.userAConfirmed && match.confirmation.userBConfirmed) {
+      match.status = 'completed';
+      match.completedAt = new Date();
+    }
+
+    match.lastActivityAt = new Date();
+    await match.save();
+
+    // Calculate confirmation status from the user's perspective
+    const myConfirmed = meIsA 
+      ? match.confirmation.userAConfirmed
+      : match.confirmation.userBConfirmed;
+    const otherConfirmed = meIsA 
+      ? match.confirmation.userBConfirmed
+      : match.confirmation.userAConfirmed;
+
+    res.json({
+      matchId: match._id,
+      status: match.status,
+      confirmation: {
+        myConfirmed,
+        otherConfirmed
+      },
+      lastActivityAt: match.lastActivityAt,
+      ...(match.completedAt ? { completedAt: match.completedAt } : {})
+    });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
 // PATCH /api/matches/:matchId/cancel - annulla scambio
 router.patch('/:matchId/cancel', protect, async (req, res) => {
   try {
