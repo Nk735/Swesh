@@ -6,6 +6,7 @@ import Item from '../models/Item.js';
 import User from '../models/User.js';
 import Message from '../models/Message.js';
 import mongoose from 'mongoose';
+import { getIO } from '../utils/socketManager.js';
 
 const router = express.Router();
 
@@ -266,6 +267,20 @@ router.patch('/:matchId/confirm', protect, async (req, res) => {
     match.lastActivityAt = new Date();
     await match.save();
 
+    // Emit match_update to both users
+    const io = getIO();
+    if (io) {
+      const otherUserId = meIsA ? String(match.userBId) : String(match.userAId);
+      io.to(`user:${String(me._id)}`).emit('match_update', {
+        type: 'match_confirmed',
+        matchId: String(match._id)
+      });
+      io.to(`user:${otherUserId}`).emit('match_update', {
+        type: 'match_confirmed',
+        matchId: String(match._id)
+      });
+    }
+
     // Calculate confirmation status from the user's perspective
     const myConfirmed = meIsA 
       ? match.confirmation.userAConfirmed
@@ -366,6 +381,19 @@ router.patch('/:matchId/cancel', protect, async (req, res) => {
 
     await chat.save();
     await match.save();
+
+    // Emit match_update to both users
+    const io = getIO();
+    if (io) {
+      io.to(`user:${String(me._id)}`).emit('match_update', {
+        type: 'match_cancelled',
+        matchId: String(match._id)
+      });
+      io.to(`user:${otherUserId}`).emit('match_update', {
+        type: 'match_cancelled',
+        matchId: String(match._id)
+      });
+    }
 
     return res.json({
       matchId: match._id,
