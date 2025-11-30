@@ -30,7 +30,27 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Item',
   }],
-  completedExchangesCount: { type: Number, default: 0 }
+  completedExchangesCount: { type: Number, default: 0 },
+  age: { 
+    type: Number, 
+    min: 16,
+    max: 120 
+  },
+  gender: { 
+    type: String, 
+    enum: ['male', 'female', 'prefer_not_to_say']
+  },
+  feedPreferences: {
+    showGender: { 
+      type: String, 
+      enum: ['male', 'female', 'all'],
+      default: null
+    }
+  },
+  onboarding: {
+    completed: { type: Boolean, default: false },
+    completedAt: { type: Date }
+  }
 }, {
   timestamps: true,
 });

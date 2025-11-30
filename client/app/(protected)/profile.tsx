@@ -112,9 +112,23 @@ export default function ProfileScreen() {
           <Image source={getAvatarSource()} style={styles.avatar} />
           <View style={styles.profileInfo}>
             <Text style={styles.nickname}>{user?.nickname}</Text>
+            {user?.age && user?.gender && (
+              <Text style={styles.profileDetails}>
+                {user.age} anni • {user.gender === 'male' ? 'Uomo' : user.gender === 'female' ? 'Donna' : 'Non specificato'}
+              </Text>
+            )}
             <Text style={styles.email}>{user?.email}</Text>
           </View>
         </View>
+
+        {/* Complete Profile Prompt for existing users without profile data */}
+        {(!user?.age || !user?.gender) && (
+          <TouchableOpacity style={styles.completeProfilePrompt} onPress={() => router.push("/onboarding")}>
+            <Ionicons name="person-add-outline" size={20} color="#F2B263" />
+            <Text style={styles.completeProfileText}>Completa il profilo</Text>
+            <Ionicons name="chevron-forward" size={18} color="#999" />
+          </TouchableOpacity>
+        )}
 
         {/* Stats Section */}
         <View style={styles.statsSection}>
@@ -192,7 +206,23 @@ const styles = StyleSheet.create({
   avatar: { width: 70, height: 70, borderRadius: 35, backgroundColor: "#eee" },
   profileInfo: { marginLeft: 16, flex: 1 },
   nickname: { fontSize: 20, fontWeight: "600", color: "#333", marginBottom: 2 },
+  profileDetails: { fontSize: 14, color: "#666", marginBottom: 2 },
   email: { fontSize: 14, color: "#777" },
+
+  // Complete Profile Prompt
+  completeProfilePrompt: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    backgroundColor: "#fff", 
+    marginHorizontal: 16, 
+    marginBottom: 12, 
+    padding: 14, 
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#F2B263",
+    gap: 10
+  },
+  completeProfileText: { flex: 1, fontSize: 15, fontWeight: "500", color: "#F2B263" },
 
   // Stats Section
   statsSection: { flexDirection: "row", gap: 12, marginHorizontal: 16, marginBottom: 12 },

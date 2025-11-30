@@ -57,4 +57,20 @@ api.interceptors.response.use(
   }
 );
 
+// Onboarding API
+export async function completeOnboarding(data: {
+  age: number;
+  gender: 'male' | 'female' | 'prefer_not_to_say';
+  feedPreference: 'male' | 'female' | 'all';
+}) {
+  const response = await api.post('/auth/complete-onboarding', data);
+  return response.data;
+}
+
+// Feed Preferences API
+export async function updateFeedPreferences(showGender: 'male' | 'female' | 'all') {
+  const response = await api.patch('/users/me/preferences', { showGender });
+  return response.data;
+}
+
 export default api;

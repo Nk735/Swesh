@@ -1,24 +1,70 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { api } from '../services/apiClient';
+import { api, completeOnboarding as completeOnboardingApi } from '../services/apiClient';
 import { router } from 'expo-router';
+import { Gender, FeedGenderPreference } from '../types';
 
-type User = { id: string; email: string; nickname: string; avatarUrl?: string; avatarKey?: string; completedExchangesCount?: number; };
-type ApiUser = { _id: string; email: string; nickname: string; avatarUrl?: string; avatarKey?: string; completedExchangesCount?: number; };
+type User = { 
+  id: string; 
+  email: string; 
+  nickname: string; 
+  avatarUrl?: string; 
+  avatarKey?: string; 
+  completedExchangesCount?: number;
+  age?: number;
+  gender?: Gender;
+  feedPreferences?: {
+    showGender: FeedGenderPreference | null;
+  };
+  onboarding?: {
+    completed: boolean;
+    completedAt?: string;
+  };
+};
+type ApiUser = { 
+  _id: string; 
+  email: string; 
+  nickname: string; 
+  avatarUrl?: string; 
+  avatarKey?: string; 
+  completedExchangesCount?: number;
+  age?: number;
+  gender?: Gender;
+  feedPreferences?: {
+    showGender: FeedGenderPreference | null;
+  };
+  onboarding?: {
+    completed: boolean;
+    completedAt?: string;
+  };
+};
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
+  onboardingCompleted: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, nickname: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshMe: () => Promise<void>;
+  completeOnboarding: (data: { age: number; gender: Gender; feedPreference: FeedGenderPreference }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 function normalizeUser(u: ApiUser): User {
-  return { id: u._id, email: u.email, nickname: u.nickname, avatarUrl: u.avatarUrl, avatarKey: u.avatarKey, completedExchangesCount: u.completedExchangesCount };
+  return { 
+    id: u._id, 
+    email: u.email, 
+    nickname: u.nickname, 
+    avatarUrl: u.avatarUrl, 
+    avatarKey: u.avatarKey, 
+    completedExchangesCount: u.completedExchangesCount,
+    age: u.age,
+    gender: u.gender,
+    feedPreferences: u.feedPreferences,
+    onboarding: u.onboarding
+  };
 }
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -71,7 +117,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(normalizeUser(data));
   };
 
-  return <AuthContext.Provider value={{ user, loading, login, register, logout, refreshMe }}>{children}</AuthContext.Provider>;
+  const completeOnboarding = async (data: { age: number; gender: Gender; feedPreference: FeedGenderPreference }) => {
+    const result = await completeOnboardingApi(data);
+    setUser(normalizeUser(result.user));
+  };
+
+  const onboardingCompleted = user?.onboarding?.completed ?? false;
+
+  return <AuthContext.Provider value={{ user, loading, onboardingCompleted, login, register, logout, refreshMe, completeOnboarding }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

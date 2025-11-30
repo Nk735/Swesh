@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Pressable, Alert, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 interface SettingsBottomSheetProps {
   visible: boolean;
@@ -28,6 +29,11 @@ export default function SettingsBottomSheet({ visible, onClose, onLogout, onChan
     onChangeAvatar();
   };
 
+  const handleFeedPreferences = () => {
+    onClose();
+    router.push('/settings/feedPreferences');
+  };
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
@@ -38,6 +44,11 @@ export default function SettingsBottomSheet({ visible, onClose, onLogout, onChan
             <TouchableOpacity style={styles.menuItem} onPress={handleChangeAvatar}>
               <Ionicons name="image-outline" size={22} color="#333" />
               <Text style={styles.menuItemText}>Cambia avatar</Text>
+              <Ionicons name="chevron-forward" size={20} color="#ccc" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={handleFeedPreferences}>
+              <Ionicons name="eye-outline" size={22} color="#333" />
+              <Text style={styles.menuItemText}>Preferenze Feed</Text>
               <Ionicons name="chevron-forward" size={20} color="#ccc" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={onClose}>

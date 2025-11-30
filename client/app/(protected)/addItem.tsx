@@ -3,6 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Platfo
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../src/services/apiClient";
+import { useAuth } from "../../src/context/AuthContext";
+import { ItemVisibility } from "../../src/types";
 
 const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL"] as const;
 const CATEGORY_OPTIONS = ["shirt", "pants", "shoes", "jacket", "accessory", "other"] as const;
@@ -12,13 +14,29 @@ const CONDITION_OPTIONS = [
   { value: "good", label: "Buono" },
 ] as const;
 
+const VISIBILITY_OPTIONS: { value: ItemVisibility; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { value: "male", label: "Uomini", icon: "male" },
+  { value: "female", label: "Donne", icon: "female" },
+  { value: "all", label: "Tutti", icon: "people" },
+];
+
 export default function AddItemScreen() {
+  const { user } = useAuth();
+  
+  // Calculate default visibility based on user gender
+  const getDefaultVisibility = (): ItemVisibility => {
+    if (user?.gender === 'male') return 'male';
+    if (user?.gender === 'female') return 'female';
+    return 'all';
+  };
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([""]);
   const [size, setSize] = useState<typeof SIZE_OPTIONS[number] | "">("M");
   const [category, setCategory] = useState<typeof CATEGORY_OPTIONS[number] | "">("other");
   const [condition, setCondition] = useState<"new" | "excellent" | "good">("good");
+  const [visibleTo, setVisibleTo] = useState<ItemVisibility>(getDefaultVisibility());
   const [loading, setLoading] = useState(false);
 
   function showAlert(title: string, message?: string) {
@@ -80,6 +98,7 @@ export default function AddItemScreen() {
       if (size) payload.size = size;
       if (category) payload.category = category;
       if (condition) payload.condition = condition;
+      if (visibleTo) payload.visibleTo = visibleTo;
 
       await api.post("/items", payload);
       showAlert("Successo", "Abito aggiunto!");
@@ -194,6 +213,32 @@ export default function AddItemScreen() {
           })}
         </View>
 
+        <Text style={[styles.label, { marginTop: 10 }]}>Chi può vedere questo abito?</Text>
+        <View style={styles.chipsRow}>
+          {VISIBILITY_OPTIONS.map(opt => {
+            const selected = visibleTo === opt.value;
+            return (
+              <TouchableOpacity
+                key={opt.value}
+                onPress={() => setVisibleTo(opt.value)}
+                style={[styles.chip, selected && styles.chipSelected]}
+              >
+                <View style={styles.visibilityChipContent}>
+                  <Ionicons 
+                    name={opt.icon} 
+                    size={16} 
+                    color={selected ? "#fff" : "#333"} 
+                    style={styles.visibilityIcon}
+                  />
+                  <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
+                    {opt.label}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
         <TouchableOpacity style={styles.button} onPress={handleAddItem} disabled={loading}>
           <Text style={styles.buttonText}>{loading ? "Salvataggio..." : "Aggiungi abito"}</Text>
         </TouchableOpacity>
@@ -221,6 +266,8 @@ const styles = StyleSheet.create({
   chipSelected: { backgroundColor: "#F28585", borderColor: "#F28585" },
   chipText: { color: "#333", fontSize: 14 },
   chipTextSelected: { color: "#fff", fontWeight: "600" },
+  visibilityChipContent: { flexDirection: "row", alignItems: "center" },
+  visibilityIcon: { marginRight: 6 },
   button: { backgroundColor: "#F2B263", padding: 14, borderRadius: 8, alignItems: "center", marginTop: 20 },
   buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 });
