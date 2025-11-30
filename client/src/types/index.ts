@@ -1,5 +1,9 @@
 // Tipi condivisi tra schermate e servizi
 
+export type Gender = 'male' | 'female' | 'prefer_not_to_say';
+export type FeedGenderPreference = 'male' | 'female' | 'all';
+export type ItemVisibility = 'male' | 'female' | 'all';
+
 export type User = {
   id: string;
   email: string;
@@ -7,12 +11,22 @@ export type User = {
   avatarUrl?: string;
   avatarKey?: string;
   completedExchangesCount?: number;
+  age?: number;
+  gender?: Gender;
+  feedPreferences?: {
+    showGender: FeedGenderPreference | null;
+  };
+  onboarding?: {
+    completed: boolean;
+    completedAt?: string;
+  };
 };
 
 export type ItemOwner = {
   nickname: string;
   avatarUrl?: string;
   _id?: string;
+  gender?: Gender;
 };
 
 export type Item = {
@@ -28,6 +42,7 @@ export type Item = {
   owner: ItemOwner;
   createdAt?: string;
   updatedAt?: string;
+  visibleTo?: ItemVisibility;
 };
 
 export type InteractionAction = 'like' | 'dislike' | 'skip';

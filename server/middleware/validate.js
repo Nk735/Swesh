@@ -1,5 +1,9 @@
 // Middleware di validazione semplice (baseline). In futuro sostituire con Zod/Joi.
 
+const GENDER_ENUM = ['male', 'female', 'prefer_not_to_say'];
+const FEED_GENDER_ENUM = ['male', 'female', 'all'];
+const VISIBLE_TO_ENUM = ['male', 'female', 'all'];
+
 export const validateAuthBody = (req, res, next) => {
   const { email, password, nickname } = req.body;
 
@@ -31,7 +35,7 @@ export const validateAuthBody = (req, res, next) => {
 };
 
 export const validateItemBody = (req, res, next) => {
-  let { title, imageUrl, description, size, category, images, condition, isAvailable } = req.body;
+  let { title, imageUrl, description, size, category, images, condition, isAvailable, visibleTo } = req.body;
 
   // Se images[] è fornito, non richiediamo imageUrl (lo genereremo dal primo elemento)
   if (!title) {
@@ -87,10 +91,64 @@ export const validateItemBody = (req, res, next) => {
     return res.status(400).json({ message: `Condition non valida. Valori consentiti: ${CONDITION_ENUM.join(', ')}` });
   }
 
+  // Validate visibleTo if provided
+  if (visibleTo && !VISIBLE_TO_ENUM.includes(visibleTo)) {
+    return res.status(400).json({ message: `visibleTo non valido. Valori consentiti: ${VISIBLE_TO_ENUM.join(', ')}` });
+  }
+
   // Riassegna i valori normalizzati
   req.body.size = size;
   req.body.category = category;
   req.body.condition = condition;
+
+  next();
+};
+
+export const validateOnboarding = (req, res, next) => {
+  const { age, gender, feedPreference } = req.body;
+
+  // Validate age
+  if (age === undefined || age === null) {
+    return res.status(400).json({ message: 'Età è obbligatoria' });
+  }
+  if (typeof age !== 'number' || !Number.isInteger(age)) {
+    return res.status(400).json({ message: 'Età deve essere un numero intero' });
+  }
+  if (age < 16) {
+    return res.status(400).json({ message: 'Devi avere almeno 16 anni per usare Swesh' });
+  }
+  if (age > 120) {
+    return res.status(400).json({ message: 'Età non valida (max 120)' });
+  }
+
+  // Validate gender
+  if (!gender) {
+    return res.status(400).json({ message: 'Genere è obbligatorio' });
+  }
+  if (!GENDER_ENUM.includes(gender)) {
+    return res.status(400).json({ message: `Genere non valido. Valori consentiti: ${GENDER_ENUM.join(', ')}` });
+  }
+
+  // Validate feedPreference
+  if (!feedPreference) {
+    return res.status(400).json({ message: 'Preferenza feed è obbligatoria' });
+  }
+  if (!FEED_GENDER_ENUM.includes(feedPreference)) {
+    return res.status(400).json({ message: `Preferenza feed non valida. Valori consentiti: ${FEED_GENDER_ENUM.join(', ')}` });
+  }
+
+  next();
+};
+
+export const validateFeedPreferences = (req, res, next) => {
+  const { showGender } = req.body;
+
+  if (!showGender) {
+    return res.status(400).json({ message: 'showGender è obbligatorio' });
+  }
+  if (!FEED_GENDER_ENUM.includes(showGender)) {
+    return res.status(400).json({ message: `showGender non valido. Valori consentiti: ${FEED_GENDER_ENUM.join(', ')}` });
+  }
 
   next();
 };

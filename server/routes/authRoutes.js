@@ -1,7 +1,7 @@
 import express from 'express';
-import { registerUser, loginUser, getMe, likeItem, dislikeItem, updateMyAvatar } from '../controllers/user.js';
+import { registerUser, loginUser, getMe, likeItem, dislikeItem, updateMyAvatar, completeOnboarding } from '../controllers/user.js';
 import { protect } from '../middleware/auth.js';
-//import { validateAuthBody } from '../middleware/validate.js';
+import { validateOnboarding } from '../middleware/validate.js';
 
 const router = express.Router();
 
@@ -16,6 +16,9 @@ router.get('/me', protect, getMe);
 
 // @desc    Update my avatar (default avatar picker)
 router.patch('/me/avatar', protect, updateMyAvatar);
+
+// @desc    Complete onboarding
+router.post('/complete-onboarding', protect, validateOnboarding, completeOnboarding);
 
 // @desc    Like item
 router.post('/like', protect, likeItem);

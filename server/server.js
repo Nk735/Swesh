@@ -8,6 +8,7 @@ import jwt from 'jsonwebtoken';
 import { connectDB } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import itemRoutes from './routes/items.js';
+import userRoutes from './routes/users.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 import interactionRoutes from './routes/interactions.js';
 import matchRoutes from './routes/matches.js';
@@ -79,6 +80,7 @@ app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/interactions', interactionRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/chat', chatRoutes);

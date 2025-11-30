@@ -26,7 +26,12 @@ const itemSchema = new mongoose.Schema({
   likesList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   exchangedAt: { type: Date },
   exchangedInMatchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Match' },
-  exchangedWith: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  exchangedWith: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  visibleTo: { 
+    type: String, 
+    enum: ['male', 'female', 'all'],
+    default: null
+  }
 }, {
   timestamps: true,
 });

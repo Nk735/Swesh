@@ -1,15 +1,29 @@
 import express from 'express';
 import Item from '../models/Item.js';
+import User from '../models/User.js';
 import { protect } from '../middleware/auth.js';
 import ItemInteraction from '../models/ItemInteraction.js';
 import { validateItemBody } from '../middleware/validate.js';
 
 const router = express.Router();
 
+// Helper function to determine user's show gender preference
+function getUserShowGender(user) {
+  // If user has explicit feed preference, use that
+  if (user.feedPreferences?.showGender) {
+    return user.feedPreferences.showGender;
+  }
+  // Otherwise, default based on gender
+  if (user.gender === 'male') return 'male';
+  if (user.gender === 'female') return 'female';
+  // For 'prefer_not_to_say' or unset, show all
+  return 'all';
+}
+
 // Create new item
 router.post('/', protect, validateItemBody, async (req, res) => {
   try {
-    const { title, description, imageUrl, size, category, images, condition, isAvailable } = req.body;
+    const { title, description, imageUrl, size, category, images, condition, isAvailable, visibleTo } = req.body;
 
     const payload = {
       title,
@@ -30,6 +44,9 @@ router.post('/', protect, validateItemBody, async (req, res) => {
     if (category) payload.category = category;
     if (condition) payload.condition = condition;
     if (typeof isAvailable === 'boolean') payload.isAvailable = isAvailable;
+    
+    // Add visibleTo if provided, otherwise it will be null (inherit from owner gender)
+    if (visibleTo) payload.visibleTo = visibleTo;
 
     const item = await Item.create(payload);
     res.status(201).json(item);
@@ -38,19 +55,45 @@ router.post('/', protect, validateItemBody, async (req, res) => {
   }
 });
 
-// Feed: escludi i miei + già interagiti (like/dislike/skip) + non disponibili
+// Feed: escludi i miei + già interagiti (like/dislike/skip) + non disponibili + filtro per genere
 router.get('/', protect, async (req, res) => {
   try {
     const interactedIds = await ItemInteraction.find({ user: req.user._id }).distinct('item');
 
-    const query = {
+    // Get user's showGender preference
+    const showGender = getUserShowGender(req.user);
+
+    let query = {
       owner: { $ne: req.user._id },
-      isAvailable: true, // Solo item disponibili
+      isAvailable: true,
       ...(interactedIds.length ? { _id: { $nin: interactedIds } } : {}),
     };
 
-    // Use lean() for better performance on read-only queries
-    const items = await Item.find(query).populate('owner', 'nickname avatarUrl').lean();
+    // Apply gender filter if not 'all'
+    if (showGender !== 'all') {
+      // Get all owner IDs to filter by their gender when visibleTo is null
+      const items = await Item.find(query)
+        .populate('owner', 'nickname avatarUrl gender')
+        .lean();
+
+      // Filter items based on visibility rules
+      const filteredItems = items.filter(item => {
+        // If item has explicit visibleTo
+        if (item.visibleTo) {
+          return item.visibleTo === showGender || item.visibleTo === 'all';
+        }
+        // If visibleTo is null, inherit from owner's gender
+        const ownerGender = item.owner?.gender;
+        if (ownerGender === showGender) return true;
+        if (!ownerGender || ownerGender === 'prefer_not_to_say') return true; // Show all for unset/prefer_not_to_say owners
+        return false;
+      });
+
+      return res.json(filteredItems);
+    }
+
+    // If showGender is 'all', return all items
+    const items = await Item.find(query).populate('owner', 'nickname avatarUrl gender').lean();
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: error.message });

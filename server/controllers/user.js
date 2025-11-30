@@ -90,3 +90,52 @@ export const updateMyAvatar = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
+
+// @route POST /api/auth/complete-onboarding (protetto)
+export const completeOnboarding = async (req, res) => {
+  try {
+    const { age, gender, feedPreference } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        age,
+        gender,
+        feedPreferences: { showGender: feedPreference },
+        onboarding: {
+          completed: true,
+          completedAt: new Date()
+        }
+      },
+      { new: true }
+    ).select('-password -__v');
+
+    if (!user) return res.status(404).json({ message: 'Utente non trovato' });
+
+    return res.json({ message: 'Onboarding completato', user });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+// @route PATCH /api/users/me/preferences (protetto)
+export const updateFeedPreferences = async (req, res) => {
+  try {
+    const { showGender } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { 'feedPreferences.showGender': showGender },
+      { new: true }
+    ).select('-password -__v');
+
+    if (!user) return res.status(404).json({ message: 'Utente non trovato' });
+
+    return res.json({ 
+      message: 'Preferenze aggiornate', 
+      feedPreferences: user.feedPreferences 
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
