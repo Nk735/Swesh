@@ -6,6 +6,26 @@ import Message from '../models/Message.js';
 import { getIO } from '../utils/socketManager.js';
 
 /**
+ * Helper to get/set unread count regardless of Map vs Object implementation
+ */
+function getUnreadCount(chat, userId) {
+  const key = String(userId);
+  if (chat.unreadCountByUser?.get) {
+    return chat.unreadCountByUser.get(key) || 0;
+  }
+  return chat.unreadCountByUser?.[key] || 0;
+}
+
+function setUnreadCount(chat, userId, count) {
+  const key = String(userId);
+  if (chat.unreadCountByUser?.set) {
+    chat.unreadCountByUser.set(key, count);
+  } else if (chat.unreadCountByUser) {
+    chat.unreadCountByUser[key] = count;
+  }
+}
+
+/**
  * Handles all post-completion logic for an exchange
  * @param {Object} match - The completed match document
  */
@@ -94,30 +114,17 @@ export async function handleExchangeCompletion(match) {
       });
     }
 
-    // Create system message
-    const systemMessage = await Message.create({
+    // Create system message (no senderId for system messages)
+    await Message.create({
       chatId: chat._id,
-      senderId: userAId, // Use one of the exchange users as sender
       content: `L'oggetto "${exchangedItemTitle}" è stato scambiato con un altro utente. Questa chat è ora in sola lettura.`,
       isSystemMessage: true
     });
 
     // Update unread counts for both users in the related match
     chat.lastMessageAt = new Date();
-    const currentUnreadA = chat.unreadCountByUser.get
-      ? (chat.unreadCountByUser.get(String(relatedMatch.userAId)) || 0)
-      : (chat.unreadCountByUser[String(relatedMatch.userAId)] || 0);
-    const currentUnreadB = chat.unreadCountByUser.get
-      ? (chat.unreadCountByUser.get(String(relatedMatch.userBId)) || 0)
-      : (chat.unreadCountByUser[String(relatedMatch.userBId)] || 0);
-
-    if (chat.unreadCountByUser.set) {
-      chat.unreadCountByUser.set(String(relatedMatch.userAId), currentUnreadA + 1);
-      chat.unreadCountByUser.set(String(relatedMatch.userBId), currentUnreadB + 1);
-    } else {
-      chat.unreadCountByUser[String(relatedMatch.userAId)] = currentUnreadA + 1;
-      chat.unreadCountByUser[String(relatedMatch.userBId)] = currentUnreadB + 1;
-    }
+    setUnreadCount(chat, relatedMatch.userAId, getUnreadCount(chat, relatedMatch.userAId) + 1);
+    setUnreadCount(chat, relatedMatch.userBId, getUnreadCount(chat, relatedMatch.userBId) + 1);
     await chat.save();
 
     // 5. Notify users via Socket.io

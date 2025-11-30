@@ -18,7 +18,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 function normalizeUser(u: ApiUser): User {
-  return { id: u._id, email: u.email, nickname: u.nickname, avatarUrl: u. avatarUrl, avatarKey: u. avatarKey, completedExchangesCount: u.completedExchangesCount };
+  return { id: u._id, email: u.email, nickname: u.nickname, avatarUrl: u.avatarUrl, avatarKey: u.avatarKey, completedExchangesCount: u.completedExchangesCount };
 }
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
