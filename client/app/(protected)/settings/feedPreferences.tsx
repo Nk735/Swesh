@@ -7,12 +7,14 @@ import {
   Platform,
   Alert as RNAlert,
   ActivityIndicator,
+  StatusBar,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../src/context/AuthContext';
 import { FeedGenderPreference } from '../../../src/types';
 import { updateFeedPreferences } from '../../../src/services/apiClient';
+import { useTheme } from '../../../src/theme';
 
 const PREFERENCE_OPTIONS: { value: FeedGenderPreference; label: string; emoji: string; description: string }[] = [
   { value: 'male', label: 'Abbigliamento maschile', emoji: '👔', description: 'Vedi solo abiti da uomo' },
@@ -30,6 +32,7 @@ function showAlert(title: string, message?: string) {
 
 export default function FeedPreferencesScreen() {
   const { user, refreshMe } = useAuth();
+  const { colors, isDark } = useTheme();
   const [preference, setPreference] = useState<FeedGenderPreference>(
     user?.feedPreferences?.showGender ?? 
     (user?.gender === 'male' ? 'male' : user?.gender === 'female' ? 'female' : 'all')
@@ -52,17 +55,18 @@ export default function FeedPreferencesScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <View style={[styles.header, { backgroundColor: colors.background }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Preferenze Feed</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Preferenze Feed</Text>
         <View style={styles.headerSpacer} />
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Scegli quali abiti vuoi vedere nel tuo feed
         </Text>
 
@@ -72,7 +76,8 @@ export default function FeedPreferencesScreen() {
               key={option.value}
               style={[
                 styles.option,
-                preference === option.value && styles.optionSelected,
+                { backgroundColor: colors.card, borderColor: colors.border },
+                preference === option.value && { backgroundColor: colors.accent, borderColor: colors.accent },
               ]}
               onPress={() => setPreference(option.value)}
             >
@@ -81,6 +86,7 @@ export default function FeedPreferencesScreen() {
                 <Text
                   style={[
                     styles.optionLabel,
+                    { color: colors.text },
                     preference === option.value && styles.optionLabelSelected,
                   ]}
                 >
@@ -89,6 +95,7 @@ export default function FeedPreferencesScreen() {
                 <Text
                   style={[
                     styles.optionDescription,
+                    { color: colors.textSecondary },
                     preference === option.value && styles.optionDescriptionSelected,
                   ]}
                 >
@@ -105,7 +112,7 @@ export default function FeedPreferencesScreen() {
 
       <View style={styles.footer}>
         <TouchableOpacity
-          style={styles.saveButton}
+          style={[styles.saveButton, { backgroundColor: colors.secondary }]}
           onPress={handleSave}
           disabled={isSaving}
         >
@@ -123,7 +130,6 @@ export default function FeedPreferencesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2E8DF',
   },
   header: {
     flexDirection: 'row',
@@ -132,7 +138,6 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingBottom: 16,
     paddingHorizontal: 20,
-    backgroundColor: '#F2E8DF',
   },
   backButton: {
     width: 40,
@@ -143,7 +148,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
   },
   headerSpacer: {
     width: 40,
@@ -155,7 +159,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -167,15 +170,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderRadius: 16,
-    backgroundColor: '#fff',
     borderWidth: 2,
-    borderColor: '#EEE',
     gap: 16,
   },
-  optionSelected: {
-    backgroundColor: '#86A69D',
-    borderColor: '#86A69D',
-  },
+  optionSelected: {},
   optionEmoji: {
     fontSize: 32,
   },
@@ -185,7 +183,6 @@ const styles = StyleSheet.create({
   optionLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 4,
   },
   optionLabelSelected: {
@@ -193,7 +190,6 @@ const styles = StyleSheet.create({
   },
   optionDescription: {
     fontSize: 13,
-    color: '#888',
   },
   optionDescriptionSelected: {
     color: 'rgba(255,255,255,0.8)',
@@ -203,7 +199,6 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.OS === 'ios' ? 40 : 30,
   },
   saveButton: {
-    backgroundColor: '#F2B263',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',

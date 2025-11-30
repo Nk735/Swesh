@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { useTheme } from '../../src/theme';
 
 interface OnboardingDotsProps {
   total: number;
@@ -7,6 +8,8 @@ interface OnboardingDotsProps {
 }
 
 export default function OnboardingDots({ total, current }: OnboardingDotsProps) {
+  const { colors } = useTheme();
+
   return (
     <View style={styles.container}>
       {Array.from({ length: total }, (_, index) => (
@@ -14,7 +17,7 @@ export default function OnboardingDots({ total, current }: OnboardingDotsProps) 
           key={index}
           style={[
             styles.dot,
-            index === current ? styles.dotActive : styles.dotInactive,
+            { backgroundColor: index === current ? colors.primary : colors.border },
           ]}
         />
       ))}
@@ -25,6 +28,4 @@ export default function OnboardingDots({ total, current }: OnboardingDotsProps) 
 const styles = StyleSheet.create({
   container: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, marginVertical: 20, },
   dot: { width: 10, height: 10, borderRadius: 5, },
-  dotActive: { backgroundColor: '#F28585', },
-  dotInactive: { backgroundColor: '#DDD', },
 });

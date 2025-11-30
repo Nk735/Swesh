@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator, RefreshControl } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator, RefreshControl, StatusBar } from "react-native";
 import { router } from "expo-router";
 import { getAllMatches } from "../../../src/services/tradeApi";
 import { TinderMatch } from "../../../src/types/trade";
 import { Ionicons } from "@expo/vector-icons";
 import BottomNav from "../../../components/BottomNav";
 import EmptyState from "../../../components/EmptyState";
+import { useTheme } from "../../../src/theme";
 
 export default function ChatsList() {
+  const { colors, isDark } = useTheme();
   const [matches, setMatches] = useState<TinderMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -64,9 +66,9 @@ export default function ChatsList() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return '#34C759';
-      case 'archived': return '#FF9500';
-      default: return '#5A31F4';
+      case 'completed': return colors.success;
+      case 'archived': return colors.secondary;
+      default: return colors.accent;
     }
   };
 
@@ -80,12 +82,13 @@ export default function ChatsList() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Chat</Text>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+        <View style={[styles.header, { backgroundColor: colors.background }]}>
+          <Text style={[styles.title, { color: colors.text }]}>Chat</Text>
         </View>
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#5A31F4" />
+          <ActivityIndicator size="large" color={colors.accent} />
         </View>
         <BottomNav />
       </View>
@@ -94,9 +97,10 @@ export default function ChatsList() {
 
   if (!matches.length) {
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Chat</Text>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+        <View style={[styles.header, { backgroundColor: colors.background }]}>
+          <Text style={[styles.title, { color: colors.text }]}>Chat</Text>
         </View>
         <EmptyState
           icon="chatbubbles-outline"
@@ -112,7 +116,7 @@ export default function ChatsList() {
 
   const renderChatItem = ({ item }: { item: TinderMatch }) => (
     <TouchableOpacity 
-      style={styles.chatItem} 
+      style={[styles.chatItem, { backgroundColor: colors.card }]} 
       onPress={() => router.push(`/chats/${item.matchId}`)}
       activeOpacity={0.7}
     >
@@ -122,7 +126,7 @@ export default function ChatsList() {
           style={styles.avatar} 
         />
         {item.unread > 0 && (
-          <View style={styles.unreadBadge}>
+          <View style={[styles.unreadBadge, { backgroundColor: colors.error }]}>
             <Text style={styles.unreadText}>{item.unread > 9 ? '9+' : item.unread}</Text>
           </View>
         )}
@@ -130,23 +134,23 @@ export default function ChatsList() {
 
       <View style={styles.chatContent}>
         <View style={styles.chatHeader}>
-          <Text style={styles.userName}>{item.otherUser?.nickname || 'Utente'}</Text>
-          <Text style={styles.timeText}>{formatDate(item.lastActivityAt)}</Text>
+          <Text style={[styles.userName, { color: colors.text }]}>{item.otherUser?.nickname || 'Utente'}</Text>
+          <Text style={[styles.timeText, { color: colors.textSecondary }]}>{formatDate(item.lastActivityAt)}</Text>
         </View>
         
         <View style={styles.itemsRow}>
-          <View style={styles.itemThumb}>
+          <View style={[styles.itemThumb, { backgroundColor: colors.inputBackground }]}>
             {item.itemMine?.imageUrl && (
               <Image source={{ uri: item.itemMine.imageUrl }} style={styles.itemThumbImage} />
             )}
           </View>
-          <Ionicons name="swap-horizontal" size={14} color="#999" />
-          <View style={styles.itemThumb}>
+          <Ionicons name="swap-horizontal" size={14} color={colors.textSecondary} />
+          <View style={[styles.itemThumb, { backgroundColor: colors.inputBackground }]}>
             {item.itemTheirs?.imageUrl && (
               <Image source={{ uri: item.itemTheirs.imageUrl }} style={styles.itemThumbImage} />
             )}
           </View>
-          <Text numberOfLines={1} style={styles.itemsText}>
+          <Text numberOfLines={1} style={[styles.itemsText, { color: colors.textSecondary }]}>
             {item.itemMine?.title || 'Il tuo'} ↔ {item.itemTheirs?.title || 'Loro'}
           </Text>
         </View>
@@ -159,32 +163,33 @@ export default function ChatsList() {
         </View>
       </View>
 
-      <Ionicons name="chevron-forward" size={20} color="#CCC" style={styles.chevron} />
+      <Ionicons name="chevron-forward" size={20} color={colors.border} style={styles.chevron} />
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Chat</Text>
-        <Text style={styles.subtitle}>{matches.length} conversazion{matches.length === 1 ? 'e' : 'i'}</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <View style={[styles.header, { backgroundColor: colors.background }]}>
+        <Text style={[styles.title, { color: colors.text }]}>Chat</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{matches.length} conversazion{matches.length === 1 ? 'e' : 'i'}</Text>
       </View>
 
       {/* Tab Switcher */}
-      <View style={styles.tabContainer}>
+      <View style={[styles.tabContainer, { backgroundColor: colors.inputBackground }]}>
         <TouchableOpacity 
-          style={[styles.tab, activeTab === 'active' && styles.tabActive]}
+          style={[styles.tab, activeTab === 'active' && [styles.tabActive, { backgroundColor: colors.card }]]}
           onPress={() => setActiveTab('active')}
         >
-          <Text style={[styles.tabText, activeTab === 'active' && styles.tabTextActive]}>
+          <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === 'active' && [styles.tabTextActive, { color: colors.text }]]}>
             Chat Attive ({activeChats.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={[styles.tab, activeTab === 'archived' && styles.tabActive]}
+          style={[styles.tab, activeTab === 'archived' && [styles.tabActive, { backgroundColor: colors.card }]]}
           onPress={() => setActiveTab('archived')}
         >
-          <Text style={[styles.tabText, activeTab === 'archived' && styles.tabTextActive]}>
+          <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === 'archived' && [styles.tabTextActive, { color: colors.text }]]}>
             Archiviate ({archivedChats.length})
           </Text>
         </TouchableOpacity>
@@ -195,9 +200,9 @@ export default function ChatsList() {
           <Ionicons 
             name={activeTab === 'active' ? 'chatbubbles-outline' : 'archive-outline'} 
             size={48} 
-            color="#ccc" 
+            color={colors.border} 
           />
-          <Text style={styles.emptyTabText}>
+          <Text style={[styles.emptyTabText, { color: colors.textSecondary }]}>
             {activeTab === 'active' 
               ? 'Nessuna chat attiva' 
               : 'Nessuna chat archiviata'}
@@ -210,7 +215,7 @@ export default function ChatsList() {
           renderItem={renderChatItem}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#5A31F4" />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />
           }
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
@@ -222,37 +227,37 @@ export default function ChatsList() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2E8DF' },
-  header: { paddingTop: 50, paddingHorizontal: 16, paddingBottom: 12, backgroundColor: '#F2E8DF' },
-  title: { fontSize: 28, fontWeight: '700', color: '#111' },
-  subtitle: { fontSize: 14, color: '#666', marginTop: 4 },
+  container: { flex: 1 },
+  header: { paddingTop: 50, paddingHorizontal: 16, paddingBottom: 12 },
+  title: { fontSize: 28, fontWeight: '700' },
+  subtitle: { fontSize: 14, marginTop: 4 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   listContent: { paddingHorizontal: 16, paddingBottom: 100 },
   
   // Tab styles
-  tabContainer: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 12, backgroundColor: '#E8E0D7', borderRadius: 10, padding: 4 },
+  tabContainer: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 12, borderRadius: 10, padding: 4 },
   tab: { flex: 1, paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
-  tabActive: { backgroundColor: '#fff' },
-  tabText: { fontSize: 13, fontWeight: '500', color: '#888' },
-  tabTextActive: { color: '#333', fontWeight: '600' },
+  tabActive: {},
+  tabText: { fontSize: 13, fontWeight: '500' },
+  tabTextActive: { fontWeight: '600' },
   emptyTabContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 100 },
-  emptyTabText: { marginTop: 12, fontSize: 15, color: '#999' },
+  emptyTabText: { marginTop: 12, fontSize: 15 },
   
-  chatItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 12, borderRadius: 12, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, },
+  chatItem: { flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 12, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, },
   avatarContainer: { position: 'relative' },
   avatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#eee' },
-  unreadBadge: { position: 'absolute', top: -4, right: -4, backgroundColor: '#FF4D4F', minWidth: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6, borderWidth: 2, borderColor: '#fff' },
+  unreadBadge: { position: 'absolute', top: -4, right: -4, minWidth: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6, borderWidth: 2, borderColor: '#fff' },
   unreadText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   
   chatContent: { flex: 1, marginLeft: 12 },
   chatHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  userName: { fontSize: 16, fontWeight: '600', color: '#111' },
-  timeText: { fontSize: 12, color: '#999' },
+  userName: { fontSize: 16, fontWeight: '600' },
+  timeText: { fontSize: 12 },
   
   itemsRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  itemThumb: { width: 24, height: 24, borderRadius: 4, backgroundColor: '#f0f0f0', overflow: 'hidden' },
+  itemThumb: { width: 24, height: 24, borderRadius: 4, overflow: 'hidden' },
   itemThumbImage: { width: '100%', height: '100%' },
-  itemsText: { fontSize: 12, color: '#666', flex: 1 },
+  itemsText: { fontSize: 12, flex: 1 },
   
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   statusDot: { width: 8, height: 8, borderRadius: 4 },
