@@ -57,6 +57,7 @@ interface HeaderProps {
     matchInfo: TinderMatch | null;
     menuOpen: boolean;
     setMenuOpen: (open: boolean) => void;
+    onCancelExchange?: () => void;
 }
 
 interface ItemsStripProps {
@@ -80,7 +81,7 @@ interface ComposerProps {
 }
 
 // --- 1. Header Component ---
-export const ChatHeader: React.FC<HeaderProps> = ({ matchInfo, menuOpen, setMenuOpen }) => {
+export const ChatHeader: React.FC<HeaderProps> = ({ matchInfo, menuOpen, setMenuOpen, onCancelExchange }) => {
     const avatar = matchInfo?.otherUser?.avatarUrl || 'https://placehold.co/60x60';
     const name = matchInfo?.otherUser?.nickname || 'Utente';
 
@@ -94,13 +95,13 @@ export const ChatHeader: React.FC<HeaderProps> = ({ matchInfo, menuOpen, setMenu
                 </View>
             </View>
 
-            <TouchableOpacity style={componentStyles.headerMenuBtn} onPress={() => setMenuOpen(v => !v)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <TouchableOpacity style={componentStyles.headerMenuBtn} onPress={() => setMenuOpen(!menuOpen)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                 <Ionicons name="ellipsis-vertical" size={20} color="#333" />
             </TouchableOpacity>
 
             {menuOpen && (
                 <View style={componentStyles.menuDropdown}>
-                    <TouchableOpacity style={componentStyles.menuItem} onPress={() => { setMenuOpen(false); Alert.alert('Annulla scambio', 'Funzione in arrivo'); }}>
+                    <TouchableOpacity style={componentStyles.menuItem} onPress={() => { setMenuOpen(false); onCancelExchange?.(); }}>
                         <Text style={componentStyles.menuItemText}>Annulla scambio</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={componentStyles.menuItem} onPress={() => { setMenuOpen(false); Alert.alert('Segnala utente', 'Funzione in arrivo'); }}>

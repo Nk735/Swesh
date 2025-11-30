@@ -3,8 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../services/apiClient';
 import { router } from 'expo-router';
 
-type User = { id: string; email: string; nickname: string; avatarUrl?: string; avatarKey?: string; };
-type ApiUser = { _id: string; email: string; nickname: string; avatarUrl?: string; avatarKey?: string; };
+type User = { id: string; email: string; nickname: string; avatarUrl?: string; avatarKey?: string; completedExchangesCount?: number; };
+type ApiUser = { _id: string; email: string; nickname: string; avatarUrl?: string; avatarKey?: string; completedExchangesCount?: number; };
 
 interface AuthContextValue {
   user: User | null;
@@ -18,7 +18,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 function normalizeUser(u: ApiUser): User {
-  return { id: u._id, email: u.email, nickname: u.nickname, avatarUrl: u. avatarUrl, avatarKey: u. avatarKey };
+  return { id: u._id, email: u.email, nickname: u.nickname, avatarUrl: u.avatarUrl, avatarKey: u.avatarKey, completedExchangesCount: u.completedExchangesCount };
 }
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {

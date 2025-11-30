@@ -49,6 +49,20 @@ export type MatchUpdateEvent = {
   matchId: string;
 };
 
+export type MatchArchivedEvent = {
+  matchId: string;
+  reason: 'item_exchanged' | 'user_cancelled' | 'item_deleted' | 'admin';
+  relatedMatchId?: string;
+  itemTitle?: string;
+};
+
+export type ExchangeCompletedEvent = {
+  matchId: string;
+  myItemTitle: string;
+  theirItemTitle: string;
+  otherUserNickname: string;
+};
+
 class SocketService {
   private socket: Socket | null = null;
   private connecting: boolean = false;
@@ -209,6 +223,20 @@ class SocketService {
     };
   }
 
+  onMatchArchived(callback: (data: MatchArchivedEvent) => void) {
+    this.socket?.on('match_archived', callback);
+    return () => {
+      this.socket?.off('match_archived', callback);
+    };
+  }
+
+  onExchangeCompleted(callback: (data: ExchangeCompletedEvent) => void) {
+    this.socket?.on('exchange_completed', callback);
+    return () => {
+      this.socket?.off('exchange_completed', callback);
+    };
+  }
+
   // Remove all event listeners
   removeAllListeners() {
     if (this.socket) {
@@ -217,6 +245,8 @@ class SocketService {
       this.socket.off('user_typing');
       this.socket.off('exchange_status');
       this.socket.off('match_update');
+      this.socket.off('match_archived');
+      this.socket.off('exchange_completed');
     }
   }
 }

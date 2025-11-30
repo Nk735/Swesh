@@ -24,6 +24,9 @@ const itemSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   likesCount: { type: Number, default: 0 },
   likesList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  exchangedAt: { type: Date },
+  exchangedInMatchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Match' },
+  exchangedWith: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, {
   timestamps: true,
 });

@@ -7,6 +7,7 @@ import User from '../models/User.js';
 import Message from '../models/Message.js';
 import mongoose from 'mongoose';
 import { getIO } from '../utils/socketManager.js';
+import { handleExchangeCompletion } from '../services/exchangeService.js';
 
 const router = express.Router();
 
@@ -267,6 +268,16 @@ router.patch('/:matchId/confirm', protect, async (req, res) => {
     match.lastActivityAt = new Date();
     await match.save();
 
+    // If exchange is completed, handle post-completion logic
+    if (match.status === 'completed') {
+      try {
+        await handleExchangeCompletion(match);
+      } catch (exchangeError) {
+        console.error('Error handling exchange completion:', exchangeError);
+        // Continue with the response even if post-completion handling fails
+      }
+    }
+
     // Emit match_update to both users
     const io = getIO();
     if (io) {
@@ -401,6 +412,81 @@ router.patch('/:matchId/cancel', protect, async (req, res) => {
       cancellation: match.cancellation,
       lastActivityAt: match.lastActivityAt
     });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+// GET /api/matches/completed - Storico scambi completati dell'utente
+router.get('/completed', protect, async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Trova tutti i match completati dell'utente
+    const matches = await Match.find({
+      status: 'completed',
+      $or: [{ userAId: userId }, { userBId: userId }]
+    })
+      .sort({ completedAt: -1 })
+      .lean();
+
+    if (!matches.length) {
+      return res.json([]);
+    }
+
+    // Collect all item and user IDs
+    const itemIds = [];
+    const userIds = new Set();
+    matches.forEach(m => {
+      itemIds.push(m.itemAId, m.itemBId);
+      userIds.add(String(m.userAId));
+      userIds.add(String(m.userBId));
+    });
+
+    // Load items and users
+    const [items, users] = await Promise.all([
+      Item.find({ _id: { $in: itemIds } }).lean(),
+      User.find({ _id: { $in: [...userIds] } }).select('nickname avatarUrl avatarKey completedExchangesCount').lean()
+    ]);
+
+    const itemMap = new Map(items.map(i => [String(i._id), i]));
+    const userMap = new Map(users.map(u => [String(u._id), u]));
+
+    // Build response
+    const result = matches.map(m => {
+      const meIsA = String(m.userAId) === String(userId);
+      const otherUserId = meIsA ? String(m.userBId) : String(m.userAId);
+      const myItemId = meIsA ? m.itemAId : m.itemBId;
+      const theirItemId = meIsA ? m.itemBId : m.itemAId;
+
+      const myItem = itemMap.get(String(myItemId));
+      const theirItem = itemMap.get(String(theirItemId));
+      const otherUser = userMap.get(otherUserId);
+
+      return {
+        matchId: m._id,
+        completedAt: m.completedAt,
+        myItem: myItem ? {
+          _id: myItem._id,
+          title: myItem.title,
+          imageUrl: myItem.imageUrl
+        } : null,
+        theirItem: theirItem ? {
+          _id: theirItem._id,
+          title: theirItem.title,
+          imageUrl: theirItem.imageUrl
+        } : null,
+        otherUser: {
+          _id: otherUserId,
+          nickname: otherUser?.nickname || 'Utente',
+          avatarUrl: otherUser?.avatarUrl,
+          avatarKey: otherUser?.avatarKey,
+          completedExchangesCount: otherUser?.completedExchangesCount || 0
+        }
+      };
+    });
+
+    res.json(result);
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
