@@ -5,7 +5,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { TinderMatch } from "../src/types/trade"; // Assicurati che il percorso sia corretto
 import { PanResponderInstance } from 'react-native';
 
-// --- STILI REPLICATI ---//
 const componentStyles = StyleSheet.create({
   // Header
   header: { paddingHorizontal: 16, paddingBottom: 10, paddingTop: 50, borderBottomWidth: 1, borderColor: '#eee', backgroundColor: '#fff' },
@@ -14,18 +13,12 @@ const componentStyles = StyleSheet.create({
   headerTitle: { fontSize: 16, fontWeight: '700', color: '#111' },
   headerSubtitle: { fontSize: 12, color: '#666' },
   headerMenuBtn: { position: 'absolute', right: 12, top: 56, padding: 6, },
-  menuDropdown: {
-    position: 'absolute', right: 10, top: 46, backgroundColor: '#fff', borderWidth: 1, borderColor: '#eee',
-    borderRadius: 10, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 6
-  },
+  menuDropdown: { position: 'absolute', right: 10, top: 46, backgroundColor: '#fff', borderWidth: 1, borderColor: '#eee', borderRadius: 10, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 6 },
   menuItem: { paddingHorizontal: 14, paddingVertical: 10, minWidth: 160 },
   menuItemText: { color: '#111', fontSize: 14 },
 
   // Items strip
-  itemsStrip: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16,
-    paddingVertical: 10, backgroundColor: '#fafafa', borderBottomWidth: 1, borderColor: '#f0f0f0'
-  },
+  itemsStrip: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, paddingVertical: 10, backgroundColor: '#fafafa', borderBottomWidth: 1, borderColor: '#f0f0f0' },
   itemBox: { alignItems: 'center', maxWidth: 140 },
   itemImage: { width: 96, height: 96, borderRadius: 8, backgroundColor: '#ddd', marginBottom: 6 },
   itemTitle: { fontSize: 12, fontWeight: '600', color: '#333' },
@@ -33,17 +26,9 @@ const componentStyles = StyleSheet.create({
   // Slider
   sliderWrap: { paddingHorizontal: 16, paddingBottom: 8, paddingTop: 6, backgroundColor: '#fff' },
   sliderLabel: { textAlign: 'center', fontSize: 12, color: '#666', marginBottom: 6 },
-  sliderTrack: {
-    alignSelf: 'center', width: 260, height: 44, borderRadius: 22, backgroundColor: '#F4F4F5',
-    borderWidth: 1, borderColor: '#E5E7EB', overflow: 'hidden', position: 'relative'
-  },
-  sliderFill: {
-    position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: '#E6E1FF'
-  },
-  sliderKnob: {
-    width: 38, height: 38, borderRadius: 19, position: 'absolute', left: 0, top: 3,
-    alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 4
-  },
+  sliderTrack: { alignSelf: 'center', width: 260, height: 44, borderRadius: 22, backgroundColor: '#F4F4F5', borderWidth: 1, borderColor: '#E5E7EB', overflow: 'hidden', position: 'relative' },
+  sliderFill: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: '#E6E1FF' },
+  sliderKnob: { width: 38, height: 38, borderRadius: 19, position: 'absolute', left: 0, top: 3, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 4 },
   sliderHint: { marginTop: 6, textAlign: 'center', fontSize: 12, color: '#34C759', fontWeight: '600' },
 
   // Composer

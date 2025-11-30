@@ -301,17 +301,7 @@ function badgeStyleFor(condition?: string) {
 
 const styles = StyleSheet.create({
   deck: { flex: 1, alignItems: 'center', justifyContent: 'center', position: 'relative' },
-  card: {
-    width: width * 0.85,
-    height: height * 0.58,
-    backgroundColor: '#eee',
-    position: 'absolute',
-    borderRadius: 28,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-  },
+  card: { width: width * 0.85, height: height * 0.58, backgroundColor: '#eee', position: 'absolute', borderRadius: 28, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8, },
   image: { width: '100%', height: '100%' },
 
   // Hotspots per cambio immagine
@@ -319,29 +309,12 @@ const styles = StyleSheet.create({
   rightHotspot: { position: 'absolute', right: 0, top: 0, bottom: 0, width: '28%' },
 
   // Dots immagini
-  dotsWrap: {
-    position: 'absolute',
-    bottom: 84,
-    alignSelf: 'center',
-    flexDirection: 'row',
-    backgroundColor: 'rgba(0,0,0,0.20)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-    gap: 6,
-  },
+  dotsWrap: { position: 'absolute', bottom: 84, alignSelf: 'center', flexDirection: 'row', backgroundColor: 'rgba(0,0,0,0.20)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 6, },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.5)' },
   dotActive: { backgroundColor: '#fff' },
 
   // Overlay info
-  overlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    padding: 14,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-  },
+  overlay: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: 14, backgroundColor: 'rgba(0,0,0,0.35)', },
   overlayCollapsed: { paddingTop: 10, paddingBottom: 12 },
   overlayExpanded: { paddingTop: 12, paddingBottom: 14, backgroundColor: 'rgba(0,0,0,0.50)' },
 
@@ -351,13 +324,7 @@ const styles = StyleSheet.create({
 
   detailsWrap: { marginTop: 10, gap: 8 },
   badgesRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
-  },
+  badge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.35)', },
   badgeTxt: { color: '#fff', fontSize: 12, fontWeight: '600' },
   desc: { color: 'white', fontSize: 13, lineHeight: 18 },
 

@@ -43,8 +43,10 @@ export default function BottomNav() {
         </Link>
         <Link href="/profile" style={styles.linkWrapper}>
           <View style={[styles.navItem, getActiveStyle('profile')]}>
-            <Ionicons name="person-outline" size={24} color="#fff" />
-            <Text style={styles.navText}>Profilo</Text>
+            <View style={[styles.navbox, getActiveStyle('profile')]}>
+              <Ionicons name="person-outline" size={24} color="#fff" />
+              <Text style={styles.navText}>Profilo</Text>
+            </View>
           </View>
         </Link>
       </View>
@@ -54,35 +56,41 @@ export default function BottomNav() {
 
 const styles = StyleSheet.create({
   bottomNavContainer: {
-    position: 'absolute', left: 20, right: 20, bottom: 0,
-    backgroundColor: '#F28585', borderWidth: 2.5, borderColor: '#F2B263',
-    borderTopLeftRadius: 100, borderTopRightRadius: 25, borderBottomLeftRadius: 25, borderBottomRightRadius: 100,
-    overflow: 'hidden', margin: 20, alignSelf:'center',
-    shadowColor: '#000', shadowOffset: { width: 0, height: -5 }, shadowOpacity: 0.1, shadowRadius: 10,
+    position: 'absolute',  bottom: 0,
+    backgroundColor: '#F28585', borderWidth: 2.5, borderColor: '#F2B263', transform: [{ skewX: '-30deg' }], borderRadius: 20,
+    //borderTopLeftRadius: 150, borderTopRightRadius: 25, borderBottomLeftRadius: 25, borderBottomRightRadius: 150,
+    overflow: 'hidden', margin: 10, alignSelf:'center'
   },
-  bottomNav: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 30 },
-  linkWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 10 },
+  bottomNav: { flexDirection: 'row', alignItems: 'center', paddingVertical: 0, paddingHorizontal: 0 },
+  linkWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   navItem: {
-    width: 60, height: 60, alignItems: 'center', justifyContent: 'center',
-    flexDirection: 'column', padding: 5,
+    width: 60, height: 60, alignItems: 'center', justifyContent: 'center', transform: [{ skewX: '30deg' }],
+    flexDirection: 'column', marginHorizontal: 10, paddingHorizontal: 10, paddingVertical: 10,
   },
-  navText: { fontSize: 12, color: '#fff', marginTop: 2 },
+  navText: { fontSize: 12, color: '#fff', marginTop: 0,},
 
   navItemActiveHome: {
-    borderColor: '#F2B263', 
-    borderWidth: 2.5,      
-    borderRadius: 50,
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    //borderColor: '#F2B263', borderWidth: 2.5, borderRadius: 50, backgroundColor: 'rgba(255,255,255,0.12)',
   },
 
   navItemActiveMatches: {
-    borderColor: '#F2B263', borderWidth: 2.5, borderRadius: 50, backgroundColor: 'rgba(255,255,255,0.12)',
-    borderTopLeftRadius: 25, borderTopRightRadius: 100, borderBottomLeftRadius: 100, borderBottomRightRadius: 25,
+    //borderColor: '#F2B263', borderWidth: 2.5, borderRadius: 50, backgroundColor: 'rgba(255,255,255,0.12)',
+    //borderTopLeftRadius: 25, borderTopRightRadius: 100, borderBottomLeftRadius: 100, borderBottomRightRadius: 25,
   },
 
   navItemActiveProfile: {
-    borderColor: '#F2B263', borderWidth: 2.5, borderRadius: 50, backgroundColor: 'rgba(255,255,255,0.12)',
-    borderTopLeftRadius: 100, borderTopRightRadius: 25, borderBottomLeftRadius: 25, borderBottomRightRadius: 100,
+    //borderColor: '#F2B263', borderWidth: 2.5, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 20, 
+    //borderTopLeftRadius: 100, borderTopRightRadius: 25, borderBottomLeftRadius: 25, borderBottomRightRadius: 100,
+  },
+
+  
+  navbox: {
+    width: 60, height: 60, alignItems: 'center', justifyContent: 'center',
+    flexDirection: 'column', marginHorizontal: 10, paddingHorizontal: 10, paddingVertical: 10,
+  },
+  navboxActiveProfile: {
+    width: 60, height: 60, alignItems: 'center', justifyContent: 'center', 
+    flexDirection: 'column', marginHorizontal: 10, paddingHorizontal: 10, paddingVertical: 10,
   },
 
 });

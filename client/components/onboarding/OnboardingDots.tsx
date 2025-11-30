@@ -23,22 +23,8 @@ export default function OnboardingDots({ total, current }: OnboardingDotsProps) 
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-    marginVertical: 20,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  dotActive: {
-    backgroundColor: '#F28585',
-  },
-  dotInactive: {
-    backgroundColor: '#DDD',
-  },
+  container: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, marginVertical: 20, },
+  dot: { width: 10, height: 10, borderRadius: 5, },
+  dotActive: { backgroundColor: '#F28585', },
+  dotInactive: { backgroundColor: '#DDD', },
 });

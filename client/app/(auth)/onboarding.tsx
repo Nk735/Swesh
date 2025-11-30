@@ -1,14 +1,5 @@
 import React, { useState, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Dimensions,
-  Platform,
-  Alert as RNAlert,
-} from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions, Platform, Alert as RNAlert } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../src/context/AuthContext';
@@ -35,14 +26,14 @@ const SLIDES: SlideData[] = [
     type: 'info',
     icon: 'shirt-outline',
     title: 'Benvenuto su Swesh!',
-    description: 'Dai nuova vita ai tuoi vestiti scambiandoli con altri utenti. Gratis, senza soldi, solo scambi!',
+    description: 'Trasforma il tuo non ho niente da mettere in nuovi outfit scambiando con la community',
   },
   {
     id: '2',
     type: 'info',
     icon: 'swap-horizontal-outline',
     title: 'Sfoglia e Scegli',
-    description: 'Scorri gli abiti degli altri utenti. ❤️ se ti piace, ✕ se vuoi passare al prossimo.',
+    description: 'Scorri gli abiti degli altri utenti.',
   },
   {
     id: '3',
@@ -156,6 +147,7 @@ export default function OnboardingScreen() {
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.continueButton} onPress={handleNext}>
               <Text style={styles.continueButtonText}>Continua</Text>
+              <Ionicons name="arrow-forward" size={18} color="#fff" />
             </TouchableOpacity>
           </View>
         </View>
@@ -258,99 +250,19 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  slideWrapper: {
-    width,
-    flex: 1,
-  },
-  buttonContainer: {
-    paddingHorizontal: 30,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 30,
-  },
-  continueButton: {
-    backgroundColor: '#F2B263',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  continueButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  finalSlide: {
-    justifyContent: 'space-between',
-    paddingTop: 60,
-  },
-  finalContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 30,
-  },
-  iconContainer: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: '#F2E8DF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 40,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  finalTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  finalDescription: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  finalButtons: {
-    paddingHorizontal: 30,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 30,
-    gap: 12,
-  },
-  primaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#86A69D',
-    padding: 16,
-    borderRadius: 12,
-    gap: 8,
-  },
-  primaryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  secondaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#86A69D',
-    gap: 8,
-  },
-  secondaryButtonText: {
-    color: '#86A69D',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  container: { flex: 1, backgroundColor: '#fff', position: 'relative', },
+  slideWrapper: { width, flex: 1, justifyContent: 'center', alignItems: 'center', },
+  buttonContainer: { paddingHorizontal: 30, paddingBottom: Platform.OS === 'ios' ? 40 : 30, right: 30},
+  continueButton: { backgroundColor: '#F2B263', padding: 10, borderRadius: 25, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, },
+  continueButtonText: { color: '#fff', fontSize: 16, fontWeight: '600', },
+  finalSlide: { justifyContent: 'space-between', paddingTop: 60, },
+  finalContent: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 30, },
+  iconContainer: { width: 160, height: 160, borderRadius: 80, backgroundColor: '#F2E8DF', justifyContent: 'center', alignItems: 'center', marginBottom: 40, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4, },
+  finalTitle: { fontSize: 28, fontWeight: '700', color: '#333', textAlign: 'center', marginBottom: 12, },
+  finalDescription: { fontSize: 16, color: '#666', textAlign: 'center', lineHeight: 24, },
+  finalButtons: { paddingHorizontal: 30, paddingBottom: Platform.OS === 'ios' ? 40 : 30, gap: 12, },
+  primaryButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#86A69D', padding: 16, borderRadius: 12, gap: 8, },
+  primaryButtonText: { color: '#fff', fontSize: 16, fontWeight: '600', },
+  secondaryButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', padding: 16, borderRadius: 12, borderWidth: 2, borderColor: '#86A69D', gap: 8, },
+  secondaryButtonText: { color: '#86A69D', fontSize: 16, fontWeight: '600', },
 });

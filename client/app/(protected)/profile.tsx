@@ -210,47 +210,17 @@ const styles = StyleSheet.create({
   email: { fontSize: 14, color: "#777" },
 
   // Complete Profile Prompt
-  completeProfilePrompt: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    backgroundColor: "#fff", 
-    marginHorizontal: 16, 
-    marginBottom: 12, 
-    padding: 14, 
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#F2B263",
-    gap: 10
-  },
+  completeProfilePrompt: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", marginHorizontal: 16, marginBottom: 12, padding: 14, borderRadius: 12, borderWidth: 1, borderColor: "#F2B263", gap: 10 },
   completeProfileText: { flex: 1, fontSize: 15, fontWeight: "500", color: "#F2B263" },
 
   // Stats Section
   statsSection: { flexDirection: "row", gap: 12, marginHorizontal: 16, marginBottom: 12 },
-  statBox: { 
-    flex: 1, 
-    backgroundColor: "#fff", 
-    borderRadius: 12, 
-    padding: 16, 
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 }
-  },
+  statBox: { flex: 1, backgroundColor: "#fff", borderRadius: 12, padding: 16, alignItems: "center", shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
   statNumber: { fontSize: 24, fontWeight: "700", color: "#333", marginTop: 8 },
   statLabel: { fontSize: 12, color: "#666", marginTop: 4, textAlign: "center" },
 
   // History Button
-  historyButton: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    backgroundColor: "#fff", 
-    marginHorizontal: 16, 
-    marginBottom: 12, 
-    padding: 14, 
-    borderRadius: 12,
-    gap: 10
-  },
+  historyButton: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", marginHorizontal: 16, marginBottom: 12, padding: 14, borderRadius: 12, gap: 10 },
   historyButtonText: { flex: 1, fontSize: 15, fontWeight: "500", color: "#333" },
 
   // Sezione abiti

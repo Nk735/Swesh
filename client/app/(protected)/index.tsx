@@ -169,9 +169,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   deckWrapper: { flex: 1, paddingTop: 10, alignItems: 'center', justifyContent: 'center' },
-  actionsBar: {
-    marginTop: 24, flexDirection: 'row', justifyContent: 'space-around', width: SCREEN_WIDTH, paddingHorizontal: 14, alignItems: 'center',
-  },
+  actionsBar: { marginTop: -10, flexDirection: 'row', justifyContent: 'space-around', width: SCREEN_WIDTH, paddingHorizontal: 14, alignItems: 'center' },
   safeArea: { flex: 1, backgroundColor: '#F2E8DF', paddingTop: 20, paddingBottom: 110 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 10 },
   logo: { width: 100, height: 40, resizeMode: 'contain' },

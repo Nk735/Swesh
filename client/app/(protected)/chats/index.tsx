@@ -230,71 +230,18 @@ const styles = StyleSheet.create({
   listContent: { paddingHorizontal: 16, paddingBottom: 100 },
   
   // Tab styles
-  tabContainer: {
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    marginBottom: 12,
-    backgroundColor: '#E8E0D7',
-    borderRadius: 10,
-    padding: 4
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center'
-  },
-  tabActive: {
-    backgroundColor: '#fff'
-  },
-  tabText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#888'
-  },
-  tabTextActive: {
-    color: '#333',
-    fontWeight: '600'
-  },
-  emptyTabContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 100
-  },
-  emptyTabText: {
-    marginTop: 12,
-    fontSize: 15,
-    color: '#999'
-  },
+  tabContainer: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 12, backgroundColor: '#E8E0D7', borderRadius: 10, padding: 4 },
+  tab: { flex: 1, paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
+  tabActive: { backgroundColor: '#fff' },
+  tabText: { fontSize: 13, fontWeight: '500', color: '#888' },
+  tabTextActive: { color: '#333', fontWeight: '600' },
+  emptyTabContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 100 },
+  emptyTabText: { marginTop: 12, fontSize: 15, color: '#999' },
   
-  chatItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-  },
+  chatItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 12, borderRadius: 12, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, },
   avatarContainer: { position: 'relative' },
   avatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#eee' },
-  unreadBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: '#FF4D4F',
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 6,
-    borderWidth: 2,
-    borderColor: '#fff'
-  },
+  unreadBadge: { position: 'absolute', top: -4, right: -4, backgroundColor: '#FF4D4F', minWidth: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6, borderWidth: 2, borderColor: '#fff' },
   unreadText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   
   chatContent: { flex: 1, marginLeft: 12 },

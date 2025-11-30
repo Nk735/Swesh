@@ -170,81 +170,21 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   listContent: { paddingHorizontal: 16, paddingBottom: 100 },
   
-  exchangeCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  dateText: {
-    fontSize: 12,
-    color: '#888',
-    marginBottom: 12
-  },
+  exchangeCard: { backgroundColor: '#fff', borderRadius: 16, padding: 16, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, },
+  dateText: { fontSize: 12, color: '#888', marginBottom: 12 },
   
-  itemsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16
-  },
-  itemBox: {
-    flex: 1,
-    alignItems: 'center',
-    maxWidth: '40%'
-  },
-  itemImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-    backgroundColor: '#f0f0f0',
-    marginBottom: 8
-  },
-  itemTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 2
-  },
-  itemLabel: {
-    fontSize: 11,
-    color: '#888'
-  },
-  swapIcon: {
-    paddingHorizontal: 10
-  },
+  itemsContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
+  itemBox: { flex: 1, alignItems: 'center', maxWidth: '40%' },
+  itemImage: { width: 80, height: 80, borderRadius: 10, backgroundColor: '#f0f0f0', marginBottom: 8 },
+  itemTitle: { fontSize: 13, fontWeight: '600', color: '#333', textAlign: 'center', marginBottom: 2 },
+  itemLabel: { fontSize: 11, color: '#888' },
+  swapIcon: { paddingHorizontal: 10 },
   
-  userSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0'
-  },
-  userAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#eee'
-  },
-  userInfo: {
-    marginLeft: 12,
-    flex: 1
-  },
-  userName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333'
-  },
-  userStats: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 2
-  },
+  userSection: { flexDirection: 'row', alignItems: 'center', paddingTop: 12, borderTopWidth: 1, borderTopColor: '#f0f0f0' },
+  userAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#eee' },
+  userInfo: { marginLeft: 12, flex: 1 },
+  userName: { fontSize: 14, fontWeight: '600', color: '#333' },
+  userStats: { fontSize: 12, color: '#888', marginTop: 2 },
   
   separator: { height: 12 }
 });

@@ -97,91 +97,22 @@ export default function FeedPreferenceSlide({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width,
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 30,
-    paddingTop: 40,
-    justifyContent: 'flex-start',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 40,
-  },
-  options: {
-    gap: 16,
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 20,
-    borderRadius: 16,
-    backgroundColor: '#F9F9F9',
-    borderWidth: 2,
-    borderColor: '#EEE',
-    gap: 16,
-  },
-  optionSelected: {
-    backgroundColor: '#86A69D',
-    borderColor: '#86A69D',
-  },
-  optionEmoji: {
-    fontSize: 32,
-  },
-  optionTextContainer: {
-    flex: 1,
-  },
-  optionLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  optionLabelSelected: {
-    color: '#fff',
-  },
-  optionDescription: {
-    fontSize: 13,
-    color: '#888',
-  },
-  optionDescriptionSelected: {
-    color: 'rgba(255,255,255,0.8)',
-  },
-  note: {
-    fontSize: 12,
-    color: '#999',
-    textAlign: 'center',
-    marginTop: 24,
-  },
-  footer: {
-    paddingHorizontal: 30,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 30,
-  },
-  continueButton: {
-    backgroundColor: '#F2B263',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  continueButtonDisabled: {
-    backgroundColor: '#DDD',
-  },
-  continueButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-  },
+  container: { width, flex: 1, backgroundColor: '#fff', },
+  content: { flex: 1, paddingHorizontal: 30, paddingTop: 40, justifyContent: 'flex-start', },
+  title: { fontSize: 28, fontWeight: '700', color: '#333', textAlign: 'center', marginBottom: 8, },
+  subtitle: { fontSize: 16, color: '#666', textAlign: 'center', marginBottom: 40, },
+  options: { gap: 16, },
+  option: { flexDirection: 'row', alignItems: 'center', padding: 20, borderRadius: 16, backgroundColor: '#F9F9F9', borderWidth: 2, borderColor: '#EEE', gap: 16, },
+  optionSelected: { backgroundColor: '#86A69D', borderColor: '#86A69D', },
+  optionEmoji: { fontSize: 32, },
+  optionTextContainer: { flex: 1, },
+  optionLabel: { fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 4, },
+  optionLabelSelected: { color: '#fff', },
+  optionDescription: { fontSize: 13, color: '#888', },
+  optionDescriptionSelected: { color: 'rgba(255,255,255,0.8)', },
+  note: { fontSize: 12, color: '#999', textAlign: 'center', marginTop: 24, },
+  footer: { paddingHorizontal: 30, paddingBottom: Platform.OS === 'ios' ? 40 : 30, },
+  continueButton: { backgroundColor: '#F2B263', padding: 16, borderRadius: 12, alignItems: 'center', },
+  continueButtonDisabled: { backgroundColor: '#DDD', },
+  continueButtonText: { color: '#fff', fontSize: 18, fontWeight: '600', },
 });
