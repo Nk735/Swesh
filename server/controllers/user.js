@@ -121,11 +121,19 @@ export const completeOnboarding = async (req, res) => {
 // @route PATCH /api/users/me/preferences (protetto)
 export const updateFeedPreferences = async (req, res) => {
   try {
-    const { showGender } = req.body;
+    const { showGender, theme } = req.body;
+
+    const updateData = {};
+    if (showGender) {
+      updateData['feedPreferences.showGender'] = showGender;
+    }
+    if (theme) {
+      updateData['preferences.theme'] = theme;
+    }
 
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { 'feedPreferences.showGender': showGender },
+      updateData,
       { new: true }
     ).select('-password -__v');
 
@@ -133,7 +141,8 @@ export const updateFeedPreferences = async (req, res) => {
 
     return res.json({ 
       message: 'Preferenze aggiornate', 
-      feedPreferences: user.feedPreferences 
+      feedPreferences: user.feedPreferences,
+      preferences: user.preferences
     });
   } catch (err) {
     return res.status(500).json({ message: err.message });

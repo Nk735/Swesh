@@ -3,6 +3,7 @@
 const GENDER_ENUM = ['male', 'female', 'prefer_not_to_say'];
 const FEED_GENDER_ENUM = ['male', 'female', 'all'];
 const VISIBLE_TO_ENUM = ['male', 'female', 'all'];
+const THEME_ENUM = ['light', 'dark', 'system'];
 
 export const validateAuthBody = (req, res, next) => {
   const { email, password, nickname } = req.body;
@@ -141,13 +142,19 @@ export const validateOnboarding = (req, res, next) => {
 };
 
 export const validateFeedPreferences = (req, res, next) => {
-  const { showGender } = req.body;
+  const { showGender, theme } = req.body;
 
-  if (!showGender) {
-    return res.status(400).json({ message: 'showGender è obbligatorio' });
+  // At least one field must be provided
+  if (!showGender && !theme) {
+    return res.status(400).json({ message: 'showGender o theme è obbligatorio' });
   }
-  if (!FEED_GENDER_ENUM.includes(showGender)) {
+  
+  if (showGender && !FEED_GENDER_ENUM.includes(showGender)) {
     return res.status(400).json({ message: `showGender non valido. Valori consentiti: ${FEED_GENDER_ENUM.join(', ')}` });
+  }
+
+  if (theme && !THEME_ENUM.includes(theme)) {
+    return res.status(400).json({ message: `theme non valido. Valori consentiti: ${THEME_ENUM.join(', ')}` });
   }
 
   next();
