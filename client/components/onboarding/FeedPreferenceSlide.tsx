@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from '
 import { Ionicons } from '@expo/vector-icons';
 import OnboardingDots from './OnboardingDots';
 import { FeedGenderPreference } from '../../src/types';
+import { useTheme } from '../../src/theme';
 
 interface FeedPreferenceSlideProps {
   currentIndex: number;
@@ -25,6 +26,7 @@ export default function FeedPreferenceSlide({
   defaultPreference,
   onComplete,
 }: FeedPreferenceSlideProps) {
+  const { colors } = useTheme();
   const [preference, setPreference] = useState<FeedGenderPreference | null>(defaultPreference ?? null);
 
   const handleContinue = () => {
@@ -34,10 +36,10 @@ export default function FeedPreferenceSlide({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.card }]}>
       <View style={styles.content}>
-        <Text style={styles.title}>Personalizza il tuo feed</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: colors.text }]}>Personalizza il tuo feed</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Quali abiti vuoi vedere nel tuo feed?
         </Text>
 
@@ -47,7 +49,8 @@ export default function FeedPreferenceSlide({
               key={option.value}
               style={[
                 styles.option,
-                preference === option.value && styles.optionSelected,
+                { backgroundColor: colors.inputBackground, borderColor: colors.border },
+                preference === option.value && { backgroundColor: colors.accent, borderColor: colors.accent },
               ]}
               onPress={() => setPreference(option.value)}
             >
@@ -56,6 +59,7 @@ export default function FeedPreferenceSlide({
                 <Text
                   style={[
                     styles.optionLabel,
+                    { color: colors.text },
                     preference === option.value && styles.optionLabelSelected,
                   ]}
                 >
@@ -64,6 +68,7 @@ export default function FeedPreferenceSlide({
                 <Text
                   style={[
                     styles.optionDescription,
+                    { color: colors.textSecondary },
                     preference === option.value && styles.optionDescriptionSelected,
                   ]}
                 >
@@ -77,7 +82,7 @@ export default function FeedPreferenceSlide({
           ))}
         </View>
 
-        <Text style={styles.note}>
+        <Text style={[styles.note, { color: colors.textSecondary }]}>
           Puoi cambiare questa scelta dalle impostazioni
         </Text>
       </View>
@@ -85,7 +90,7 @@ export default function FeedPreferenceSlide({
       <View style={styles.footer}>
         <OnboardingDots total={totalSlides} current={currentIndex} />
         <TouchableOpacity
-          style={[styles.continueButton, !preference && styles.continueButtonDisabled]}
+          style={[styles.continueButton, { backgroundColor: colors.secondary }, !preference && styles.continueButtonDisabled]}
           onPress={handleContinue}
           disabled={!preference}
         >
@@ -97,22 +102,22 @@ export default function FeedPreferenceSlide({
 }
 
 const styles = StyleSheet.create({
-  container: { width, flex: 1, backgroundColor: '#fff', },
+  container: { width, flex: 1 },
   content: { flex: 1, paddingHorizontal: 30, paddingTop: 40, justifyContent: 'flex-start', },
-  title: { fontSize: 28, fontWeight: '700', color: '#333', textAlign: 'center', marginBottom: 8, },
-  subtitle: { fontSize: 16, color: '#666', textAlign: 'center', marginBottom: 40, },
+  title: { fontSize: 28, fontWeight: '700', textAlign: 'center', marginBottom: 8, },
+  subtitle: { fontSize: 16, textAlign: 'center', marginBottom: 40, },
   options: { gap: 16, },
-  option: { flexDirection: 'row', alignItems: 'center', padding: 20, borderRadius: 16, backgroundColor: '#F9F9F9', borderWidth: 2, borderColor: '#EEE', gap: 16, },
-  optionSelected: { backgroundColor: '#86A69D', borderColor: '#86A69D', },
+  option: { flexDirection: 'row', alignItems: 'center', padding: 20, borderRadius: 16, borderWidth: 2, gap: 16 },
+  optionSelected: {},
   optionEmoji: { fontSize: 32, },
   optionTextContainer: { flex: 1, },
-  optionLabel: { fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 4, },
+  optionLabel: { fontSize: 16, fontWeight: '600', marginBottom: 4, },
   optionLabelSelected: { color: '#fff', },
-  optionDescription: { fontSize: 13, color: '#888', },
+  optionDescription: { fontSize: 13 },
   optionDescriptionSelected: { color: 'rgba(255,255,255,0.8)', },
-  note: { fontSize: 12, color: '#999', textAlign: 'center', marginTop: 24, },
+  note: { fontSize: 12, textAlign: 'center', marginTop: 24, },
   footer: { paddingHorizontal: 30, paddingBottom: Platform.OS === 'ios' ? 40 : 30, },
-  continueButton: { backgroundColor: '#F2B263', padding: 16, borderRadius: 12, alignItems: 'center', },
-  continueButtonDisabled: { backgroundColor: '#DDD', },
+  continueButton: { padding: 16, borderRadius: 12, alignItems: 'center', },
+  continueButtonDisabled: { opacity: 0.5 },
   continueButtonText: { color: '#fff', fontSize: 18, fontWeight: '600', },
 });

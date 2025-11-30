@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Platform, Alert as RNAlert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Platform, Alert as RNAlert, StatusBar } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../src/services/apiClient";
 import { useAuth } from "../../src/context/AuthContext";
 import { ItemVisibility } from "../../src/types";
+import { useTheme } from "../../src/theme";
 
 const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL"] as const;
 const CATEGORY_OPTIONS = ["shirt", "pants", "shoes", "jacket", "accessory", "other"] as const;
@@ -22,6 +23,7 @@ const VISIBILITY_OPTIONS: { value: ItemVisibility; label: string; icon: keyof ty
 
 export default function AddItemScreen() {
   const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   
   // Calculate default visibility based on user gender
   const getDefaultVisibility = (): ItemVisibility => {
@@ -111,27 +113,30 @@ export default function AddItemScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#86A69D" />
+          <Ionicons name="arrow-back" size={24} color={colors.accent} />
         </TouchableOpacity>
-        <Text style={styles.title}>Aggiungi un nuovo abito</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Aggiungi un nuovo abito</Text>
       </View>
 
       <View style={styles.form}>
-        <Text style={styles.label}>Titolo *</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>Titolo *</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.border, color: colors.text }]}
           placeholder="Es. Giacca di pelle nera"
+          placeholderTextColor={colors.textSecondary}
           value={title}
           onChangeText={setTitle}
         />
 
-        <Text style={styles.label}>Descrizione</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>Descrizione</Text>
         <TextInput
-          style={[styles.input, styles.textArea]}
+          style={[styles.input, styles.textArea, { backgroundColor: colors.inputBackground, borderColor: colors.border, color: colors.text }]}
           placeholder="Descrizione dettagliata del capo (max 600 caratteri)"
+          placeholderTextColor={colors.textSecondary}
           value={description}
           onChangeText={setDescription}
           multiline
@@ -139,12 +144,13 @@ export default function AddItemScreen() {
           maxLength={600}
         />
 
-        <Text style={styles.label}>Immagini *</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>Immagini *</Text>
         {imageUrls.map((url, index) => (
           <View key={index} style={styles.imageInputRow}>
             <TextInput
-              style={[styles.input, styles.imageInput]}
+              style={[styles.input, styles.imageInput, { backgroundColor: colors.inputBackground, borderColor: colors.border, color: colors.text }]}
               placeholder={`URL immagine ${index + 1}`}
+              placeholderTextColor={colors.textSecondary}
               value={url}
               onChangeText={(value) => updateImageUrl(index, value)}
             />
@@ -153,17 +159,17 @@ export default function AddItemScreen() {
                 onPress={() => removeImageField(index)}
                 style={styles.removeButton}
               >
-                <Ionicons name="close-circle" size={24} color="#FF6347" />
+                <Ionicons name="close-circle" size={24} color={colors.error} />
               </TouchableOpacity>
             )}
           </View>
         ))}
         <TouchableOpacity onPress={addImageField} style={styles.addImageButton}>
-          <Ionicons name="add-circle-outline" size={20} color="#86A69D" />
-          <Text style={styles.addImageText}>Aggiungi altra immagine</Text>
+          <Ionicons name="add-circle-outline" size={20} color={colors.accent} />
+          <Text style={[styles.addImageText, { color: colors.accent }]}>Aggiungi altra immagine</Text>
         </TouchableOpacity>
 
-        <Text style={styles.label}>Taglia</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>Taglia</Text>
         <View style={styles.chipsRow}>
           {SIZE_OPTIONS.map(opt => {
             const selected = size === opt;
@@ -171,15 +177,15 @@ export default function AddItemScreen() {
               <TouchableOpacity
                 key={opt}
                 onPress={() => setSize(opt)}
-                style={[styles.chip, selected && styles.chipSelected]}
+                style={[styles.chip, { backgroundColor: colors.card, borderColor: colors.border }, selected && { backgroundColor: colors.primary, borderColor: colors.primary }]}
               >
-                <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{opt}</Text>
+                <Text style={[styles.chipText, { color: colors.text }, selected && styles.chipTextSelected]}>{opt}</Text>
               </TouchableOpacity>
             );
           })}
         </View>
 
-        <Text style={[styles.label, { marginTop: 10 }]}>Categoria</Text>
+        <Text style={[styles.label, { marginTop: 10, color: colors.textSecondary }]}>Categoria</Text>
         <View style={styles.chipsRow}>
           {CATEGORY_OPTIONS.map(opt => {
             const selected = category === opt;
@@ -187,15 +193,15 @@ export default function AddItemScreen() {
               <TouchableOpacity
                 key={opt}
                 onPress={() => setCategory(opt)}
-                style={[styles.chip, selected && styles.chipSelected]}
+                style={[styles.chip, { backgroundColor: colors.card, borderColor: colors.border }, selected && { backgroundColor: colors.primary, borderColor: colors.primary }]}
               >
-                <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{opt}</Text>
+                <Text style={[styles.chipText, { color: colors.text }, selected && styles.chipTextSelected]}>{opt}</Text>
               </TouchableOpacity>
             );
           })}
         </View>
 
-        <Text style={[styles.label, { marginTop: 10 }]}>Condizione *</Text>
+        <Text style={[styles.label, { marginTop: 10, color: colors.textSecondary }]}>Condizione *</Text>
         <View style={styles.chipsRow}>
           {CONDITION_OPTIONS.map(opt => {
             const selected = condition === opt.value;
@@ -203,9 +209,9 @@ export default function AddItemScreen() {
               <TouchableOpacity
                 key={opt.value}
                 onPress={() => setCondition(opt.value)}
-                style={[styles.chip, selected && styles.chipSelected]}
+                style={[styles.chip, { backgroundColor: colors.card, borderColor: colors.border }, selected && { backgroundColor: colors.primary, borderColor: colors.primary }]}
               >
-                <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
+                <Text style={[styles.chipText, { color: colors.text }, selected && styles.chipTextSelected]}>
                   {opt.label}
                 </Text>
               </TouchableOpacity>
@@ -213,7 +219,7 @@ export default function AddItemScreen() {
           })}
         </View>
 
-        <Text style={[styles.label, { marginTop: 10 }]}>Chi può vedere questo abito?</Text>
+        <Text style={[styles.label, { marginTop: 10, color: colors.textSecondary }]}>Chi può vedere questo abito?</Text>
         <View style={styles.chipsRow}>
           {VISIBILITY_OPTIONS.map(opt => {
             const selected = visibleTo === opt.value;
@@ -221,16 +227,16 @@ export default function AddItemScreen() {
               <TouchableOpacity
                 key={opt.value}
                 onPress={() => setVisibleTo(opt.value)}
-                style={[styles.chip, selected && styles.chipSelected]}
+                style={[styles.chip, { backgroundColor: colors.card, borderColor: colors.border }, selected && { backgroundColor: colors.primary, borderColor: colors.primary }]}
               >
                 <View style={styles.visibilityChipContent}>
                   <Ionicons 
                     name={opt.icon} 
                     size={16} 
-                    color={selected ? "#fff" : "#333"} 
+                    color={selected ? "#fff" : colors.text} 
                     style={styles.visibilityIcon}
                   />
-                  <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
+                  <Text style={[styles.chipText, { color: colors.text }, selected && styles.chipTextSelected]}>
                     {opt.label}
                   </Text>
                 </View>
@@ -239,7 +245,7 @@ export default function AddItemScreen() {
           })}
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleAddItem} disabled={loading}>
+        <TouchableOpacity style={[styles.button, { backgroundColor: colors.secondary }]} onPress={handleAddItem} disabled={loading}>
           <Text style={styles.buttonText}>{loading ? "Salvataggio..." : "Aggiungi abito"}</Text>
         </TouchableOpacity>
       </View>
@@ -248,26 +254,26 @@ export default function AddItemScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F2E8DF" },
+  container: { flex: 1 },
   header: { flexDirection: "row", alignItems: "center", padding: 20, paddingTop: 50 },
   backButton: { marginRight: 12 },
   title: { fontSize: 22, fontWeight: "600" },
   form: { padding: 20, paddingTop: 0 },
-  label: { fontSize: 14, color: "#444", marginBottom: 6, marginTop: 12, fontWeight: "500" },
-  input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 10, marginBottom: 10 },
+  label: { fontSize: 14, marginBottom: 6, marginTop: 12, fontWeight: "500" },
+  input: { borderWidth: 1, borderRadius: 8, padding: 10, marginBottom: 10 },
   textArea: { height: 100, textAlignVertical: "top" },
   imageInputRow: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
   imageInput: { flex: 1, marginBottom: 0 },
   removeButton: { marginLeft: 8 },
   addImageButton: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  addImageText: { marginLeft: 8, color: "#86A69D", fontWeight: "500" },
+  addImageText: { marginLeft: 8, fontWeight: "500" },
   chipsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 8 },
-  chip: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 16, borderWidth: 1, borderColor: "#ccc", backgroundColor: "#fff" },
-  chipSelected: { backgroundColor: "#F28585", borderColor: "#F28585" },
-  chipText: { color: "#333", fontSize: 14 },
+  chip: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 16, borderWidth: 1 },
+  chipSelected: {},
+  chipText: { fontSize: 14 },
   chipTextSelected: { color: "#fff", fontWeight: "600" },
   visibilityChipContent: { flexDirection: "row", alignItems: "center" },
   visibilityIcon: { marginRight: 6 },
-  button: { backgroundColor: "#F2B263", padding: 14, borderRadius: 8, alignItems: "center", marginTop: 20 },
+  button: { padding: 14, borderRadius: 8, alignItems: "center", marginTop: 20 },
   buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 });

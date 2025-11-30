@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Image, Dimensions, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Image, Dimensions, ActivityIndicator, Alert, StatusBar } from 'react-native';
 import { Link, router } from 'expo-router';
 import { Ionicons, FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import { useAuth } from '../../src/context/AuthContext';
@@ -8,11 +8,13 @@ import SwipeDeck, { DeckItem } from '../../components/SwipeDeck';
 import { MatchNotificationModal } from '../../components/MatchNotificationModal';
 import { InteractionResponse } from '../../src/types/trade';
 import BottomNav from '../../components/BottomNav';
+import { useTheme } from '../../src/theme';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const { user, refreshMe } = useAuth();
+  const { colors, isDark } = useTheme();
   const [items, setItems] = useState<DeckItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -108,14 +110,15 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <View style={styles.header}>
         <Image
           source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQp_2rtjz5BDvEY3-DDF8uM9bMZhyWSIgk2bg&s' }}
           style={styles.logo}
         />
         <TouchableOpacity onPress={reload} disabled={loading}>
-          <Ionicons name="refresh-outline" size={28} color={loading ? '#bbb' : '#000'} />
+          <Ionicons name="refresh-outline" size={28} color={loading ? colors.textSecondary : colors.text} />
         </TouchableOpacity>
       </View>
 
@@ -129,10 +132,10 @@ export default function HomeScreen() {
           onSkip={handleSkip}
           emptyComponent={
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: '#777', fontSize: 16, marginBottom: 12 }}>
+              <Text style={{ color: colors.textSecondary, fontSize: 16, marginBottom: 12 }}>
                 Nessun vestito disponibile
               </Text>
-              <TouchableOpacity onPress={reload} style={styles.reloadBtn} disabled={loading}>
+              <TouchableOpacity onPress={reload} style={[styles.reloadBtn, { backgroundColor: colors.primary }]} disabled={loading}>
                 <Text style={{ color: '#fff', fontWeight: '600' }}>Ricarica feed</Text>
               </TouchableOpacity>
             </View>
@@ -140,13 +143,13 @@ export default function HomeScreen() {
           renderFooter={
             <View style={styles.actionsBar}>
               {/* Pulsante vedi item precednete da implementare*/}
-              <TouchableOpacity style={[styles.actionButton, styles.skipButton]} disabled={!current || actionLoading} onPress={() => current && handleDislike(current)}>
-                <Ionicons name="close" size={38} color="#F28585" />
+              <TouchableOpacity style={[styles.actionButton, styles.skipButton, { backgroundColor: colors.card }]} disabled={!current || actionLoading} onPress={() => current && handleDislike(current)}>
+                <Ionicons name="close" size={38} color={colors.primary} />
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionButton, styles.starButton]} disabled={!current || actionLoading} onPress={() => current && handleSkip(current)}>
-                <FontAwesome name="star-o" size={28} color="#F2B263" />
+              <TouchableOpacity style={[styles.actionButton, styles.starButton, { backgroundColor: colors.card }]} disabled={!current || actionLoading} onPress={() => current && handleSkip(current)}>
+                <FontAwesome name="star-o" size={28} color={colors.secondary} />
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionButton, styles.heartButton]} disabled={!current || actionLoading} onPress={() => current && handleLike(current)}>
+              <TouchableOpacity style={[styles.actionButton, styles.heartButton, { backgroundColor: colors.accent }]} disabled={!current || actionLoading} onPress={() => current && handleLike(current)}>
                 <Ionicons name="heart" size={38} color="white" />
               </TouchableOpacity>
               {/* Pulsante per azioni premium da implementare
@@ -170,18 +173,18 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const styles = StyleSheet.create({
   deckWrapper: { flex: 1, paddingTop: 10, alignItems: 'center', justifyContent: 'center' },
   actionsBar: { marginTop: -10, flexDirection: 'row', justifyContent: 'space-around', width: SCREEN_WIDTH, paddingHorizontal: 14, alignItems: 'center' },
-  safeArea: { flex: 1, backgroundColor: '#F2E8DF', paddingTop: 20, paddingBottom: 110 },
+  safeArea: { flex: 1, paddingTop: 20, paddingBottom: 110 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 10 },
   logo: { width: 100, height: 40, resizeMode: 'contain' },
   actionButton: {
     width: 65, height: 65, borderRadius: 35, justifyContent: 'center', alignItems: 'center',
-    backgroundColor: '#FFF', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 5,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 5,
   },
-  skipButton: { backgroundColor: '#FFF', width: 80, height: 80, borderRadius: 40 },
-  starButton: { backgroundColor: '#FFF', width: 60, height: 60, borderRadius: 40 },
-  heartButton: { backgroundColor: '#86A69D', width: 80, height: 80, borderRadius: 40, shadowColor: '#86A69D', shadowOpacity: 0.4 },
+  skipButton: { width: 80, height: 80, borderRadius: 40 },
+  starButton: { width: 60, height: 60, borderRadius: 40 },
+  heartButton: { width: 80, height: 80, borderRadius: 40, shadowOpacity: 0.4 },
   linkWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 10 },
-  navItem: { width: 60, height: 60, alignItems: 'center', flexDirection: 'column', borderColor: '#F2B263', borderWidth: 2.5, borderRadius: 50, padding: 5 },
+  navItem: { width: 60, height: 60, alignItems: 'center', flexDirection: 'column', borderWidth: 2.5, borderRadius: 50, padding: 5 },
   navText: { fontSize: 12, color: '#fff', marginTop: 2 },
-  reloadBtn: { position: 'absolute', bottom: 24, left: '20%', right: '20%', backgroundColor: '#F28585', paddingVertical: 12, borderRadius: 12, alignItems: 'center' },
+  reloadBtn: { position: 'absolute', bottom: 24, left: '20%', right: '20%', paddingVertical: 12, borderRadius: 12, alignItems: 'center' },
 });

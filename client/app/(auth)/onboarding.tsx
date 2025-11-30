@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions, Platform, Alert as RNAlert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions, Platform, Alert as RNAlert, StatusBar } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../src/context/AuthContext';
@@ -8,6 +8,7 @@ import OnboardingSlide from '../../components/onboarding/OnboardingSlide';
 import OnboardingDots from '../../components/onboarding/OnboardingDots';
 import ProfileSetupSlide from '../../components/onboarding/ProfileSetupSlide';
 import FeedPreferenceSlide from '../../components/onboarding/FeedPreferenceSlide';
+import { useTheme } from '../../src/theme';
 
 const { width } = Dimensions.get('window');
 const TOTAL_SLIDES = 6;
@@ -70,6 +71,7 @@ function showAlert(title: string, message?: string) {
 
 export default function OnboardingScreen() {
   const { completeOnboarding } = useAuth();
+  const { colors, isDark } = useTheme();
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -145,7 +147,7 @@ export default function OnboardingScreen() {
             totalSlides={TOTAL_SLIDES}
           />
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.continueButton} onPress={handleNext}>
+            <TouchableOpacity style={[styles.continueButton, { backgroundColor: colors.secondary }]} onPress={handleNext}>
               <Text style={styles.continueButtonText}>Continua</Text>
               <Ionicons name="arrow-forward" size={18} color="#fff" />
             </TouchableOpacity>
@@ -183,13 +185,13 @@ export default function OnboardingScreen() {
 
     // Final slide
     return (
-      <View style={[styles.slideWrapper, styles.finalSlide]}>
+      <View style={[styles.slideWrapper, styles.finalSlide, { backgroundColor: colors.card }]}>
         <View style={styles.finalContent}>
-          <View style={styles.iconContainer}>
-            <Ionicons name="rocket-outline" size={80} color="#86A69D" />
+          <View style={[styles.iconContainer, { backgroundColor: colors.background }]}>
+            <Ionicons name="rocket-outline" size={80} color={colors.accent} />
           </View>
-          <Text style={styles.finalTitle}>Pronto a iniziare!</Text>
-          <Text style={styles.finalDescription}>
+          <Text style={[styles.finalTitle, { color: colors.text }]}>Pronto a iniziare!</Text>
+          <Text style={[styles.finalDescription, { color: colors.textSecondary }]}>
             Il tuo account è pronto. Cosa vuoi fare ora?
           </Text>
         </View>
@@ -197,7 +199,7 @@ export default function OnboardingScreen() {
         <View style={styles.finalButtons}>
           <OnboardingDots total={TOTAL_SLIDES} current={index} />
           <TouchableOpacity
-            style={styles.primaryButton}
+            style={[styles.primaryButton, { backgroundColor: colors.accent }]}
             onPress={() => handleFinish('addItem')}
             disabled={isSubmitting}
           >
@@ -207,12 +209,12 @@ export default function OnboardingScreen() {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.secondaryButton}
+            style={[styles.secondaryButton, { backgroundColor: colors.card, borderColor: colors.accent }]}
             onPress={() => handleFinish('home')}
             disabled={isSubmitting}
           >
-            <Ionicons name="compass-outline" size={20} color="#86A69D" />
-            <Text style={styles.secondaryButtonText}>
+            <Ionicons name="compass-outline" size={20} color={colors.accent} />
+            <Text style={[styles.secondaryButtonText, { color: colors.accent }]}>
               {isSubmitting ? 'Salvataggio...' : 'Esplora il feed'}
             </Text>
           </TouchableOpacity>
@@ -228,7 +230,8 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.card }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <FlatList
         ref={flatListRef}
         data={SLIDES}
@@ -250,19 +253,19 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', position: 'relative', },
+  container: { flex: 1, position: 'relative', },
   slideWrapper: { width, flex: 1, justifyContent: 'center', alignItems: 'center', },
   buttonContainer: { paddingHorizontal: 30, paddingBottom: Platform.OS === 'ios' ? 40 : 30, right: 30},
-  continueButton: { backgroundColor: '#F2B263', padding: 10, borderRadius: 25, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, },
+  continueButton: { padding: 10, borderRadius: 25, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, },
   continueButtonText: { color: '#fff', fontSize: 16, fontWeight: '600', },
   finalSlide: { justifyContent: 'space-between', paddingTop: 60, },
   finalContent: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 30, },
-  iconContainer: { width: 160, height: 160, borderRadius: 80, backgroundColor: '#F2E8DF', justifyContent: 'center', alignItems: 'center', marginBottom: 40, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4, },
-  finalTitle: { fontSize: 28, fontWeight: '700', color: '#333', textAlign: 'center', marginBottom: 12, },
-  finalDescription: { fontSize: 16, color: '#666', textAlign: 'center', lineHeight: 24, },
+  iconContainer: { width: 160, height: 160, borderRadius: 80, justifyContent: 'center', alignItems: 'center', marginBottom: 40, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4, },
+  finalTitle: { fontSize: 28, fontWeight: '700', textAlign: 'center', marginBottom: 12, },
+  finalDescription: { fontSize: 16, textAlign: 'center', lineHeight: 24, },
   finalButtons: { paddingHorizontal: 30, paddingBottom: Platform.OS === 'ios' ? 40 : 30, gap: 12, },
-  primaryButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#86A69D', padding: 16, borderRadius: 12, gap: 8, },
+  primaryButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 16, borderRadius: 12, gap: 8, },
   primaryButtonText: { color: '#fff', fontSize: 16, fontWeight: '600', },
-  secondaryButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', padding: 16, borderRadius: 12, borderWidth: 2, borderColor: '#86A69D', gap: 8, },
-  secondaryButtonText: { color: '#86A69D', fontSize: 16, fontWeight: '600', },
+  secondaryButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 16, borderRadius: 12, borderWidth: 2, gap: 8, },
+  secondaryButtonText: { fontSize: 16, fontWeight: '600', },
 });

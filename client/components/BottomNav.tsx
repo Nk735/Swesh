@@ -2,8 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Link, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../src/theme';
 
 export default function BottomNav() {
+  const { colors } = useTheme();
   const pathname = usePathname();
   const active = pathname.startsWith('/profile') ? 'profile'
                : pathname.startsWith('/matches') ? 'matches'
@@ -27,7 +29,7 @@ export default function BottomNav() {
   };
 
   return (
-    <View style={styles.bottomNavContainer}>
+    <View style={[styles.bottomNavContainer, { backgroundColor: colors.navBackground, borderColor: colors.navBorder }]}>
       <View style={styles.bottomNav}>
         <Link href="/matches" style={styles.linkWrapper}>
           <View style={[styles.navItem, getActiveStyle('matches')]}>
@@ -56,9 +58,8 @@ export default function BottomNav() {
 
 const styles = StyleSheet.create({
   bottomNavContainer: {
-    position: 'absolute',  bottom: 0,
-    backgroundColor: '#F28585', borderWidth: 2.5, borderColor: '#F2B263', transform: [{ skewX: '-30deg' }], borderRadius: 20,
-    //borderTopLeftRadius: 150, borderTopRightRadius: 25, borderBottomLeftRadius: 25, borderBottomRightRadius: 150,
+    position: 'absolute', bottom: 0,
+    borderWidth: 2.5, transform: [{ skewX: '-30deg' }], borderRadius: 20,
     overflow: 'hidden', margin: 10, alignSelf:'center'
   },
   bottomNav: { flexDirection: 'row', alignItems: 'center', paddingVertical: 0, paddingHorizontal: 0 },
@@ -69,21 +70,10 @@ const styles = StyleSheet.create({
   },
   navText: { fontSize: 12, color: '#fff', marginTop: 0,},
 
-  navItemActiveHome: {
-    //borderColor: '#F2B263', borderWidth: 2.5, borderRadius: 50, backgroundColor: 'rgba(255,255,255,0.12)',
-  },
+  navItemActiveHome: {},
+  navItemActiveMatches: {},
+  navItemActiveProfile: {},
 
-  navItemActiveMatches: {
-    //borderColor: '#F2B263', borderWidth: 2.5, borderRadius: 50, backgroundColor: 'rgba(255,255,255,0.12)',
-    //borderTopLeftRadius: 25, borderTopRightRadius: 100, borderBottomLeftRadius: 100, borderBottomRightRadius: 25,
-  },
-
-  navItemActiveProfile: {
-    //borderColor: '#F2B263', borderWidth: 2.5, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 20, 
-    //borderTopLeftRadius: 100, borderTopRightRadius: 25, borderBottomLeftRadius: 25, borderBottomRightRadius: 100,
-  },
-
-  
   navbox: {
     width: 60, height: 60, alignItems: 'center', justifyContent: 'center',
     flexDirection: 'column', marginHorizontal: 10, paddingHorizontal: 10, paddingVertical: 10,

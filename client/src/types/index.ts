@@ -3,6 +3,7 @@
 export type Gender = 'male' | 'female' | 'prefer_not_to_say';
 export type FeedGenderPreference = 'male' | 'female' | 'all';
 export type ItemVisibility = 'male' | 'female' | 'all';
+export type ThemePreference = 'light' | 'dark' | 'system';
 
 export type User = {
   id: string;

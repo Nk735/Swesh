@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, ActivityIndicator, FlatList, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, ActivityIndicator, FlatList, TouchableOpacity, Image, StyleSheet, ScrollView, StatusBar } from 'react-native';
 import { getGroupedMatches } from '../../src/services/tradeApi';
 import { GroupedMatchesResponse } from '../../src/types/trade';
 import { router } from 'expo-router';
 import BottomNav from '../../components/BottomNav';
 import EmptyState from '../../components/EmptyState';
 import socketService from '../../src/services/socketService';
+import { useTheme } from '../../src/theme';
 
 export default function MatchesScreen() {
+  const { colors, isDark } = useTheme();
   const [groups, setGroups] = useState<GroupedMatchesResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -46,12 +48,13 @@ export default function MatchesScreen() {
   }, [load]);
 
   if (loading) {
-    return <View style={styles.center}><ActivityIndicator /></View>;
+    return <View style={[styles.center, { backgroundColor: colors.background }]}><ActivityIndicator color={colors.accent} /></View>;
   }
 
   if (!groups.length) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#F2E8DF' }}>
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
         <EmptyState
           icon="heart-outline"
           title="Nessun match ancora"
@@ -65,16 +68,17 @@ export default function MatchesScreen() {
   }
 
   return (
-    <View style={ { flex: 1 } }>
-      <ScrollView style={styles.container}>
-        <Text style={styles.title}>I tuoi Scambi</Text>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+        <Text style={[styles.title, { color: colors.text }]}>I tuoi Scambi</Text>
         <FlatList
           data={groups}
           keyExtractor={g => g.otherUser._id}
           renderItem={({ item }) => {
             const isOpen = expanded[item.otherUser._id];
             return (
-              <View style={styles.groupBox}>
+              <View style={[styles.groupBox, { backgroundColor: colors.background, borderColor: colors.accent }]}>
                 <TouchableOpacity
                   style={styles.groupHeader}
                   onPress={() => setExpanded(s => ({ ...s, [item.otherUser._id]: !isOpen }))}
@@ -84,31 +88,31 @@ export default function MatchesScreen() {
                     style={styles.avatar}
                   />
                   <View style={{ flex:1 }}>
-                    <Text style={styles.nickname}>{item.otherUser.nickname}</Text>
-                    <Text style={styles.meta}>
+                    <Text style={[styles.nickname, { color: colors.text }]}>{item.otherUser.nickname}</Text>
+                    <Text style={[styles.meta, { color: colors.textSecondary }]}>
                       {item.aggregate.matchCount} scambi • {item.aggregate.unreadTotal} non letti
                     </Text>
                   </View>
-                  <Text style={styles.chevron}>{isOpen ? '▲' : '▼'}</Text>
+                  <Text style={[styles.chevron, { color: colors.textSecondary }]}>{isOpen ? '▲' : '▼'}</Text>
                 </TouchableOpacity>
                 {isOpen && (
                   <View style={styles.matchesWrap}>
                     {item.matches.map(m => (
                       <TouchableOpacity
                         key={m.matchId}
-                        style={styles.matchChip}
+                        style={[styles.matchChip, { backgroundColor: colors.card }]}
                         onPress={() => router.push(`/chats/${m.matchId}`)}
                       >
                         <View style={styles.imagesRow}>
                           {m.itemMine?.imageUrl &&
                             <Image source={{ uri: m.itemMine.imageUrl }} style={styles.itemImg} />}
                           {m.itemTheirs?.imageUrl &&
-                            <Image source={{ uri: m.itemTheirs.imageUrl }} style={[styles.itemImg, { marginLeft: -12, borderWidth:2, borderColor:'#fff' }]} />}
+                            <Image source={{ uri: m.itemTheirs.imageUrl }} style={[styles.itemImg, { marginLeft: -12, borderWidth:2, borderColor: colors.card }]} />}
                         </View>
-                        <Text numberOfLines={1} style={styles.chipTxt}>
+                        <Text numberOfLines={1} style={[styles.chipTxt, { color: colors.text }]}>
                           {m.itemMine?.title} ↔ {m.itemTheirs?.title}
                         </Text>
-                        {m.unread > 0 && <View style={styles.unreadDot}><Text style={styles.unreadTxt}>{m.unread}</Text></View>}
+                        {m.unread > 0 && <View style={[styles.unreadDot, { backgroundColor: colors.error }]}><Text style={styles.unreadTxt}>{m.unread}</Text></View>}
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -125,25 +129,25 @@ export default function MatchesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F2E8DF", paddingTop: 50, paddingBottom: 100 },
+  container: { flex: 1, paddingTop: 50, paddingBottom: 100 },
   center:{ flex:1, justifyContent:'center', alignItems:'center' },
   title:{ fontSize:22, fontWeight:'600', marginBottom:12, marginInline:16 },
-  groupBox:{ backgroundColor:'#F2E8DF', borderColor: '#86A69D', borderWidth: 2.5, borderRadius:14, marginBottom:14, marginInline:16, overflow:'hidden' },
+  groupBox:{ borderWidth: 2.5, borderRadius:14, marginBottom:14, marginInline:16, overflow:'hidden' },
   groupHeader:{ flexDirection:'row', alignItems:'center', padding:12 },
   avatar:{ width:50, height:50, borderRadius:25, marginRight:12, backgroundColor:'#ddd' },
   nickname:{ fontSize:16, fontWeight:'600' },
-  meta:{ fontSize:12, color:'#666', marginTop:2 },
-  chevron:{ fontSize:16, color:'#555', marginLeft:8 },
+  meta:{ fontSize:12, marginTop:2 },
+  chevron:{ fontSize:16, marginLeft:8 },
   matchesWrap:{ flexDirection:'row', flexWrap:'wrap', padding:10, gap:10 },
   matchChip:{
-    width:170, backgroundColor:'#F2E8DF', borderRadius:12, padding:8, shadowColor:'#000',
+    width:170, borderRadius:12, padding:8, shadowColor:'#000',
     shadowOpacity:0.08, shadowRadius:4, position:'relative'
   },
   imagesRow:{ flexDirection:'row', marginBottom:6, },
   itemImg:{ width:80, height:80, borderRadius:10, backgroundColor:'#eee' },
   chipTxt:{ fontSize:12, fontWeight:'500' },
   unreadDot:{
-    position:'absolute', top:6, right:6, backgroundColor:'#FF4D4F', minWidth:20, height:20,
+    position:'absolute', top:6, right:6, minWidth:20, height:20,
     paddingHorizontal:4, borderRadius:10, alignItems:'center', justifyContent:'center'
   },
   unreadTxt:{ color:'#fff', fontSize:11, fontWeight:'600' }

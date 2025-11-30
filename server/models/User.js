@@ -47,6 +47,13 @@ const userSchema = new mongoose.Schema({
       default: null
     }
   },
+  preferences: {
+    theme: {
+      type: String,
+      enum: ['light', 'dark', 'system'],
+      default: 'system'
+    }
+  },
   onboarding: {
     completed: { type: Boolean, default: false },
     completedAt: { type: Date }

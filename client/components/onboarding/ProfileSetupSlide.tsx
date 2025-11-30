@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Platf
 import { Ionicons } from '@expo/vector-icons';
 import OnboardingDots from './OnboardingDots';
 import { Gender } from '../../src/types';
+import { useTheme } from '../../src/theme';
 
 interface ProfileSetupSlideProps {
   currentIndex: number;
@@ -23,6 +24,7 @@ export default function ProfileSetupSlide({
   totalSlides,
   onComplete,
 }: ProfileSetupSlideProps) {
+  const { colors } = useTheme();
   const [age, setAge] = useState<number | null>(null);
   const [gender, setGender] = useState<Gender | null>(null);
 
@@ -49,63 +51,65 @@ export default function ProfileSetupSlide({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.card }]}>
       <ScrollView 
         style={styles.scrollView} 
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Parlaci di te</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: colors.text }]}>Parlaci di te</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Questi dati ci aiutano a personalizzare la tua esperienza
         </Text>
 
         {/* Age Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quanti anni hai?</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Quanti anni hai?</Text>
           <View style={styles.ageContainer}>
             <TouchableOpacity
-              style={[styles.ageButton, age === null || age <= 16 ? styles.ageButtonDisabled : {}]}
+              style={[styles.ageButton, { backgroundColor: colors.background }, age === null || age <= 16 ? styles.ageButtonDisabled : {}]}
               onPress={decreaseAge}
               disabled={age === null || age <= 16}
             >
-              <Ionicons name="remove" size={24} color={age === null || age <= 16 ? '#CCC' : '#333'} />
+              <Ionicons name="remove" size={24} color={age === null || age <= 16 ? colors.border : colors.text} />
             </TouchableOpacity>
-            <View style={styles.ageDisplay}>
-              <Text style={styles.ageText}>{age ?? '--'}</Text>
+            <View style={[styles.ageDisplay, { backgroundColor: colors.inputBackground, borderColor: colors.border }]}>
+              <Text style={[styles.ageText, { color: colors.text }]}>{age ?? '--'}</Text>
             </View>
             <TouchableOpacity
-              style={[styles.ageButton, age === 99 ? styles.ageButtonDisabled : {}]}
+              style={[styles.ageButton, { backgroundColor: colors.background }, age === 99 ? styles.ageButtonDisabled : {}]}
               onPress={increaseAge}
               disabled={age === 99}
             >
-              <Ionicons name="add" size={24} color={age === 99 ? '#CCC' : '#333'} />
+              <Ionicons name="add" size={24} color={age === 99 ? colors.border : colors.text} />
             </TouchableOpacity>
           </View>
-          <Text style={styles.note}>Devi avere almeno 16 anni per usare Swesh</Text>
+          <Text style={[styles.note, { color: colors.textSecondary }]}>Devi avere almeno 16 anni per usare Swesh</Text>
         </View>
 
         {/* Gender Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Come ti identifichi?</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Come ti identifichi?</Text>
           <View style={styles.genderOptions}>
             {GENDER_OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option.value}
                 style={[
                   styles.genderOption,
-                  gender === option.value && styles.genderOptionSelected,
+                  { backgroundColor: colors.inputBackground, borderColor: colors.border },
+                  gender === option.value && { backgroundColor: colors.primary, borderColor: colors.primary },
                 ]}
                 onPress={() => setGender(option.value)}
               >
                 <Ionicons
                   name={option.icon}
                   size={24}
-                  color={gender === option.value ? '#fff' : '#666'}
+                  color={gender === option.value ? '#fff' : colors.textSecondary}
                 />
                 <Text
                   style={[
                     styles.genderOptionText,
+                    { color: colors.text },
                     gender === option.value && styles.genderOptionTextSelected,
                   ]}
                 >
@@ -120,7 +124,7 @@ export default function ProfileSetupSlide({
       <View style={styles.footer}>
         <OnboardingDots total={totalSlides} current={currentIndex} />
         <TouchableOpacity
-          style={[styles.continueButton, !isValid && styles.continueButtonDisabled]}
+          style={[styles.continueButton, { backgroundColor: colors.secondary }, !isValid && styles.continueButtonDisabled]}
           onPress={handleContinue}
           disabled={!isValid}
         >
@@ -132,26 +136,26 @@ export default function ProfileSetupSlide({
 }
 
 const styles = StyleSheet.create({
-  container: { width, flex: 1, backgroundColor: '#fff', },
+  container: { width, flex: 1 },
   scrollView: { flex: 1, },
   content: { paddingHorizontal: 30, paddingTop: 40, paddingBottom: 20, },
-  title: { fontSize: 28, fontWeight: '700', color: '#333', textAlign: 'center', marginBottom: 8, },
-  subtitle: { fontSize: 16, color: '#666', textAlign: 'center', marginBottom: 40, },
+  title: { fontSize: 28, fontWeight: '700', textAlign: 'center', marginBottom: 8, },
+  subtitle: { fontSize: 16, textAlign: 'center', marginBottom: 40, },
   section: { marginBottom: 30, },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: '#333', marginBottom: 16, textAlign: 'center', },
+  sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 16, textAlign: 'center', },
   ageContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 20, marginBottom: 12, },
-  ageButton: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#F2E8DF', justifyContent: 'center', alignItems: 'center', },
-  ageButtonDisabled: { backgroundColor: '#EEE', },
-  ageDisplay: { width: 80, height: 60, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9F9F9', borderRadius: 12, borderWidth: 1, borderColor: '#DDD', },
-  ageText: { fontSize: 28, fontWeight: '700', color: '#333', },
-  note: { fontSize: 12, color: '#999', textAlign: 'center', },
+  ageButton: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', },
+  ageButtonDisabled: { opacity: 0.5 },
+  ageDisplay: { width: 80, height: 60, justifyContent: 'center', alignItems: 'center', borderRadius: 12, borderWidth: 1 },
+  ageText: { fontSize: 28, fontWeight: '700' },
+  note: { fontSize: 12, textAlign: 'center', },
   genderOptions: { gap: 12, },
-  genderOption: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, backgroundColor: '#F9F9F9', borderWidth: 2, borderColor: '#EEE', gap: 12, },
-  genderOptionSelected: { backgroundColor: '#F28585', borderColor: '#F28585', },
-  genderOptionText: { fontSize: 16, fontWeight: '500', color: '#333', },
+  genderOption: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, borderWidth: 2, gap: 12 },
+  genderOptionSelected: {},
+  genderOptionText: { fontSize: 16, fontWeight: '500' },
   genderOptionTextSelected: { color: '#fff', },
   footer: { paddingHorizontal: 30, paddingBottom: Platform.OS === 'ios' ? 40 : 30, },
-  continueButton: { backgroundColor: '#F2B263', padding: 16, borderRadius: 12, alignItems: 'center', },
-  continueButtonDisabled: { backgroundColor: '#DDD', },
+  continueButton: { padding: 16, borderRadius: 12, alignItems: 'center', },
+  continueButtonDisabled: { opacity: 0.5 },
   continueButtonText: { color: '#fff', fontSize: 18, fontWeight: '600', },
 });
