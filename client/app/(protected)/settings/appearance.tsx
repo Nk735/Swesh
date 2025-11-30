@@ -46,7 +46,7 @@ export default function AppearanceScreen() {
             >
               <Text style={styles.optionIcon}>{option.icon}</Text>
               <Text style={[styles.optionLabel, { color: colors.text }]}>{option.label}</Text>
-              <View style={styles.radioOuter}>
+              <View style={[styles.radioOuter, { borderColor: colors.border }]}>
                 {theme === option.value && (
                   <View style={[styles.radioInner, { backgroundColor: colors.primary }]} />
                 )}
@@ -122,7 +122,6 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 2,
-    borderColor: '#CCC',
     justifyContent: 'center',
     alignItems: 'center',
   },
