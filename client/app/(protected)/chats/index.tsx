@@ -11,6 +11,26 @@ export default function ChatsList() {
   const [matches, setMatches] = useState<TinderMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
+
+  const loadChats = useCallback(async () => {
+    try {
+      const data = await getAllMatches();
+      // Sort by last activity (most recent first)
+      const sorted = data.sort((a, b) => 
+        new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime()
+      );
+      setMatches(sorted);
+    } catch (e) {
+      console.log('Error loading chats:', e);
+      setMatches([]);
+    }
+  }, []);
+
+  // Separate chats into active and archived
+  const activeChats = matches.filter(m => m.status === 'active');
+  const archivedChats = matches.filter(m => m.status === 'archived' || m.status === 'completed');
+  const displayedChats = activeTab === 'active' ? activeChats : archivedChats;
 
   const loadChats = useCallback(async () => {
     try {
@@ -164,16 +184,51 @@ export default function ChatsList() {
         <Text style={styles.subtitle}>{matches.length} conversazion{matches.length === 1 ? 'e' : 'i'}</Text>
       </View>
 
-      <FlatList
-        data={matches}
-        keyExtractor={item => item.matchId}
-        renderItem={renderChatItem}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#5A31F4" />
-        }
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-      />
+      {/* Tab Switcher */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'active' && styles.tabActive]}
+          onPress={() => setActiveTab('active')}
+        >
+          <Text style={[styles.tabText, activeTab === 'active' && styles.tabTextActive]}>
+            Chat Attive ({activeChats.length})
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'archived' && styles.tabActive]}
+          onPress={() => setActiveTab('archived')}
+        >
+          <Text style={[styles.tabText, activeTab === 'archived' && styles.tabTextActive]}>
+            Archiviate ({archivedChats.length})
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {displayedChats.length === 0 ? (
+        <View style={styles.emptyTabContainer}>
+          <Ionicons 
+            name={activeTab === 'active' ? 'chatbubbles-outline' : 'archive-outline'} 
+            size={48} 
+            color="#ccc" 
+          />
+          <Text style={styles.emptyTabText}>
+            {activeTab === 'active' 
+              ? 'Nessuna chat attiva' 
+              : 'Nessuna chat archiviata'}
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={displayedChats}
+          keyExtractor={item => item.matchId}
+          renderItem={renderChatItem}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#5A31F4" />
+          }
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+        />
+      )}
 
       <BottomNav />
     </View>
@@ -187,6 +242,45 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 14, color: '#666', marginTop: 4 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   listContent: { paddingHorizontal: 16, paddingBottom: 100 },
+  
+  // Tab styles
+  tabContainer: {
+    flexDirection: 'row',
+    marginHorizontal: 16,
+    marginBottom: 12,
+    backgroundColor: '#E8E0D7',
+    borderRadius: 10,
+    padding: 4
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center'
+  },
+  tabActive: {
+    backgroundColor: '#fff'
+  },
+  tabText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#888'
+  },
+  tabTextActive: {
+    color: '#333',
+    fontWeight: '600'
+  },
+  emptyTabContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 100
+  },
+  emptyTabText: {
+    marginTop: 12,
+    fontSize: 15,
+    color: '#999'
+  },
   
   chatItem: {
     flexDirection: 'row',

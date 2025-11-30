@@ -6,6 +6,8 @@ import { ChatMessage, TinderMatch } from "../../../src/types/trade";
 import { useAuth } from "../../../src/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import socketService from "../../../src/services/socketService";
+import ExchangeCompletedModal from "../../../components/ExchangeCompletedModal";
+import { api } from "../../../src/services/apiClient";
 
 export default function ChatScreen() {
   const { chatId: matchId } = useLocalSearchParams<{ chatId: string }>();
@@ -21,6 +23,10 @@ export default function ChatScreen() {
   const [otherConfirmed, setOtherConfirmed] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [itemDetailModal, setItemDetailModal] = useState<{ visible: boolean; item: TinderMatch['itemMine'] | null; isMine: boolean }>({ visible: false, item: null, isMine: true });
+  const [exchangeCompletedModal, setExchangeCompletedModal] = useState<{
+    visible: boolean;
+    info: { myItemTitle: string; theirItemTitle: string; otherUserNickname: string } | null;
+  }>({ visible: false, info: null });
 
   const flatRef = useRef<FlatList>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -37,6 +43,7 @@ export default function ChatScreen() {
     let unsubNewMessage: (() => void) | undefined;
     let unsubTyping: (() => void) | undefined;
     let unsubExchangeStatus: (() => void) | undefined;
+    let unsubExchangeCompleted: (() => void) | undefined;
 
     const setupSocket = async () => {
       try {
@@ -76,8 +83,21 @@ export default function ChatScreen() {
               }
               if (data.status === 'completed') {
                 setMatchInfo(prev => prev ? { ...prev, status: 'completed' } : prev);
-                Alert.alert('Scambio completato!', 'Entrambi avete confermato lo scambio.');
               }
+            }
+          });
+
+          unsubExchangeCompleted = socketService.onExchangeCompleted((data) => {
+            if (data.matchId === matchId) {
+              setMatchInfo(prev => prev ? { ...prev, status: 'completed' } : prev);
+              setExchangeCompletedModal({
+                visible: true,
+                info: {
+                  myItemTitle: data.myItemTitle,
+                  theirItemTitle: data.theirItemTitle,
+                  otherUserNickname: data.otherUserNickname
+                }
+              });
             }
           });
         }
@@ -95,6 +115,7 @@ export default function ChatScreen() {
       unsubNewMessage?.();
       unsubTyping?.();
       unsubExchangeStatus?.();
+      unsubExchangeCompleted?.();
     };
   }, [matchId, user?.id, matchInfo?.otherUser?._id]);
 
@@ -122,7 +143,15 @@ export default function ChatScreen() {
                 setOtherConfirmed(resp.confirmation.otherConfirmed);
                 if (resp.status === 'completed') {
                   setMatchInfo(prev => prev ? { ...prev, status: 'completed' } : prev);
-                  Alert.alert('Scambio completato!', 'Entrambi avete confermato lo scambio.');
+                  // Show the exchange completed modal with info from matchInfo
+                  setExchangeCompletedModal({
+                    visible: true,
+                    info: {
+                      myItemTitle: matchInfo?.itemMine?.title || 'Il tuo oggetto',
+                      theirItemTitle: matchInfo?.itemTheirs?.title || 'Oggetto ricevuto',
+                      otherUserNickname: matchInfo?.otherUser?.nickname || 'Utente'
+                    }
+                  });
                 } else {
                   Alert.alert('Proposta inviata', "In attesa della conferma dell'altro utente");
                 }
@@ -142,7 +171,7 @@ export default function ChatScreen() {
         Animated.spring(sliderX, { toValue: 0, useNativeDriver: false, friction: 7 }).start(() => setSliderActive(false));
       }
     });
-  }, [myConfirmed, isReadOnly, matchId, sliderX]);
+  }, [myConfirmed, isReadOnly, matchId, sliderX, matchInfo]);
 
   const loadAll = useCallback(async () => {
     if (!matchId) return;
@@ -261,6 +290,23 @@ export default function ChatScreen() {
     if (item) {
       setItemDetailModal({ visible: true, item, isMine });
     }
+  };
+
+  const handleDeleteItem = async () => {
+    setExchangeCompletedModal({ visible: false, info: null });
+    if (matchInfo?.itemMine?._id) {
+      try {
+        await api.delete(`/items/${matchInfo.itemMine._id}`);
+        Alert.alert('Oggetto eliminato', 'Il tuo oggetto è stato rimosso dal profilo.');
+      } catch (e: any) {
+        Alert.alert('Errore', e?.response?.data?.message || 'Impossibile eliminare l\'oggetto');
+      }
+    }
+  };
+
+  const handleKeepItem = () => {
+    setExchangeCompletedModal({ visible: false, info: null });
+    Alert.alert('Oggetto nascosto', 'Il tuo oggetto rimarrà nascosto ma non sarà eliminato.');
   };
 
   const Header = () => {
@@ -434,6 +480,15 @@ export default function ChatScreen() {
           data={messages}
           keyExtractor={m => m._id}
           renderItem={({ item }) => {
+            // System messages are rendered differently
+            if (item.isSystemMessage) {
+              return (
+                <View style={styles.systemMessage}>
+                  <Ionicons name="information-circle-outline" size={16} color="#888" />
+                  <Text style={styles.systemMessageText}>{item.content}</Text>
+                </View>
+              );
+            }
             const mine = user?.id ? String(item.senderId) === String(user.id) : false;
             return (
               <View style={[styles.bubble, mine ? styles.mine : styles.theirs]}>
@@ -472,6 +527,12 @@ export default function ChatScreen() {
       </View>
 
       <ItemDetailModal />
+      <ExchangeCompletedModal
+        visible={exchangeCompletedModal.visible}
+        matchInfo={exchangeCompletedModal.info}
+        onDeleteItem={handleDeleteItem}
+        onKeepItem={handleKeepItem}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -511,6 +572,21 @@ const styles = StyleSheet.create({
   theirs: { backgroundColor: '#E4E6EB', alignSelf: 'flex-start' },
   msgTxt: { color: '#fff' },
   time: { fontSize: 10, color: '#666', marginTop: 4 },
+  
+  systemMessage: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    gap: 6, 
+    backgroundColor: '#F5F5F5', 
+    paddingVertical: 10, 
+    paddingHorizontal: 16, 
+    borderRadius: 10, 
+    marginBottom: 8, 
+    alignSelf: 'center',
+    maxWidth: '90%'
+  },
+  systemMessageText: { fontSize: 12, color: '#888', textAlign: 'center', flex: 1 },
 
   typingIndicator: { padding: 8, alignSelf: 'flex-start' },
   typingText: { fontSize: 12, color: '#888', fontStyle: 'italic' },

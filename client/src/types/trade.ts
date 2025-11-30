@@ -53,7 +53,35 @@ export interface TinderMatch {
     at: string;
     reason?: string;
   };
+  archival?: {
+    reason: 'user_cancelled' | 'item_exchanged' | 'item_deleted' | 'admin';
+    relatedMatchId?: string;
+    at: string;
+  };
   completedAt?: string;
+}
+
+// Completed exchange history item
+export interface CompletedExchange {
+  matchId: string;
+  completedAt: string;
+  myItem: {
+    _id: string;
+    title: string;
+    imageUrl: string;
+  } | null;
+  theirItem: {
+    _id: string;
+    title: string;
+    imageUrl: string;
+  } | null;
+  otherUser: {
+    _id: string;
+    nickname: string;
+    avatarUrl?: string;
+    avatarKey?: string;
+    completedExchangesCount: number;
+  };
 }
 
 export interface GroupedMatchesResponse {
@@ -112,6 +140,7 @@ export interface ChatMessage {
   content: string;
   createdAt: string;
   read: boolean;
+  isSystemMessage?: boolean;
 }
 
 // Envelope per GET chat messages (include stato match)

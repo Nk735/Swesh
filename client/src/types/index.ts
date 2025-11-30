@@ -6,6 +6,7 @@ export type User = {
   nickname: string;
   avatarUrl?: string;
   avatarKey?: string;
+  completedExchangesCount?: number;
 };
 
 export type ItemOwner = {

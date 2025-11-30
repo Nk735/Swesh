@@ -6,7 +6,8 @@ import {
   RecentMatch,
   InteractionStats,
   TinderMatch,
-  ChatMessagesEnvelope
+  ChatMessagesEnvelope,
+  CompletedExchange
 } from '../types/trade';
 
 // Nuove funzioni per il sistema Tinder
@@ -94,6 +95,12 @@ export async function confirmExchange(matchId: string) {
     lastActivityAt: string;
     completedAt?: string;
   };
+}
+
+// Get completed exchanges history
+export async function getCompletedExchanges(): Promise<CompletedExchange[]> {
+  const { data } = await api.get('/matches/completed');
+  return data;
 }
 
 // Utility functions

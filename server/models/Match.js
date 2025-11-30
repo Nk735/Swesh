@@ -30,7 +30,12 @@ const matchSchema = new mongoose.Schema({
     userBConfirmed: { type: Boolean, default: false },
     userBConfirmedAt: { type: Date }
   },
-  completedAt: { type: Date }
+  completedAt: { type: Date },
+  archival: {
+    reason: { type: String, enum: ['user_cancelled', 'item_exchanged', 'item_deleted', 'admin'] },
+    relatedMatchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Match' },
+    at: { type: Date }
+  }
 }, {
   timestamps: true
 });

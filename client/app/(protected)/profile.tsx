@@ -116,6 +116,27 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        {/* Stats Section */}
+        <View style={styles.statsSection}>
+          <View style={styles.statBox}>
+            <Ionicons name="checkmark-circle-outline" size={24} color="#34C759" />
+            <Text style={styles.statNumber}>{user?.completedExchangesCount || 0}</Text>
+            <Text style={styles.statLabel}>Scambi completati</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Ionicons name="shirt-outline" size={24} color="#5A31F4" />
+            <Text style={styles.statNumber}>{myItems.length}</Text>
+            <Text style={styles.statLabel}>Abiti disponibili</Text>
+          </View>
+        </View>
+
+        {/* Exchange History Button */}
+        <TouchableOpacity style={styles.historyButton} onPress={() => router.push("/exchanges")}>
+          <Ionicons name="time-outline" size={20} color="#5A31F4" />
+          <Text style={styles.historyButtonText}>Storico Scambi</Text>
+          <Ionicons name="chevron-forward" size={18} color="#999" />
+        </TouchableOpacity>
+
         <View style={styles.itemsSection}>
           <Text style={styles.sectionTitle}>I tuoi abiti</Text>
           {loadingItems ? (
@@ -172,6 +193,35 @@ const styles = StyleSheet.create({
   profileInfo: { marginLeft: 16, flex: 1 },
   nickname: { fontSize: 20, fontWeight: "600", color: "#333", marginBottom: 2 },
   email: { fontSize: 14, color: "#777" },
+
+  // Stats Section
+  statsSection: { flexDirection: "row", gap: 12, marginHorizontal: 16, marginBottom: 12 },
+  statBox: { 
+    flex: 1, 
+    backgroundColor: "#fff", 
+    borderRadius: 12, 
+    padding: 16, 
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 }
+  },
+  statNumber: { fontSize: 24, fontWeight: "700", color: "#333", marginTop: 8 },
+  statLabel: { fontSize: 12, color: "#666", marginTop: 4, textAlign: "center" },
+
+  // History Button
+  historyButton: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    backgroundColor: "#fff", 
+    marginHorizontal: 16, 
+    marginBottom: 12, 
+    padding: 14, 
+    borderRadius: 12,
+    gap: 10
+  },
+  historyButtonText: { flex: 1, fontSize: 15, fontWeight: "500", color: "#333" },
 
   // Sezione abiti
   itemsSection: { backgroundColor: "#fff", borderRadius: 16, marginHorizontal: 16, marginTop: 8, padding: 16 },
