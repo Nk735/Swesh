@@ -50,7 +50,7 @@ export default function ExchangeCompletedModal({
           <View style={styles.questionSection}>
             <Ionicons name="help-circle-outline" size={20} color="#666" />
             <Text style={styles.questionText}>
-              Vuoi rimuovere "{matchInfo.myItemTitle}" dal tuo profilo?
+              Vuoi rimuovere &quot;{matchInfo.myItemTitle}&quot; dal tuo profilo?
             </Text>
           </View>
 

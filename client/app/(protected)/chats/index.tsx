@@ -32,20 +32,6 @@ export default function ChatsList() {
   const archivedChats = matches.filter(m => m.status === 'archived' || m.status === 'completed');
   const displayedChats = activeTab === 'active' ? activeChats : archivedChats;
 
-  const loadChats = useCallback(async () => {
-    try {
-      const data = await getAllMatches();
-      // Sort by last activity (most recent first)
-      const sorted = data.sort((a, b) => 
-        new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime()
-      );
-      setMatches(sorted);
-    } catch (e) {
-      console.log('Error loading chats:', e);
-      setMatches([]);
-    }
-  }, []);
-
   useEffect(() => {
     setLoading(true);
     loadChats().finally(() => setLoading(false));

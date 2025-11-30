@@ -95,7 +95,7 @@ export const ChatHeader: React.FC<HeaderProps> = ({ matchInfo, menuOpen, setMenu
                 </View>
             </View>
 
-            <TouchableOpacity style={componentStyles.headerMenuBtn} onPress={() => setMenuOpen(v => !v)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <TouchableOpacity style={componentStyles.headerMenuBtn} onPress={() => setMenuOpen(!menuOpen)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                 <Ionicons name="ellipsis-vertical" size={20} color="#333" />
             </TouchableOpacity>
 
