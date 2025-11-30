@@ -71,21 +71,23 @@ router.get('/', protect, async (req, res) => {
 
     // Apply gender filter if not 'all'
     if (showGender !== 'all') {
-      // Get all owner IDs to filter by their gender when visibleTo is null
       const items = await Item.find(query)
         .populate('owner', 'nickname avatarUrl gender')
         .lean();
 
-      // Filter items based on visibility rules
+      // Filter items based on visibility rules:
+      // 1. Items with explicit visibleTo matching user preference or 'all' are shown
+      // 2. Items with null visibleTo inherit from owner's gender
+      // 3. Items from owners with 'prefer_not_to_say' or unset gender are shown to everyone
+      //    (Design decision: neutral gender items are inclusive by default)
       const filteredItems = items.filter(item => {
-        // If item has explicit visibleTo
         if (item.visibleTo) {
           return item.visibleTo === showGender || item.visibleTo === 'all';
         }
-        // If visibleTo is null, inherit from owner's gender
         const ownerGender = item.owner?.gender;
         if (ownerGender === showGender) return true;
-        if (!ownerGender || ownerGender === 'prefer_not_to_say') return true; // Show all for unset/prefer_not_to_say owners
+        // Owners with unset or 'prefer_not_to_say' gender have items visible to all
+        if (!ownerGender || ownerGender === 'prefer_not_to_say') return true;
         return false;
       });
 
