@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import OnboardingDots from './OnboardingDots';
 import { Gender } from '../../src/types';
@@ -51,7 +52,12 @@ export default function ProfileSetupSlide({
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.onboardingPink }]}>
+    <LinearGradient
+      colors={[colors.onboardingPink, '#ff85f0', colors.onboardingPink]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.container}
+    >
       <ScrollView 
         style={styles.scrollView} 
         contentContainerStyle={styles.content}
@@ -131,7 +137,7 @@ export default function ProfileSetupSlide({
           <Text style={[styles.continueButtonText, { color: colors.onboardingPink }]}>Continua</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 

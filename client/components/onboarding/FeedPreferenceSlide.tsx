@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import OnboardingDots from './OnboardingDots';
 import { FeedGenderPreference } from '../../src/types';
@@ -36,7 +37,12 @@ export default function FeedPreferenceSlide({
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.onboardingPink }]}>
+    <LinearGradient
+      colors={[colors.onboardingPink, '#ff85f0', colors.onboardingPink]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.container}
+    >
       <View style={styles.content}>
         <Text style={[styles.title, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 }]}>Personalizza il tuo feed</Text>
         <Text style={[styles.subtitle, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.2)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }]}>
@@ -97,7 +103,7 @@ export default function FeedPreferenceSlide({
           <Text style={[styles.continueButtonText, { color: colors.onboardingPink }]}>Continua</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions, Platform, Alert as RNAlert, StatusBar } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../src/context/AuthContext';
@@ -185,7 +186,12 @@ export default function OnboardingScreen() {
 
     // Final slide
     return (
-      <View style={[styles.slideWrapper, styles.finalSlide, { backgroundColor: colors.onboardingPink }]}>
+      <LinearGradient
+        colors={[colors.onboardingPink, '#ff85f0', colors.onboardingPink]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.slideWrapper, styles.finalSlide]}
+      >
         <View style={styles.finalContent}>
           <View style={[styles.iconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}>
             <Ionicons name="rocket-outline" size={80} color={colors.onboardingPink} />
@@ -219,7 +225,7 @@ export default function OnboardingScreen() {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </LinearGradient>
     );
   };
 

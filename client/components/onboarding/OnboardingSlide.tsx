@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import OnboardingDots from './OnboardingDots';
 import { useTheme } from '../../src/theme';
@@ -18,7 +19,12 @@ export default function OnboardingSlide({ icon, title, description, currentIndex
   const { colors } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.onboardingPink }]}>
+    <LinearGradient
+      colors={[colors.onboardingPink, '#ff85f0', colors.onboardingPink]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.container}
+    >
       <View style={styles.content}>
         <View style={[styles.iconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}>
           <Ionicons name={icon} size={80} color={colors.onboardingPink} />
@@ -27,7 +33,7 @@ export default function OnboardingSlide({ icon, title, description, currentIndex
         <Text style={[styles.description, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.2)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }]}>{description}</Text>
       </View>
       <OnboardingDots total={totalSlides} current={currentIndex} />
-    </View>
+    </LinearGradient>
   );
 }
 
