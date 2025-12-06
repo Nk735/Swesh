@@ -71,7 +71,7 @@ function showAlert(title: string, message?: string) {
 
 export default function OnboardingScreen() {
   const { completeOnboarding } = useAuth();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -147,7 +147,7 @@ export default function OnboardingScreen() {
             totalSlides={TOTAL_SLIDES}
           />
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={[styles.continueButton, { backgroundColor: colors.secondary }]} onPress={handleNext}>
+            <TouchableOpacity style={[styles.continueButton, { backgroundColor: colors.onboardingPink, borderColor: '#FFFFFF', borderWidth: 2 }]} onPress={handleNext}>
               <Text style={styles.continueButtonText}>Continua</Text>
               <Ionicons name="arrow-forward" size={18} color="#fff" />
             </TouchableOpacity>
@@ -185,13 +185,13 @@ export default function OnboardingScreen() {
 
     // Final slide
     return (
-      <View style={[styles.slideWrapper, styles.finalSlide, { backgroundColor: colors.card }]}>
+      <View style={[styles.slideWrapper, styles.finalSlide, { backgroundColor: colors.onboardingPink }]}>
         <View style={styles.finalContent}>
-          <View style={[styles.iconContainer, { backgroundColor: colors.background }]}>
-            <Ionicons name="rocket-outline" size={80} color={colors.accent} />
+          <View style={[styles.iconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}>
+            <Ionicons name="rocket-outline" size={80} color={colors.onboardingPink} />
           </View>
-          <Text style={[styles.finalTitle, { color: colors.text }]}>Pronto a iniziare!</Text>
-          <Text style={[styles.finalDescription, { color: colors.textSecondary }]}>
+          <Text style={[styles.finalTitle, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 }]}>Pronto a iniziare!</Text>
+          <Text style={[styles.finalDescription, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.2)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }]}>
             Il tuo account è pronto. Cosa vuoi fare ora?
           </Text>
         </View>
@@ -199,22 +199,22 @@ export default function OnboardingScreen() {
         <View style={styles.finalButtons}>
           <OnboardingDots total={TOTAL_SLIDES} current={index} />
           <TouchableOpacity
-            style={[styles.primaryButton, { backgroundColor: colors.accent }]}
+            style={[styles.primaryButton, { backgroundColor: '#FFFFFF' }]}
             onPress={() => handleFinish('addItem')}
             disabled={isSubmitting}
           >
-            <Ionicons name="add-circle-outline" size={20} color="#fff" />
-            <Text style={styles.primaryButtonText}>
+            <Ionicons name="add-circle-outline" size={20} color={colors.onboardingPink} />
+            <Text style={[styles.primaryButtonText, { color: colors.onboardingPink }]}>
               {isSubmitting ? 'Salvataggio...' : 'Carica il tuo primo abito'}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.secondaryButton, { backgroundColor: colors.card, borderColor: colors.accent }]}
+            style={[styles.secondaryButton, { backgroundColor: 'rgba(255, 255, 255, 0.2)', borderColor: '#FFFFFF' }]}
             onPress={() => handleFinish('home')}
             disabled={isSubmitting}
           >
-            <Ionicons name="compass-outline" size={20} color={colors.accent} />
-            <Text style={[styles.secondaryButtonText, { color: colors.accent }]}>
+            <Ionicons name="compass-outline" size={20} color="#FFFFFF" />
+            <Text style={[styles.secondaryButtonText, { color: '#FFFFFF' }]}>
               {isSubmitting ? 'Salvataggio...' : 'Esplora il feed'}
             </Text>
           </TouchableOpacity>
@@ -230,8 +230,8 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.card }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+    <View style={[styles.container, { backgroundColor: colors.onboardingPink }]}>
+      <StatusBar barStyle='light-content' />
       <FlatList
         ref={flatListRef}
         data={SLIDES}
@@ -255,8 +255,8 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, position: 'relative', },
   slideWrapper: { width, flex: 1, justifyContent: 'center', alignItems: 'center', },
-  buttonContainer: { paddingHorizontal: 30, paddingBottom: Platform.OS === 'ios' ? 40 : 30, right: 30},
-  continueButton: { padding: 10, borderRadius: 25, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, },
+  buttonContainer: { position: 'absolute', bottom: Platform.OS === 'ios' ? 40 : 30, right: 30 },
+  continueButton: { padding: 10, borderRadius: 25, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, paddingHorizontal: 20, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 5, shadowOffset: { width: 0, height: 2 }, elevation: 3 },
   continueButtonText: { color: '#fff', fontSize: 16, fontWeight: '600', },
   finalSlide: { justifyContent: 'space-between', paddingTop: 60, },
   finalContent: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 30, },

@@ -51,66 +51,66 @@ export default function ProfileSetupSlide({
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.card }]}>
+    <View style={[styles.container, { backgroundColor: colors.onboardingPink }]}>
       <ScrollView 
         style={styles.scrollView} 
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={[styles.title, { color: colors.text }]}>Parlaci di te</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        <Text style={[styles.title, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 }]}>Parlaci di te</Text>
+        <Text style={[styles.subtitle, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.2)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }]}>
           Questi dati ci aiutano a personalizzare la tua esperienza
         </Text>
 
         {/* Age Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Quanti anni hai?</Text>
+          <Text style={[styles.sectionTitle, { color: '#FFFFFF' }]}>Quanti anni hai?</Text>
           <View style={styles.ageContainer}>
             <TouchableOpacity
-              style={[styles.ageButton, { backgroundColor: colors.background }, age === null || age <= 16 ? styles.ageButtonDisabled : {}]}
+              style={[styles.ageButton, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }, age === null || age <= 16 ? styles.ageButtonDisabled : {}]}
               onPress={decreaseAge}
               disabled={age === null || age <= 16}
             >
-              <Ionicons name="remove" size={24} color={age === null || age <= 16 ? colors.border : colors.text} />
+              <Ionicons name="remove" size={24} color={age === null || age <= 16 ? colors.border : colors.onboardingPink} />
             </TouchableOpacity>
-            <View style={[styles.ageDisplay, { backgroundColor: colors.inputBackground, borderColor: colors.border }]}>
-              <Text style={[styles.ageText, { color: colors.text }]}>{age ?? '--'}</Text>
+            <View style={[styles.ageDisplay, { backgroundColor: 'rgba(255, 255, 255, 0.9)', borderColor: '#FFFFFF' }]}>
+              <Text style={[styles.ageText, { color: colors.onboardingPink }]}>{age ?? '--'}</Text>
             </View>
             <TouchableOpacity
-              style={[styles.ageButton, { backgroundColor: colors.background }, age === 99 ? styles.ageButtonDisabled : {}]}
+              style={[styles.ageButton, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }, age === 99 ? styles.ageButtonDisabled : {}]}
               onPress={increaseAge}
               disabled={age === 99}
             >
-              <Ionicons name="add" size={24} color={age === 99 ? colors.border : colors.text} />
+              <Ionicons name="add" size={24} color={age === 99 ? colors.border : colors.onboardingPink} />
             </TouchableOpacity>
           </View>
-          <Text style={[styles.note, { color: colors.textSecondary }]}>Devi avere almeno 16 anni per usare Swesh</Text>
+          <Text style={[styles.note, { color: '#FFFFFF' }]}>Devi avere almeno 16 anni per usare Swesh</Text>
         </View>
 
         {/* Gender Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Come ti identifichi?</Text>
+          <Text style={[styles.sectionTitle, { color: '#FFFFFF' }]}>Come ti identifichi?</Text>
           <View style={styles.genderOptions}>
             {GENDER_OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option.value}
                 style={[
                   styles.genderOption,
-                  { backgroundColor: colors.inputBackground, borderColor: colors.border },
-                  gender === option.value && { backgroundColor: colors.primary, borderColor: colors.primary },
+                  { backgroundColor: 'rgba(255, 255, 255, 0.9)', borderColor: '#FFFFFF' },
+                  gender === option.value && { backgroundColor: '#FFFFFF', borderColor: '#FFFFFF' },
                 ]}
                 onPress={() => setGender(option.value)}
               >
                 <Ionicons
                   name={option.icon}
                   size={24}
-                  color={gender === option.value ? '#fff' : colors.textSecondary}
+                  color={gender === option.value ? colors.onboardingPink : colors.textSecondary}
                 />
                 <Text
                   style={[
                     styles.genderOptionText,
                     { color: colors.text },
-                    gender === option.value && styles.genderOptionTextSelected,
+                    gender === option.value && { color: colors.onboardingPink },
                   ]}
                 >
                   {option.label}
@@ -124,11 +124,11 @@ export default function ProfileSetupSlide({
       <View style={styles.footer}>
         <OnboardingDots total={totalSlides} current={currentIndex} />
         <TouchableOpacity
-          style={[styles.continueButton, { backgroundColor: colors.secondary }, !isValid && styles.continueButtonDisabled]}
+          style={[styles.continueButton, { backgroundColor: '#FFFFFF', borderColor: '#FFFFFF', borderWidth: 2 }, !isValid && styles.continueButtonDisabled]}
           onPress={handleContinue}
           disabled={!isValid}
         >
-          <Text style={styles.continueButtonText}>Continua</Text>
+          <Text style={[styles.continueButtonText, { color: colors.onboardingPink }]}>Continua</Text>
         </TouchableOpacity>
       </View>
     </View>

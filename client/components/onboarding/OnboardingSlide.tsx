@@ -18,13 +18,13 @@ export default function OnboardingSlide({ icon, title, description, currentIndex
   const { colors } = useTheme();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.onboardingPink }]}>
       <View style={styles.content}>
-        <View style={[styles.iconContainer, { backgroundColor: colors.background }]}>
-          <Ionicons name={icon} size={80} color={colors.accent} />
+        <View style={[styles.iconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}>
+          <Ionicons name={icon} size={80} color={colors.onboardingPink} />
         </View>
-        <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
-        <Text style={[styles.description, { color: colors.textSecondary }]}>{description}</Text>
+        <Text style={[styles.title, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 }]}>{title}</Text>
+        <Text style={[styles.description, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.2)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }]}>{description}</Text>
       </View>
       <OnboardingDots total={totalSlides} current={currentIndex} />
     </View>

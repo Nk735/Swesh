@@ -36,10 +36,10 @@ export default function FeedPreferenceSlide({
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.card }]}>
+    <View style={[styles.container, { backgroundColor: colors.onboardingPink }]}>
       <View style={styles.content}>
-        <Text style={[styles.title, { color: colors.text }]}>Personalizza il tuo feed</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        <Text style={[styles.title, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 }]}>Personalizza il tuo feed</Text>
+        <Text style={[styles.subtitle, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.2)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }]}>
           Quali abiti vuoi vedere nel tuo feed?
         </Text>
 
@@ -49,8 +49,8 @@ export default function FeedPreferenceSlide({
               key={option.value}
               style={[
                 styles.option,
-                { backgroundColor: colors.inputBackground, borderColor: colors.border },
-                preference === option.value && { backgroundColor: colors.accent, borderColor: colors.accent },
+                { backgroundColor: 'rgba(255, 255, 255, 0.9)', borderColor: '#FFFFFF' },
+                preference === option.value && { backgroundColor: '#FFFFFF', borderColor: '#FFFFFF' },
               ]}
               onPress={() => setPreference(option.value)}
             >
@@ -60,7 +60,7 @@ export default function FeedPreferenceSlide({
                   style={[
                     styles.optionLabel,
                     { color: colors.text },
-                    preference === option.value && styles.optionLabelSelected,
+                    preference === option.value && { color: colors.onboardingPink },
                   ]}
                 >
                   {option.label}
@@ -69,20 +69,20 @@ export default function FeedPreferenceSlide({
                   style={[
                     styles.optionDescription,
                     { color: colors.textSecondary },
-                    preference === option.value && styles.optionDescriptionSelected,
+                    preference === option.value && { color: colors.onboardingPink, opacity: 0.8 },
                   ]}
                 >
                   {option.description}
                 </Text>
               </View>
               {preference === option.value && (
-                <Ionicons name="checkmark-circle" size={24} color="#fff" />
+                <Ionicons name="checkmark-circle" size={24} color={colors.onboardingPink} />
               )}
             </TouchableOpacity>
           ))}
         </View>
 
-        <Text style={[styles.note, { color: colors.textSecondary }]}>
+        <Text style={[styles.note, { color: '#FFFFFF' }]}>
           Puoi cambiare questa scelta dalle impostazioni
         </Text>
       </View>
@@ -90,11 +90,11 @@ export default function FeedPreferenceSlide({
       <View style={styles.footer}>
         <OnboardingDots total={totalSlides} current={currentIndex} />
         <TouchableOpacity
-          style={[styles.continueButton, { backgroundColor: colors.secondary }, !preference && styles.continueButtonDisabled]}
+          style={[styles.continueButton, { backgroundColor: '#FFFFFF', borderColor: '#FFFFFF', borderWidth: 2 }, !preference && styles.continueButtonDisabled]}
           onPress={handleContinue}
           disabled={!preference}
         >
-          <Text style={styles.continueButtonText}>Continua</Text>
+          <Text style={[styles.continueButtonText, { color: colors.onboardingPink }]}>Continua</Text>
         </TouchableOpacity>
       </View>
     </View>

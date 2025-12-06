@@ -14,6 +14,7 @@ export interface ThemeColors {
   inputBackground: string;
   navBackground: string;
   navBorder: string;
+  onboardingPink: string;
 }
 
 export const lightColors: ThemeColors = {
@@ -30,6 +31,7 @@ export const lightColors: ThemeColors = {
   inputBackground: '#FFFFFF',
   navBackground: '#F28585',
   navBorder: '#F2B263',
+  onboardingPink: '#fd9ef8',
 };
 
 export const darkColors: ThemeColors = {
@@ -46,4 +48,5 @@ export const darkColors: ThemeColors = {
   inputBackground: '#252538',
   navBackground: '#2D2D44',
   navBorder: '#FFB347',
+  onboardingPink: '#fd9ef8',
 };
