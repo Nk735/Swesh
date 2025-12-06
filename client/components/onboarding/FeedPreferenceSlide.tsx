@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import OnboardingDots from './OnboardingDots';
 import { FeedGenderPreference } from '../../src/types';
 import { useTheme } from '../../src/theme';
+import { onboardingTextStyles } from '../../src/theme/onboardingStyles';
 
 interface FeedPreferenceSlideProps {
   currentIndex: number;
@@ -44,8 +45,8 @@ export default function FeedPreferenceSlide({
       style={styles.container}
     >
       <View style={styles.content}>
-        <Text style={[styles.title, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 }]}>Personalizza il tuo feed</Text>
-        <Text style={[styles.subtitle, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.2)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }]}>
+        <Text style={[styles.title, onboardingTextStyles.whiteTitle]}>Personalizza il tuo feed</Text>
+        <Text style={[styles.subtitle, onboardingTextStyles.whiteDescription]}>
           Quali abiti vuoi vedere nel tuo feed?
         </Text>
 

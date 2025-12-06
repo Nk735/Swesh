@@ -10,6 +10,7 @@ import OnboardingDots from '../../components/onboarding/OnboardingDots';
 import ProfileSetupSlide from '../../components/onboarding/ProfileSetupSlide';
 import FeedPreferenceSlide from '../../components/onboarding/FeedPreferenceSlide';
 import { useTheme } from '../../src/theme';
+import { onboardingTextStyles } from '../../src/theme/onboardingStyles';
 
 const { width } = Dimensions.get('window');
 const TOTAL_SLIDES = 6;
@@ -196,8 +197,8 @@ export default function OnboardingScreen() {
           <View style={[styles.iconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}>
             <Ionicons name="rocket-outline" size={80} color={colors.onboardingPink} />
           </View>
-          <Text style={[styles.finalTitle, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 }]}>Pronto a iniziare!</Text>
-          <Text style={[styles.finalDescription, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.2)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }]}>
+          <Text style={[styles.finalTitle, onboardingTextStyles.whiteTitle]}>Pronto a iniziare!</Text>
+          <Text style={[styles.finalDescription, onboardingTextStyles.whiteDescription]}>
             Il tuo account è pronto. Cosa vuoi fare ora?
           </Text>
         </View>

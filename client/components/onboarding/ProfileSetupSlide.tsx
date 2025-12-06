@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import OnboardingDots from './OnboardingDots';
 import { Gender } from '../../src/types';
 import { useTheme } from '../../src/theme';
+import { onboardingTextStyles } from '../../src/theme/onboardingStyles';
 
 interface ProfileSetupSlideProps {
   currentIndex: number;
@@ -63,8 +64,8 @@ export default function ProfileSetupSlide({
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={[styles.title, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 }]}>Parlaci di te</Text>
-        <Text style={[styles.subtitle, { color: '#FFFFFF', textShadowColor: 'rgba(0, 0, 0, 0.2)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }]}>
+        <Text style={[styles.title, onboardingTextStyles.whiteTitle]}>Parlaci di te</Text>
+        <Text style={[styles.subtitle, onboardingTextStyles.whiteDescription]}>
           Questi dati ci aiutano a personalizzare la tua esperienza
         </Text>
 
