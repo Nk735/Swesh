@@ -10,7 +10,7 @@ import OnboardingDots from '../../components/onboarding/OnboardingDots';
 import ProfileSetupSlide from '../../components/onboarding/ProfileSetupSlide';
 import FeedPreferenceSlide from '../../components/onboarding/FeedPreferenceSlide';
 import { useTheme } from '../../src/theme';
-import { onboardingTextStyles } from '../../src/theme/onboardingStyles';
+import { onboardingTextStyles, onboardingColors } from '../../src/theme/onboardingStyles';
 
 const { width } = Dimensions.get('window');
 const TOTAL_SLIDES = 6;
@@ -194,7 +194,7 @@ export default function OnboardingScreen() {
         style={[styles.slideWrapper, styles.finalSlide]}
       >
         <View style={styles.finalContent}>
-          <View style={[styles.iconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}>
+          <View style={[styles.iconContainer, { backgroundColor: onboardingColors.whiteTransparent }]}>
             <Ionicons name="rocket-outline" size={80} color={colors.onboardingPink} />
           </View>
           <Text style={[styles.finalTitle, onboardingTextStyles.whiteTitle]}>Pronto a iniziare!</Text>
@@ -216,7 +216,7 @@ export default function OnboardingScreen() {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.secondaryButton, { backgroundColor: 'rgba(255, 255, 255, 0.2)', borderColor: '#FFFFFF' }]}
+            style={[styles.secondaryButton, { backgroundColor: onboardingColors.whiteTransparentLight, borderColor: '#FFFFFF' }]}
             onPress={() => handleFinish('home')}
             disabled={isSubmitting}
           >

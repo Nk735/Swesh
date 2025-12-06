@@ -1,5 +1,10 @@
 // Shared onboarding styles for consistent text readability on pink gradient backgrounds
 
+export const onboardingColors = {
+  whiteTransparent: 'rgba(255, 255, 255, 0.9)',
+  whiteTransparentLight: 'rgba(255, 255, 255, 0.2)',
+};
+
 export const onboardingTextStyles = {
   whiteTitle: {
     color: '#FFFFFF',

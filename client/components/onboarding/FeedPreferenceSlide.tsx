@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import OnboardingDots from './OnboardingDots';
 import { FeedGenderPreference } from '../../src/types';
 import { useTheme } from '../../src/theme';
-import { onboardingTextStyles } from '../../src/theme/onboardingStyles';
+import { onboardingTextStyles, onboardingColors } from '../../src/theme/onboardingStyles';
 
 interface FeedPreferenceSlideProps {
   currentIndex: number;
@@ -56,7 +56,7 @@ export default function FeedPreferenceSlide({
               key={option.value}
               style={[
                 styles.option,
-                { backgroundColor: 'rgba(255, 255, 255, 0.9)', borderColor: '#FFFFFF' },
+                { backgroundColor: onboardingColors.whiteTransparent, borderColor: '#FFFFFF' },
                 preference === option.value && { backgroundColor: '#FFFFFF', borderColor: '#FFFFFF' },
               ]}
               onPress={() => setPreference(option.value)}

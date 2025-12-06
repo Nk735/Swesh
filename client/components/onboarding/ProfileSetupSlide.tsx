@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import OnboardingDots from './OnboardingDots';
 import { Gender } from '../../src/types';
 import { useTheme } from '../../src/theme';
-import { onboardingTextStyles } from '../../src/theme/onboardingStyles';
+import { onboardingTextStyles, onboardingColors } from '../../src/theme/onboardingStyles';
 
 interface ProfileSetupSlideProps {
   currentIndex: number;
@@ -74,17 +74,17 @@ export default function ProfileSetupSlide({
           <Text style={[styles.sectionTitle, { color: '#FFFFFF' }]}>Quanti anni hai?</Text>
           <View style={styles.ageContainer}>
             <TouchableOpacity
-              style={[styles.ageButton, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }, age === null || age <= 16 ? styles.ageButtonDisabled : {}]}
+              style={[styles.ageButton, { backgroundColor: onboardingColors.whiteTransparent }, age === null || age <= 16 ? styles.ageButtonDisabled : {}]}
               onPress={decreaseAge}
               disabled={age === null || age <= 16}
             >
               <Ionicons name="remove" size={24} color={age === null || age <= 16 ? colors.border : colors.onboardingPink} />
             </TouchableOpacity>
-            <View style={[styles.ageDisplay, { backgroundColor: 'rgba(255, 255, 255, 0.9)', borderColor: '#FFFFFF' }]}>
+            <View style={[styles.ageDisplay, { backgroundColor: onboardingColors.whiteTransparent, borderColor: '#FFFFFF' }]}>
               <Text style={[styles.ageText, { color: colors.onboardingPink }]}>{age ?? '--'}</Text>
             </View>
             <TouchableOpacity
-              style={[styles.ageButton, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }, age === 99 ? styles.ageButtonDisabled : {}]}
+              style={[styles.ageButton, { backgroundColor: onboardingColors.whiteTransparent }, age === 99 ? styles.ageButtonDisabled : {}]}
               onPress={increaseAge}
               disabled={age === 99}
             >
@@ -103,7 +103,7 @@ export default function ProfileSetupSlide({
                 key={option.value}
                 style={[
                   styles.genderOption,
-                  { backgroundColor: 'rgba(255, 255, 255, 0.9)', borderColor: '#FFFFFF' },
+                  { backgroundColor: onboardingColors.whiteTransparent, borderColor: '#FFFFFF' },
                   gender === option.value && { backgroundColor: '#FFFFFF', borderColor: '#FFFFFF' },
                 ]}
                 onPress={() => setGender(option.value)}

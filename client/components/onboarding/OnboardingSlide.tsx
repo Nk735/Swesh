@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import OnboardingDots from './OnboardingDots';
 import { useTheme } from '../../src/theme';
-import { onboardingTextStyles } from '../../src/theme/onboardingStyles';
+import { onboardingTextStyles, onboardingColors } from '../../src/theme/onboardingStyles';
 
 interface OnboardingSlideProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -27,7 +27,7 @@ export default function OnboardingSlide({ icon, title, description, currentIndex
       style={styles.container}
     >
       <View style={styles.content}>
-        <View style={[styles.iconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}>
+        <View style={[styles.iconContainer, { backgroundColor: onboardingColors.whiteTransparent }]}>
           <Ionicons name={icon} size={80} color={colors.onboardingPink} />
         </View>
         <Text style={[styles.title, onboardingTextStyles.whiteTitle]}>{title}</Text>
