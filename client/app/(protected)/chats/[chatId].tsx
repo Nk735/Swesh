@@ -8,11 +8,15 @@ import { Ionicons } from "@expo/vector-icons";
 import socketService from "../../../src/services/socketService";
 import ExchangeCompletedModal from "../../../components/ExchangeCompletedModal";
 import { api } from "../../../src/services/apiClient";
+import { useTheme } from "../../../src/theme";
+import ChatHeader from "../../../components/chat/ChatHeader";
+import ItemsStrip from "../../../components/chat/ItemsStrip";
+import SlideToConfirm from "../../../components/chat/SlideToConfirm";
 
 export default function ChatScreen() {
   const { chatId: matchId } = useLocalSearchParams<{ chatId: string }>();
   const { user } = useAuth();
-
+  const { colors, isDark } = useTheme();
   const [matchInfo, setMatchInfo] = useState<TinderMatch | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -309,121 +313,6 @@ export default function ChatScreen() {
     Alert.alert('Oggetto nascosto', 'Il tuo oggetto rimarrà nascosto ma non sarà eliminato.');
   };
 
-  const Header = () => {
-    const avatar = matchInfo?.otherUser?.avatarUrl || 'https://placehold.co/60x60';
-    const name = matchInfo?.otherUser?.nickname || 'Utente';
-
-    return (
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <View style={styles.headerLeft}>
-          <Image source={{ uri: avatar }} style={styles.headerAvatar} />
-          <View>
-            <Text style={styles.headerTitle}>{name}</Text>
-            <Text style={styles.headerSubtitle}>
-              {isCompleted ? 'Scambio completato' : (isReadOnly ? 'Scambio non attivo' : 'Scambio in corso')}
-            </Text>
-          </View>
-        </View>
-
-        <TouchableOpacity style={styles.headerMenuBtn} onPress={() => setMenuOpen(v => !v)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Ionicons name="ellipsis-vertical" size={20} color="#333" />
-        </TouchableOpacity>
-
-        {menuOpen && (
-          <View style={styles.menuDropdown}>
-            {!isReadOnly && (
-              <TouchableOpacity style={styles.menuItem} onPress={onCancelTrade}>
-                <Text style={styles.menuItemText}>Annulla scambio</Text>
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); Alert.alert('Segnala utente', 'Funzione in arrivo'); }}>
-              <Text style={styles.menuItemText}>Segnala utente</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-    );
-  };
-
-  const ItemsStrip = () => {
-    if (!matchInfo) return null;
-    return (
-      <View style={styles.itemsStrip}>
-        <TouchableOpacity style={styles.itemBox} onPress={() => openItemDetail(matchInfo.itemMine, true)}>
-          {matchInfo.itemMine?.imageUrl ? <Image source={{ uri: matchInfo.itemMine.imageUrl }} style={styles.itemImage} /> : <View style={[styles.itemImage, { backgroundColor: '#eee' }]} />}
-          <Text numberOfLines={1} style={styles.itemTitle}>{matchInfo.itemMine?.title || 'Mio oggetto'}</Text>
-          <Text style={styles.itemSubtitle}>Il tuo</Text>
-        </TouchableOpacity>
-        <Ionicons name="swap-horizontal" size={22} color="#666" />
-        <TouchableOpacity style={styles.itemBox} onPress={() => openItemDetail(matchInfo.itemTheirs, false)}>
-          {matchInfo.itemTheirs?.imageUrl ? <Image source={{ uri: matchInfo.itemTheirs.imageUrl }} style={styles.itemImage} /> : <View style={[styles.itemImage, { backgroundColor: '#eee' }]} />}
-          <Text numberOfLines={1} style={styles.itemTitle}>{matchInfo.itemTheirs?.title || 'Oggetto loro'}</Text>
-          <Text style={styles.itemSubtitle}>Di {matchInfo.otherUser?.nickname || 'Utente'}</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
-  const SlideToConfirm = () => {
-    const disabled = !!isReadOnly;
-    
-    let statusText = 'Trascina per confermare scambio';
-    if (disabled) {
-      statusText = 'Scambio non attivo';
-    } else if (isCompleted) {
-      statusText = 'Scambio completato!';
-    } else if (myConfirmed && otherConfirmed) {
-      statusText = 'Scambio completato!';
-    } else if (myConfirmed) {
-      statusText = 'In attesa della conferma di ' + (matchInfo?.otherUser?.nickname || 'Utente');
-    } else if (otherConfirmed) {
-      statusText = (matchInfo?.otherUser?.nickname || 'Utente') + ' ha confermato! Trascina per completare';
-    }
-
-    return (
-      <View style={styles.sliderWrap}>
-        <Text style={styles.sliderLabel}>{statusText}</Text>
-        
-        <View style={styles.confirmStatusRow}>
-          <View style={styles.confirmIndicator}>
-            <Ionicons name={myConfirmed ? 'checkmark-circle' : 'ellipse-outline'} size={18} color={myConfirmed ? '#34C759' : '#CCC'} />
-            <Text style={[styles.confirmText, myConfirmed && styles.confirmTextActive]}>Tu</Text>
-          </View>
-          <View style={styles.confirmIndicator}>
-            <Ionicons name={otherConfirmed ? 'checkmark-circle' : 'ellipse-outline'} size={18} color={otherConfirmed ? '#34C759' : '#CCC'} />
-            <Text style={[styles.confirmText, otherConfirmed && styles.confirmTextActive]}>{matchInfo?.otherUser?.nickname || 'Altro'}</Text>
-          </View>
-        </View>
-
-        <View style={[
-          styles.sliderTrack,
-          (myConfirmed || disabled || isCompleted) && { backgroundColor: (disabled && !isCompleted) ? '#EEE' : '#D1FADF', borderColor: (disabled && !isCompleted) ? '#DDD' : '#34C759' }
-        ]}>
-          {!(myConfirmed || disabled || isCompleted) && (
-            <Animated.View
-              style={[styles.sliderFill, { width: Animated.add(sliderX, KNOB_SIZE) }]}
-            />
-          )}
-          <Animated.View
-            style={[
-              styles.sliderKnob,
-              {
-                transform: [{ translateX: (myConfirmed || isCompleted) ? SLIDER_WIDTH - KNOB_SIZE : (disabled ? 0 : sliderX) }],
-                backgroundColor: (disabled && !isCompleted) ? '#BBB' : ((myConfirmed || isCompleted) ? '#34C759' : (sliderActive ? '#5A31F4' : '#7A5AF8'))
-              }
-            ]}
-            {...(!(myConfirmed || disabled || isCompleted) ? sliderResponder.panHandlers : {})}
-          >
-            <Ionicons name={(myConfirmed || isCompleted) ? 'checkmark' : 'arrow-forward'} size={18} color="#fff" />
-          </Animated.View>
-        </View>
-      </View>
-    );
-  };
-
   const ItemDetailModal = () => (
     <Modal
       visible={itemDetailModal.visible}
@@ -456,10 +345,21 @@ export default function ChatScreen() {
   );
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#fff' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Header />
-      {isCompleted ? (
-        <View style={styles.completedBanner}>
+    <KeyboardAvoidingView 
+      style={{ flex: 1, backgroundColor: colors.background }} 
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ChatHeader
+        matchInfo={matchInfo}
+        isCompleted={isCompleted}
+        isReadOnly={!! isReadOnly}
+        menuOpen={menuOpen}
+        onMenuToggle={() => setMenuOpen(v => !v)}
+        onCancelTrade={onCancelTrade}
+      />
+
+      {isCompleted ?  (
+        <View style={[styles.completedBanner, { backgroundColor: '#D1FADF', borderColor: colors.success }]}>
           <Ionicons name="checkmark-circle" size={20} color="#166534" />
           <Text style={styles.completedBannerTxt}>Scambio completato con successo!</Text>
         </View>
@@ -470,9 +370,13 @@ export default function ChatScreen() {
           </Text>
         </View>
       ) : null}
-      <ItemsStrip />
 
-      {loading ? (
+      <ItemsStrip
+        matchInfo={matchInfo}
+        onItemPress={openItemDetail}
+      />
+
+      {loading ?  (
         <View style={styles.center}><ActivityIndicator /></View>
       ) : (
         <FlatList
@@ -480,20 +384,26 @@ export default function ChatScreen() {
           data={messages}
           keyExtractor={m => m._id}
           renderItem={({ item }) => {
-            // System messages are rendered differently
             if (item.isSystemMessage) {
               return (
-                <View style={styles.systemMessage}>
-                  <Ionicons name="information-circle-outline" size={16} color="#888" />
-                  <Text style={styles.systemMessageText}>{item.content}</Text>
+                <View style={[styles.systemMessage, { backgroundColor: colors.inputBackground }]}>
+                  <Ionicons name="information-circle-outline" size={16} color={colors.textSecondary} />
+                  <Text style={[styles.systemMessageText, { color: colors.textSecondary }]}>{item.content}</Text>
                 </View>
               );
             }
-            const mine = user?.id ? String(item.senderId) === String(user.id) : false;
+            const mine = user?.id ?  String(item.senderId) === String(user.id) : false;
             return (
-              <View style={[styles.bubble, mine ? styles.mine : styles.theirs]}>
-                <Text style={[styles.msgTxt, !mine && { color: '#111' }]}>{item.content}</Text>
-                <Text style={[styles.time, mine && { color: 'rgba(255,255,255,0.7)' }]}>{new Date(item.createdAt).toLocaleTimeString()}</Text>
+              <View style={[
+                styles.bubble, 
+                mine ?  { backgroundColor: colors.primary, alignSelf: 'flex-end' } : { backgroundColor: colors. card, alignSelf: 'flex-start' }
+              ]}>
+                <Text style={[styles.msgTxt, mine ? { color: '#fff' } : { color: colors.text }]}>
+                  {item.content}
+                </Text>
+                <Text style={[styles.time, { color: colors.textSecondary }, mine && { color: 'rgba(255,255,255,0.7)' }]}>
+                  {new Date(item.createdAt).toLocaleTimeString()}
+                </Text>
               </View>
             );
           }}
@@ -502,33 +412,53 @@ export default function ChatScreen() {
           ListFooterComponent={
             isTyping ? (
               <View style={styles.typingIndicator}>
-                <Text style={styles.typingText}>{matchInfo?.otherUser?.nickname || 'Utente'} sta scrivendo...</Text>
+                <Text style={[styles.typingText, { color: colors.textSecondary }]}>
+                  {matchInfo?.otherUser?.nickname || 'Utente'} sta scrivendo...
+                </Text>
               </View>
             ) : null
           }
         />
       )}
 
-      {!isReadOnly && <SlideToConfirm />}
+      {! isReadOnly && (
+        <SlideToConfirm
+          SLIDER_WIDTH={SLIDER_WIDTH}
+          KNOB_SIZE={KNOB_SIZE}
+          sliderX={sliderX}
+          sliderActive={sliderActive}
+          sliderResponder={sliderResponder}
+          myConfirmed={myConfirmed}
+          otherConfirmed={otherConfirmed}
+          isReadOnly={!! isReadOnly}
+          isCompleted={isCompleted}
+          matchInfo={matchInfo}
+        />
+      )}
 
-      <View style={[styles.composer, isReadOnly && { opacity: 0.5 }]}>
+      <View style={[styles.composer, { borderColor: colors.border, backgroundColor: colors.card }, isReadOnly && { opacity: 0.5 }]}>
         <TextInput
-          style={styles.input}
+          style={[styles. input, { backgroundColor: colors.inputBackground, borderColor: colors.border, color: colors.text }]}
           placeholder={isReadOnly ? 'Chat in sola lettura' : 'Scrivi un messaggio...'}
+          placeholderTextColor={colors.textSecondary}
           value={draft}
           onChangeText={handleTextChange}
           editable={!sending && !isReadOnly}
           onSubmitEditing={submit}
           returnKeyType="send"
         />
-        <TouchableOpacity style={styles.sendBtn} onPress={submit} disabled={sending || !draft.trim() || !!isReadOnly}>
+        <TouchableOpacity 
+          style={[styles.sendBtn, { backgroundColor: colors.accent }]} 
+          onPress={submit} 
+          disabled={sending || !draft. trim() || !!isReadOnly}
+        >
           <Ionicons name="send" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
 
       <ItemDetailModal />
       <ExchangeCompletedModal
-        visible={exchangeCompletedModal.visible}
+        visible={exchangeCompletedModal. visible}
         matchInfo={exchangeCompletedModal.info}
         onDeleteItem={handleDeleteItem}
         onKeepItem={handleKeepItem}
@@ -538,86 +468,31 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 10, paddingTop: 50, borderBottomWidth: 1, borderColor: '#eee', backgroundColor: '#fff' },
-  backBtn: { marginRight: 8 },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
-  headerAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#eee' },
-  headerTitle: { fontSize: 16, fontWeight: '700', color: '#111' },
-  headerSubtitle: { fontSize: 12, color: '#666' },
-  headerMenuBtn: { padding: 6 },
-  menuDropdown: {
-    position: 'absolute', right: 10, top: 90, backgroundColor: '#fff', borderWidth: 1, borderColor: '#eee',
-    borderRadius: 10, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 6, zIndex: 100
-  },
-  menuItem: { paddingHorizontal: 14, paddingVertical: 10, minWidth: 160 },
-  menuItemText: { color: '#111', fontSize: 14 },
-
   banner: { backgroundColor: '#FFF3CD', padding: 10, borderBottomWidth: 1, borderColor: '#FDE68A' },
   bannerTxt: { color: '#7A5C00', textAlign: 'center', fontWeight: '600' },
-  completedBanner: { backgroundColor: '#D1FADF', padding: 10, borderBottomWidth: 1, borderColor: '#34C759', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
-  completedBannerTxt: { color: '#166534', textAlign: 'center', fontWeight: '600' },
-
-  itemsStrip: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16,
-    paddingVertical: 10, backgroundColor: '#fafafa', borderBottomWidth: 1, borderColor: '#f0f0f0'
-  },
-  itemBox: { alignItems: 'center', maxWidth: 140 },
-  itemImage: { width: 80, height: 80, borderRadius: 8, backgroundColor: '#ddd', marginBottom: 4 },
-  itemTitle: { fontSize: 12, fontWeight: '600', color: '#333' },
-  itemSubtitle: { fontSize: 10, color: '#888' },
-
+  completedBanner: { padding: 10, borderBottomWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  completedBannerTxt: { color: '#166534', textAlign: 'center', fontWeight:  '600' },
+  
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   bubble: { padding: 10, borderRadius: 12, marginBottom: 8, maxWidth: '80%' },
-  mine: { backgroundColor: '#5A31F4', alignSelf: 'flex-end' },
-  theirs: { backgroundColor: '#E4E6EB', alignSelf: 'flex-start' },
-  msgTxt: { color: '#fff' },
-  time: { fontSize: 10, color: '#666', marginTop: 4 },
-  
-  systemMessage: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    gap: 6, 
-    backgroundColor: '#F5F5F5', 
-    paddingVertical: 10, 
-    paddingHorizontal: 16, 
-    borderRadius: 10, 
-    marginBottom: 8, 
-    alignSelf: 'center',
-    maxWidth: '90%'
-  },
-  systemMessageText: { fontSize: 12, color: '#888', textAlign: 'center', flex: 1 },
+  msgTxt: {},
+  time: { fontSize: 10, marginTop: 4 },
+
+  systemMessage: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 10, marginBottom: 8, alignSelf: 'center', maxWidth: '90%' },
+  systemMessageText: { fontSize: 12, textAlign: 'center', flex: 1 },
 
   typingIndicator: { padding: 8, alignSelf: 'flex-start' },
-  typingText: { fontSize: 12, color: '#888', fontStyle: 'italic' },
+  typingText: { fontSize: 12, fontStyle: 'italic' },
 
-  sliderWrap: { paddingHorizontal: 16, paddingBottom: 8, paddingTop: 6, backgroundColor: '#fff' },
-  sliderLabel: { textAlign: 'center', fontSize: 12, color: '#666', marginBottom: 6 },
-  confirmStatusRow: { flexDirection: 'row', justifyContent: 'center', gap: 24, marginBottom: 8 },
-  confirmIndicator: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  confirmText: { fontSize: 12, color: '#888' },
-  confirmTextActive: { color: '#34C759', fontWeight: '600' },
-  sliderTrack: {
-    alignSelf: 'center', width: 260, height: 44, borderRadius: 22, backgroundColor: '#F4F4F5',
-    borderWidth: 1, borderColor: '#E5E7EB', overflow: 'hidden', position: 'relative'
-  },
-  sliderFill: {
-    position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: '#E6E1FF'
-  },
-  sliderKnob: {
-    width: 38, height: 38, borderRadius: 19, position: 'absolute', left: 0, top: 3,
-    alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 4
-  },
-
-  composer: { flexDirection: 'row', padding: 12, borderTopWidth: 1, borderColor: '#eee', backgroundColor: '#fff' },
-  input: { flex: 1, borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 10, marginRight: 8, backgroundColor: '#fff' },
-  sendBtn: { backgroundColor: '#5A31F4', paddingHorizontal: 16, justifyContent: 'center', alignItems: 'center', borderRadius: 8 },
+  composer: { flexDirection: 'row', padding: 12, borderTopWidth: 1 },
+  input: { flex: 1, borderWidth: 1, borderRadius: 8, padding: 10, marginRight: 8 },
+  sendBtn: { paddingHorizontal: 16, justifyContent: 'center', alignItems: 'center', borderRadius: 8 },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
-  modalContent: { backgroundColor: '#fff', borderRadius: 16, padding: 20, width: '85%', maxHeight: '80%' },
+  modalContent: { borderRadius: 16, padding: 20, width: '85%', maxHeight: '80%' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: '#111' },
+  modalTitle: { fontSize: 18, fontWeight: '700' },
   modalImage: { width: '100%', height: 250, borderRadius: 12, marginBottom: 16 },
-  modalItemTitle: { fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 8 },
-  modalDescription: { fontSize: 14, color: '#666', lineHeight: 20 }
+  modalItemTitle: { fontSize: 16, fontWeight: '600', marginBottom: 8 },
+  modalDescription: { fontSize: 14, lineHeight: 20 }
 });
