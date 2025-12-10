@@ -25,8 +25,9 @@ export default function ChatHeader({
 }: ChatHeaderProps) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const avatar = matchInfo?.otherUser?. avatarUrl || 'https://placehold.co/60x60';
   const name = matchInfo?.otherUser?. nickname || 'Utente';
+  const hasAvatar = matchInfo?.otherUser?.avatarUrl && matchInfo.otherUser.avatarUrl.length > 0 && !matchInfo.otherUser.avatarUrl.includes('placehold.co');
+  const initials = name.charAt(0).toUpperCase();
 
   return (
     <View style={[styles.header, { borderColor: colors.border, backgroundColor: colors.card, paddingTop: insets.top + 10, zIndex: 200 }]}>
@@ -34,7 +35,13 @@ export default function ChatHeader({
         <Ionicons name="arrow-back" size={24} color={colors.text} />
       </TouchableOpacity>
       <View style={styles.headerLeft}>
-        <Image source={{ uri:  avatar }} style={[styles.headerAvatar, { backgroundColor: colors.border }]} />
+        {hasAvatar ? (
+          <Image source={{ uri: matchInfo.otherUser.avatarUrl }} style={[styles.headerAvatar, { backgroundColor: colors.border }]} />
+        ) : (
+          <View style={[styles.headerAvatar, styles.avatarPlaceholder, { backgroundColor: colors.primary }]}>
+            <Text style={styles.avatarInitials}>{initials}</Text>
+          </View>
+        )}
         <View>
           <Text style={[styles.headerTitle, { color: colors.text }]}>{name}</Text>
           <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
@@ -81,6 +88,15 @@ const styles = StyleSheet.create({
   backBtn:  { marginRight: 8 },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
   headerAvatar: { width: 40, height: 40, borderRadius: 20 },
+  avatarPlaceholder: { 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  avatarInitials: { 
+    color: '#FFFFFF', 
+    fontSize: 16, 
+    fontWeight: '700' 
+  },
   headerTitle: { fontSize: 16, fontWeight: '700' },
   headerSubtitle:  { fontSize: 12 },
   headerMenuBtn: { padding: 6 },

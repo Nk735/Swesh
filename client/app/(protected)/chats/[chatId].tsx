@@ -64,9 +64,26 @@ export default function ChatScreen() {
           unsubNewMessage = socketService.onNewMessage((data) => {
             if (data.matchId === matchId) {
               setMessages(prev => {
+                // Check if this is a duplicate of an existing message
                 if (prev.some(m => m._id === data.message._id)) {
                   return prev;
                 }
+                
+                // Check if there's a temporary message with same content from same sender
+                // that should be replaced
+                const tempIndex = prev.findIndex(m => 
+                  m._id.startsWith('temp-') && 
+                  m.content === data.message.content && 
+                  m.senderId === data.message.senderId
+                );
+                
+                if (tempIndex !== -1) {
+                  // Replace temp message with real one
+                  const newMessages = [...prev];
+                  newMessages[tempIndex] = data.message;
+                  return newMessages;
+                }
+                
                 return [...prev, data.message];
               });
               setTimeout(() => flatRef.current?.scrollToEnd({ animated: true }), 50);
