@@ -15,7 +15,7 @@ export default function ItemsStrip({ matchInfo, onItemPress }: ItemsStripProps) 
   if (!matchInfo) return null;
 
   return (
-    <View style={[styles.itemsStrip, { backgroundColor: colors.background, borderColor: colors.border }]}>
+    <View style={[styles.itemsStrip, { backgroundColor: colors.background, borderColor: colors.border, zIndex: 1 }]}>
       <TouchableOpacity 
         style={styles.itemBox} 
         onPress={() => onItemPress(matchInfo.itemMine, true)}

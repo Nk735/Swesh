@@ -34,6 +34,7 @@ export default function ChatScreen() {
 
   const flatRef = useRef<FlatList>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const matchInfoRef = useRef<TinderMatch | null>(null);
 
   const SLIDER_WIDTH = 260;
   const KNOB_SIZE = 38;
@@ -42,6 +43,11 @@ export default function ChatScreen() {
 
   const isReadOnly = matchInfo?.status && matchInfo.status !== 'active';
   const isCompleted = matchInfo?.status === 'completed';
+
+  // Keep matchInfoRef in sync with matchInfo
+  useEffect(() => {
+    matchInfoRef.current = matchInfo;
+  }, [matchInfo]);
 
   useEffect(() => {
     let unsubNewMessage: (() => void) | undefined;
@@ -68,7 +74,7 @@ export default function ChatScreen() {
           });
 
           unsubTyping = socketService.onTyping((data) => {
-            if (data.matchId === matchId && data.userId !== user?.id) {
+            if (data.matchId === matchId && String(data.userId) !== String(user?.id)) {
               setIsTyping(data.isTyping);
             }
           });
@@ -120,6 +126,9 @@ export default function ChatScreen() {
       unsubTyping?.();
       unsubExchangeStatus?.();
       unsubExchangeCompleted?.();
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
     };
   }, [matchId, user?.id, matchInfo?.otherUser?._id]);
 
@@ -147,13 +156,13 @@ export default function ChatScreen() {
                 setOtherConfirmed(resp.confirmation.otherConfirmed);
                 if (resp.status === 'completed') {
                   setMatchInfo(prev => prev ? { ...prev, status: 'completed' } : prev);
-                  // Show the exchange completed modal with info from matchInfo
+                  // Show the exchange completed modal with info from matchInfoRef
                   setExchangeCompletedModal({
                     visible: true,
                     info: {
-                      myItemTitle: matchInfo?.itemMine?.title || 'Il tuo oggetto',
-                      theirItemTitle: matchInfo?.itemTheirs?.title || 'Oggetto ricevuto',
-                      otherUserNickname: matchInfo?.otherUser?.nickname || 'Utente'
+                      myItemTitle: matchInfoRef.current?.itemMine?.title || 'Il tuo oggetto',
+                      theirItemTitle: matchInfoRef.current?.itemTheirs?.title || 'Oggetto ricevuto',
+                      otherUserNickname: matchInfoRef.current?.otherUser?.nickname || 'Utente'
                     }
                   });
                 } else {
@@ -175,7 +184,7 @@ export default function ChatScreen() {
         Animated.spring(sliderX, { toValue: 0, useNativeDriver: false, friction: 7 }).start(() => setSliderActive(false));
       }
     });
-  }, [myConfirmed, isReadOnly, matchId, sliderX, matchInfo]);
+  }, [myConfirmed, isReadOnly, matchId, sliderX]);
 
   const loadAll = useCallback(async () => {
     if (!matchId) return;
@@ -246,6 +255,15 @@ export default function ChatScreen() {
 
     try {
       if (socketService.isConnected()) {
+        // Add optimistic message
+        const tempMessage = {
+          _id: `temp-${Date.now()}`,
+          content: draft.trim(),
+          senderId: user?.id || '',
+          createdAt: new Date().toISOString(),
+          read: false
+        };
+        setMessages(prev => [...prev, tempMessage]);
         socketService.sendMessage(String(matchId), draft.trim());
         setDraft('');
         setSending(false);
@@ -325,19 +343,19 @@ export default function ChatScreen() {
         activeOpacity={1} 
         onPress={() => setItemDetailModal({ visible: false, item: null, isMine: true })}
       >
-        <View style={styles.modalContent}>
+        <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{itemDetailModal.isMine ? 'Il tuo oggetto' : ('Oggetto di ' + (matchInfo?.otherUser?.nickname || 'Utente'))}</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>{itemDetailModal.isMine ? 'Il tuo oggetto' : ('Oggetto di ' + (matchInfo?.otherUser?.nickname || 'Utente'))}</Text>
             <TouchableOpacity onPress={() => setItemDetailModal({ visible: false, item: null, isMine: true })}>
-              <Ionicons name="close" size={24} color="#333" />
+              <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
           </View>
           {itemDetailModal.item?.imageUrl && (
             <Image source={{ uri: itemDetailModal.item.imageUrl }} style={styles.modalImage} />
           )}
-          <Text style={styles.modalItemTitle}>{itemDetailModal.item?.title}</Text>
+          <Text style={[styles.modalItemTitle, { color: colors.text }]}>{itemDetailModal.item?.title}</Text>
           {itemDetailModal.item?.description && (
-            <Text style={styles.modalDescription}>{itemDetailModal.item.description}</Text>
+            <Text style={[styles.modalDescription, { color: colors.textSecondary }]}>{itemDetailModal.item.description}</Text>
           )}
         </View>
       </TouchableOpacity>
@@ -392,11 +410,11 @@ export default function ChatScreen() {
                 </View>
               );
             }
-            const mine = user?.id ?  String(item.senderId) === String(user.id) : false;
+            const mine = user?.id ? String(item.senderId) === String(user.id) : false;
             return (
               <View style={[
                 styles.bubble, 
-                mine ?  { backgroundColor: colors.primary, alignSelf: 'flex-end' } : { backgroundColor: colors. card, alignSelf: 'flex-start' }
+                mine ? { backgroundColor: colors.primary, alignSelf: 'flex-end' } : { backgroundColor: colors.card, alignSelf: 'flex-start' }
               ]}>
                 <Text style={[styles.msgTxt, mine ? { color: '#fff' } : { color: colors.text }]}>
                   {item.content}

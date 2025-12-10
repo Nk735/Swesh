@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/theme';
 import { TinderMatch } from '../../src/types/trade';
 
@@ -23,11 +24,12 @@ export default function ChatHeader({
   onCancelTrade 
 }: ChatHeaderProps) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const avatar = matchInfo?.otherUser?. avatarUrl || 'https://placehold.co/60x60';
   const name = matchInfo?.otherUser?. nickname || 'Utente';
 
   return (
-    <View style={[styles.header, { borderColor: colors.border, backgroundColor: colors.card }]}>
+    <View style={[styles.header, { borderColor: colors.border, backgroundColor: colors.card, paddingTop: insets.top + 10, zIndex: 200 }]}>
       <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
         <Ionicons name="arrow-back" size={24} color={colors.text} />
       </TouchableOpacity>
@@ -74,7 +76,6 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     paddingHorizontal: 16, 
     paddingBottom: 10, 
-    paddingTop: 50, 
     borderBottomWidth: 1 
   },
   backBtn:  { marginRight: 8 },
