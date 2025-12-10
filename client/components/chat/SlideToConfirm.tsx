@@ -80,7 +80,7 @@ export default function SlideToConfirm({
 
       <View style={[
         styles.sliderTrack,
-        { backgroundColor: colors.inputBackground, borderColor: colors.border },
+        { backgroundColor: colors.inputBackground, borderColor: colors.border, width: SLIDER_WIDTH },
         (myConfirmed || isReadOnly || isCompleted) && { 
           backgroundColor: (isReadOnly && !isCompleted) ? colors.border : '#D1FADF', 
           borderColor: (isReadOnly && !isCompleted) ? colors.border : colors. success 
@@ -146,7 +146,6 @@ const styles = StyleSheet.create({
   confirmText: { fontSize: 12 },
   sliderTrack: {
     alignSelf: 'center',
-    width: 260,
     height: 44,
     borderRadius: 22,
     borderWidth: 1,
