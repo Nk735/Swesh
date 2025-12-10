@@ -83,14 +83,14 @@ export default function SlideToConfirm({
         { backgroundColor: colors.inputBackground, borderColor: colors.border, width: SLIDER_WIDTH },
         (myConfirmed || isReadOnly || isCompleted) && { 
           backgroundColor: (isReadOnly && !isCompleted) ? colors.border : '#D1FADF', 
-          borderColor: (isReadOnly && !isCompleted) ? colors.border : colors. success 
+          borderColor: (isReadOnly && !isCompleted) ? colors.border : colors.success 
         }
       ]}>
         {!(myConfirmed || isReadOnly || isCompleted) && (
           <Animated.View
             style={[
-              styles. sliderFill, 
-              { backgroundColor: colors.accent + '40', width:  Animated.add(sliderX, KNOB_SIZE) }
+              styles.sliderFill, 
+              { backgroundColor: colors.primary + '20', width: Animated.add(sliderX, KNOB_SIZE) }
             ]}
           />
         )}
@@ -100,15 +100,15 @@ export default function SlideToConfirm({
             {
               transform: [{ 
                 translateX: (myConfirmed || isCompleted) 
-                  ?  SLIDER_WIDTH - KNOB_SIZE 
-                  : (isReadOnly ?  0 : sliderX) 
+                  ? SLIDER_WIDTH - KNOB_SIZE 
+                  : (isReadOnly ? 0 : sliderX) 
               }],
               backgroundColor: (isReadOnly && !isCompleted) 
                 ? colors.border 
-                : ((myConfirmed || isCompleted) ? colors.success : (sliderActive ? colors.primary : colors.accent))
+                : ((myConfirmed || isCompleted) ? colors.success : colors.primary)
             }
           ]}
-          {... (!(myConfirmed || isReadOnly || isCompleted) ? sliderResponder. panHandlers : {})}
+          {...(!(myConfirmed || isReadOnly || isCompleted) ? sliderResponder.panHandlers : {})}
         >
           <Ionicons 
             name={(myConfirmed || isCompleted) ? 'checkmark' : 'arrow-forward'} 
