@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions, Platform, Alert as RNAlert, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions, Platform, Alert as RNAlert, StatusBar, ImageBackground } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../src/context/AuthContext';
@@ -9,8 +9,9 @@ import OnboardingDots from '../../components/onboarding/OnboardingDots';
 import ProfileSetupSlide from '../../components/onboarding/ProfileSetupSlide';
 import FeedPreferenceSlide from '../../components/onboarding/FeedPreferenceSlide';
 import { useTheme } from '../../src/theme';
+//import armadio from '../../assets/images/armadio.png';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const TOTAL_SLIDES = 6;
 
 type SlideData = {
@@ -138,14 +139,18 @@ export default function OnboardingScreen() {
   const renderSlide = ({ item, index }: { item: SlideData; index: number }) => {
     if (item.type === 'info') {
       return (
-        <View style={styles.slideWrapper}>
-          <OnboardingSlide
-            icon={item.icon!}
-            title={item.title!}
-            description={item.description!}
-            currentIndex={index}
-            totalSlides={TOTAL_SLIDES}
-          />
+        <View style={[styles.slideWrapper, { backgroundColor: colors.card }]}>
+          {/* Contenuto centrato verticalmente e orizzontalmente */}
+          <View style={styles.infoContent}>
+            <OnboardingSlide
+              icon={item.icon!}
+              title={item.title!}
+              description={item.description!}
+              currentIndex={index}
+              totalSlides={TOTAL_SLIDES}
+            />
+          </View>
+          {/* Pulsante fisso in basso a destra */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={[styles.continueButton, { backgroundColor: colors.secondary }]} onPress={handleNext}>
               <Text style={styles.continueButtonText}>Continua</Text>
@@ -253,11 +258,42 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, position: 'relative', },
-  slideWrapper: { width, flex: 1, justifyContent: 'center', alignItems: 'center', },
-  buttonContainer: { paddingHorizontal: 30, paddingBottom: Platform.OS === 'ios' ? 40 : 30, right: 30},
-  continueButton: { padding: 10, borderRadius: 25, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, },
+  // Container che avvolge tutto l'onboarding (tutte le slide)
+  container: { 
+    flex: 1,
+    height: '100%', // <-- forza altezza 100% per web
+  },
+
+  // slideWrapper -> usato da ogni slide (info, profile, feed, final)
+  slideWrapper: { 
+    width, 
+    height, // <-- usa l'altezza dello schermo
+  },
+
+  /* Info slides (SLIDES tipo 'info') */
+  infoContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 30,
+  },
+  
+  buttonContainer: { 
+    position: 'absolute',
+    bottom: Platform.OS === 'ios' ? 40 : 30,
+    right: 30,
+  },
+  continueButton: { 
+    padding: 10, 
+    paddingHorizontal: 20,
+    borderRadius: 25, 
+    alignItems: 'center', 
+    flexDirection: 'row', 
+    justifyContent: 'center', 
+    gap: 10, 
+  },
   continueButtonText: { color: '#fff', fontSize: 16, fontWeight: '600', },
+  
   finalSlide: { justifyContent: 'space-between', paddingTop: 60, },
   finalContent: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 30, },
   iconContainer: { width: 160, height: 160, borderRadius: 80, justifyContent: 'center', alignItems: 'center', marginBottom: 40, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4, },

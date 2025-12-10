@@ -12,7 +12,7 @@ interface FeedPreferenceSlideProps {
   onComplete: (preference: FeedGenderPreference) => void;
 }
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const PREFERENCE_OPTIONS: { value: FeedGenderPreference; label: string; emoji: string; description: string }[] = [
   { value: 'male', label: 'Abbigliamento maschile', emoji: '👔', description: 'Vedi solo abiti da uomo' },
@@ -102,7 +102,7 @@ export default function FeedPreferenceSlide({
 }
 
 const styles = StyleSheet.create({
-  container: { width, flex: 1 },
+  container: { width, height },
   content: { flex: 1, paddingHorizontal: 30, paddingTop: 40, justifyContent: 'flex-start', },
   title: { fontSize: 28, fontWeight: '700', textAlign: 'center', marginBottom: 8, },
   subtitle: { fontSize: 16, textAlign: 'center', marginBottom: 40, },

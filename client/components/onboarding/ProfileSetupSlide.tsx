@@ -11,7 +11,7 @@ interface ProfileSetupSlideProps {
   onComplete: (age: number, gender: Gender) => void;
 }
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const GENDER_OPTIONS: { value: Gender; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { value: 'male', label: 'Uomo', icon: 'male' },
@@ -136,7 +136,7 @@ export default function ProfileSetupSlide({
 }
 
 const styles = StyleSheet.create({
-  container: { width, flex: 1 },
+  container: { width, height },
   scrollView: { flex: 1, },
   content: { paddingHorizontal: 30, paddingTop: 40, paddingBottom: 20, },
   title: { fontSize: 28, fontWeight: '700', textAlign: 'center', marginBottom: 8, },
