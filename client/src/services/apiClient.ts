@@ -2,7 +2,7 @@ import axios, { AxiosHeaders } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // URL di produzione Railway
-const PRODUCTION_URL = 'https://swesh-production-ee2e.up.railway.app';
+const PRODUCTION_URL = 'https://swesh-backend.onrender.com';
 
 // Rileva automaticamente il base URL
 const getBaseUrl = (): string => {
@@ -10,6 +10,9 @@ const getBaseUrl = (): string => {
   if (__DEV__) {
     console.log('[API] Dev mode - uso localhost:3000');
     return 'http://localhost:3000';
+    //const LOCAL_IP = '192.168.1.9'; // <-- CAMBIA CON IL TUO IP LOCALE
+    //console.log(`[API] Dev mode - uso ${LOCAL_IP}:3000`);
+    //return `http://${LOCAL_IP}:3000`;
   }
 
   // In produzione, usa Railway

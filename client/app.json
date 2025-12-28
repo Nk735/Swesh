@@ -35,7 +35,7 @@
     ],
     "experiments": { "typedRoutes": true },
     "extra": {
-      "API_BASE_URL": "https://swesh-production.up.railway.app"
+      "API_BASE_URL": "https://swesh-backend.onrender.com"
     }
   }
 }
