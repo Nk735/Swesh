@@ -1,8 +1,17 @@
 import { io, Socket } from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ChatMessage } from '../types/trade';
 
 // Production URL for Render deployment
 const PRODUCTION_URL = 'https://swesh-backend.onrender.com';
+
+// Socket event data types
+export interface ExchangeConfirmation {
+  userAConfirmed: boolean;
+  userBConfirmed: boolean;
+  userAConfirmedAt?: Date;
+  userBConfirmedAt?: Date;
+}
 
 // Get the base URL based on environment
 const getBaseUrl = (): string => {
@@ -155,7 +164,7 @@ class SocketService {
   /**
    * Listen for new messages
    */
-  onNewMessage(callback: (data: { matchId: string; message: any }) => void): () => void {
+  onNewMessage(callback: (data: { matchId: string; message: ChatMessage }) => void): () => void {
     if (!this.socket) {
       console.warn('[Socket] Cannot listen for messages - socket not initialized');
       return () => {};
@@ -221,7 +230,7 @@ class SocketService {
   /**
    * Listen for exchange status updates
    */
-  onExchangeStatus(callback: (data: { matchId: string; status: string; confirmation: any }) => void): () => void {
+  onExchangeStatus(callback: (data: { matchId: string; status: string; confirmation: ExchangeConfirmation }) => void): () => void {
     if (!this.socket) {
       console.warn('[Socket] Cannot listen for exchange status - socket not initialized');
       return () => {};
